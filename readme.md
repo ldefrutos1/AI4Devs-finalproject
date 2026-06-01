@@ -112,11 +112,23 @@ graph TD
 
 ### **2.2.2 Diagrama de Casos de Uso del sistema**
 
-A continuación se incluye el modelo de casos de uso del sistema.
+A continuación se incluye el diagrama de casos de uso del sistema.
 
 ![Casos de uso](./docs/use-cases/use-case-model.png)
 
-*El listado de actores y casos de uso se puede consultar en:* [resumen de casos de uso](docs/use-cases/use-case-summary.md) · [modelo PlantUML](docs/use-cases/use-case-model.puml)
+| ID | Nombre | Actor principal |
+| --- | --- | --- |
+| UC-01 | Consultar árboles publicados y mapa | Público |
+| UC-02 | Registrarse para recibir notificaciones (e-mail) | Público |
+| UC-03 | Registrar árbol | Colaborador |
+| UC-04 | Modificar y eliminar árboles del colaborador | Colaborador |
+| UC-05 | Identificar árbol asistido por IA (imagen) | Colaborador |
+| UC-06 | Consultar asistente IA (chat) | Colaborador |
+| UC-07 | Gestionar tablas de catálogo (maestros taxonómicos) | ADMIN |
+| UC-08 | Gestionar solicitudes de notificación | ADMIN |
+| UC-09 | Notificar por correo a suscriptores | Sistema |
+
+*El Modelo completo se puede consultar en:* [resumen de casos de uso](docs/use-cases/use-case-summary.md) · [modelo PlantUML](docs/use-cases/use-case-model.puml)
 
 ### **2.3. Diseño y experiencia de usuario:**
 
