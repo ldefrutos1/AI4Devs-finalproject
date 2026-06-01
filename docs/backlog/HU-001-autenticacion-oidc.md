@@ -1,20 +1,7 @@
 # HU-001 — Autenticación OIDC
 
-## 1. Validación de la información existente
 
-| Aspecto | Estado |
-|---------|--------|
-| **Título** | Correcto y alineado con backlog: *Autenticación OIDC*. |
-| **Formato “Como… quiero… para…”** | Correcto y claro: cubre colaboradores y usuarios con rol **ADMIN** con acceso a funciones protegidas. |
-| **Estimación (S/M/L)** | **M** coherente para alcance MVP (IdP, SPA, gateway y primer cierre backend de seguridad). |
-| **Prioridad** | **Alta** coherente con dependencia transversal para rutas protegidas del MVP. |
-| **Inconsistencias detectadas** | **Cerrado:** desglose en [HU-001-ticket-breakdown.md](HU-001-ticket-breakdown.md) (tickets **TASK-HU-001-01** … **001-16** **Hecho**, incl. correlación **001-10**). |
-| **Estado** | **Cerrada** — tickets **TASK-HU-001-01** … **001-16** **Hecho**; E2E: manual **001-14**, back `Hu001Scenario*` ([breakdown](HU-001-ticket-breakdown.md)); correlación **001-10**. |
-| **Tamaño / división** | Entregado: Keycloak local, SPA OIDC (login/callback/silent renew/logout), Bearer al gateway, resource server piloto en **catalog-service**, autorización por rol, CORS local, tests automatizados y documentación de arranque. **HU-013** cubre mapa de rutas y guardas de navegación por rol. |
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 | Campo | Valor |
 |-------|--------|
@@ -98,7 +85,7 @@ Ver [HU-001-ticket-breakdown.md](HU-001-ticket-breakdown.md) (`TASK-HU-001-01` �
 
 *Ninguna.* Refinamiento cerrado; desglose y evidencia en [HU-001-ticket-breakdown.md](HU-001-ticket-breakdown.md).
 
-## 3. Criterios de aceptación (BDD)
+## 2. Criterios de aceptación (BDD)
 
 ### Referencias
 
@@ -130,7 +117,7 @@ Backlog `HU-001` (tabla §3); [HU-001-ticket-breakdown.md](HU-001-ticket-breakdo
 
 **Automatización:** esc. 2–4 back → [system-e2e-tests/README.md](../../services/system-e2e-tests/README.md); esc. 1 OIDC → **TASK-HU-001-14** / UI E2E; guardas SPA → **HU-013**. Matriz: [testing-java.md](../engineering/testing-java.md) §2.1.1.
 
-## 4. Evaluación INVEST (resumen)
+## 3. Evaluación INVEST (resumen)
 
 | Criterio | Comentario |
 |----------|------------|
@@ -141,6 +128,6 @@ Backlog `HU-001` (tabla §3); [HU-001-ticket-breakdown.md](HU-001-ticket-breakdo
 | **Small** | Aceptable para **M**; no se amplió a IAM avanzado. |
 | **Testable** | Sí: IT por capa; `system-e2e-tests` (esc. 2–4); checklist manual esc. 1 (**001-14**); navegación/guardas en **HU-013** (Vitest; UI según §2.1.1). |
 
-## 5. Esfuerzo estimado de implementación
+## 4. Esfuerzo estimado de implementación
 
 Orden de magnitud **medio (M)** para MVP, repartido entre Keycloak local, integración OIDC en SPA, seguridad en gateway y **catalog-service**, CORS local, correlación gateway → upstream, pruebas automatizadas y documentación de cierre (**TASK-HU-001-01** … **001-16**).

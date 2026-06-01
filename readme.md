@@ -43,7 +43,7 @@ MyTreeLibrary es una solución digital para crear y gestionar tu colección pers
 
 Desarrollar una plataforma web que permita registrar, organizar y consultar fotografías, ubicaciones y datos relevantes de árboles de tu ciudad, facilitando al usuario la creación de una biblioteca personal digital y la posibilidad de compartir esa información de forma pública.
 
-**NOTA IMPORTANTE:** Se ha seleccionado una arquitectura de mircroservicios en Java con Spring y Vue con un **proposito didactico**, con el fin de aprender estas tecnologías.
+**NOTA IMPORTANTE:** Se ha seleccionado una arquitectura de microservicios en Java con Spring y Vue con un **propósito didáctico**, con el fin de aprender estas tecnologías.
 
 
 #### Valor aportado (qué soluciona)
@@ -68,7 +68,7 @@ Los usuarios autenticados con perfil de colaborador pueden dar de alta nuevas fi
 
 #### Consulta pública y visualización geográfica
 
-El sistema implementa una consulta pública de árboles publicados mediante listado y detalle, mostrando en la ficha de detalle las fotografias de cada árbol y su localización sobre mapa de forma clara e intuitiva.
+El sistema implementa una consulta pública de árboles publicados mediante listado y detalle, mostrando en la ficha de detalle las fotografías de cada árbol y su localización sobre mapa de forma clara e intuitiva.
 
 #### Notificaciones
 
@@ -76,7 +76,7 @@ La solución ofrece un sistema de notificaciones para comunicar novedades a usua
 
 #### Integración con IA
 
-El producto se entegra con IA para obtener información de las características de cada especie; en próximas versiones se implementará la identificación orientativa de la especie a partir de fotografías y la funciónalidad de chat.
+El producto se integra con IA para obtener información de las características de cada especie; en próximas versiones se implementará la identificación orientativa de la especie a partir de fotografías y la funciónalidad de chat.
 
 ### **2.2.1 Diagrama de contexto del sistema (C1)**
 
@@ -116,7 +116,7 @@ A continuación se incluye el modelo de casos de uso del sistema.
 
 ![Casos de uso](./docs/use-cases/use-case-model.png)
 
-*El listado de actores y casos de uso se puedde consultar en:* [resumen de casos de uso](docs/use-cases/use-case-summary.md) · [modelo PlantUML](docs/use-cases/use-case-model.puml)
+*El listado de actores y casos de uso se puede consultar en:* [resumen de casos de uso](docs/use-cases/use-case-summary.md) · [modelo PlantUML](docs/use-cases/use-case-model.puml)
 
 ### **2.3. Diseño y experiencia de usuario:**
 
@@ -193,7 +193,7 @@ En `[infra/compose/](infra/compose/)` hay un `docker-compose.yml` que levanta la
 | Keycloak                | Versión 26 en modo desarrollo                                   |
 | Mailpit                 | SMTP de prueba (captura correo; UI web); imagen `axllent/mailpit`; puertos en [infra/compose/README.md](infra/compose/README.md) |
 | Prometheus              | Métricas; imagen `prom/prometheus:v3.2.1`; scrape de microservicios en el host (`/actuator/prometheus`); UI en puerto **9090** |
-| Grafana                 | Dashboards; imagen `grafana/grafana:11.5.2`; datasource y dashboard provisionados desde [platform/observability/](platform/observability/README.md); UI en puerto **3000** |
+| Grafana                 | Dashboards; imagen `grafana/grafana:11.5.2`; datasource y dashboard provisionados desde [platform/observability/README.md](platform/observability/README.md); UI en puerto **3000** |
 
 
 > **Nota:** por defecto, Postgres del Compose se expone en el host en el **puerto `5433`**  
@@ -299,7 +299,7 @@ Además del init de Postgres/Keycloak en Compose, **catalog-service** aplica sem
 
 ### **3.1. Diagrama de arquitectura:**
 
-La aplicación está desarrollará en microservicios con Spring en la parte de backend y Vue como tecnología frontend. Aunque es una **arquitectura sobredimensionada** para el alcance real del sistema, se ha seleccionado esta implementación **por motivos didácticos**, con el fin de adquirir experiencia en estas tecnologías.
+La aplicación se desarrolla en microservicios con Spring en la parte de backend y Vue como tecnología frontend. Aunque es una **arquitectura sobredimensionada** para el alcance real del sistema, se ha seleccionado esta implementación **por motivos didácticos**, con el fin de adquirir experiencia en estas tecnologías.
 
 #### Patrón y Stack tecnológico
 
@@ -382,7 +382,48 @@ flowchart TB
     AIS --> CAT
 ```
 
+### **3.2. Descripción de componentes principales**
+
+A continuación se detallan los componentes del diagrama C2 (§3.1), desplegados o consumidos por la plataforma. No se listan dependencias externas como el proveedor de mapas (**OpenStreetMap** / **Leaflet**) ni el proveedor de IA.
+
+#### Capa de aplicación y entrada
+
+| Componente | Tecnología | Responsabilidad |
+| --- | --- | --- |
+| **SPA** (`frontend/`) | Vue 3, Vite, TypeScript | Consulta pública, fichas, mapa, fotos y administración. |
+| **API Gateway** (`api-gateway`) | Spring Cloud Gateway (WebFlux), Spring Boot 4 | Entrada HTTP (**8080**). Enruta a los microservicios bajo `/api/` [openapi.yaml](docs/api/openapi.yaml). Valida JWT (Keycloak) y reenvía el token a los microservicios. |
+
+#### Microservicios de dominio
+
+| Componente | Tecnología | Responsabilidad |
+| --- | --- | --- |
+| **catalog-service** | Spring Boot 4, JPA, Flyway, PostgreSQL; MongoDB, Redis en perfil `dev`; productor Kafka | Esquema `catalog`. Tras el alta de ejemplar publica `EJEMPLAR_CREADO` en `catalog.ejemplar.evento` ([kafka-events.md](docs/events/kafka-events.md)). |
+| **media-service** | Spring Boot 4, JPA, Flyway, cliente MinIO (API S3) | Esquema `media` para metadatos; binarios en **MinIO** (dev) o **S3** (prod). Flujo: presign → subida → confirmación. |
+| **notification-service** | Spring Boot 4, JPA, Flyway, Spring Kafka, JavaMail | Esquema `notification`. Consume `catalog.ejemplar.evento` de forma idempotente y envía correo SMTP a suscriptores **ACTIVA** (Mailpit en dev). |
+| **ai-assistant-service** | Spring Boot 4 | Orquestación al proveedor de IA y trazas en esquema `ai` (auditoría de uso). |
+
+#### Identidad, mensajería y almacenamiento
+
+| Componente | Tecnología | Responsabilidad |
+| --- | --- | --- |
+| **Keycloak** | Keycloak 26 (Compose) | IdP OIDC: realm `mtl`, clientes, roles `COLABORADOR` y `ADMIN`, emisión de JWT. |
+| **Kafka** | Apache Kafka (KRaft en dev) | Topic `catalog.ejemplar.evento`: enlaza el alta del ejemplar con el aviso por correo. |
+| **PostgreSQL** | 16 + PostGIS en contenedor | Un servidor; esquemas `catalog`, `media`, `notification` y `ai` (uno por servicio JDBC). |
+| **MongoDB** | 7 (Compose) | Enriquecimiento (especie, ejemplar, notas). |
+| **Redis** | 7 (Compose) | Caché de maestros en **catalog-service** (perfil `dev`; desactivada en tests sin Docker). |
+| **MinIO** | API S3 | Imágenes en dev (bucket `mtl-photos`); en prod, S3 u otro compatible. |
+
+#### Observabilidad y herramientas de desarrollo local
+
+| Componente | Tecnología | Responsabilidad |
+| --- | --- | --- |
+| **Mailpit** | `axllent/mailpit` (Compose) | SMTP y bandeja web de prueba en local; no envía a dominios reales. |
+| **Prometheus** | `prom/prometheus:v3.2.1` (Compose) | Métricas vía `/actuator/prometheus`. |
+| **Grafana** | `grafana/grafana:11.5.2` (Compose) | Dashboard **MTL Microservices**; UI **http://localhost:3000** |
+
+
 **C2 (detalle) — un servidor PostgreSQL con PostGIS, cuatro esquemas, un esquema por servicio:**
+
 
 ```mermaid
 flowchart TB
@@ -413,7 +454,7 @@ flowchart TB
     AIS --> SCH_I
 ```
 
-### **3.1.1 Autenticación en Front (Vue):**
+### **3.2.1 Autenticación en Front (Vue):**
 
 Descripción del flujo de autenticación para SPA en **Vue 3** con **OIDC Authorization Code + PKCE** (IdP: Keycloak).  
 Objetivo: mantener rutas protegidas con sesión válida, renovar token de forma transparente y centralizar el manejo de `401` en cliente HTTP.
@@ -461,15 +502,15 @@ flowchart TB
 
 Responsabilidades clave:
 
-- `**Router Guards**`: bloquean rutas con `requiresAuth` y comprueban `requiredRoles` (p. ej. `ADMIN` en `/admin/*`); consultan **directamente** el servicio OIDC (`getUser`, `signinSilent`, `login`), no el Auth Store.
-- `**Auth Store / useAuth**`: estado reactivo de sesión (`currentUser`, `isAuthenticated`, roles) y listeners de eventos OIDC; lo consumen vistas y shell de navegación, no el guard.
-- `**OIDC Service**` (`authService` en código): login, callback en `/auth/callback`, `signinSilent`, logout y renovación silenciosa automática (`automaticSilentRenew`).
-- `**Cliente HTTP**` (`apiFetch` / `apiFetchBlob` en código): inyecta Bearer en rutas autenticadas; reintenta una vez tras `401` con `signinSilent`; si falla, redirige a login con `returnPath`.
+- **Router Guards**: bloquean rutas con `requiresAuth` y comprueban `requiredRoles` (p. ej. `ADMIN` en `/admin/*`); consultan **directamente** el servicio OIDC (`getUser`, `signinSilent`, `login`), no el Auth Store.
+- **Auth Store / useAuth**: estado reactivo de sesión (`currentUser`, `isAuthenticated`, roles) y listeners de eventos OIDC; lo consumen vistas y shell de navegación, no el guard.
+- **OIDC Service** (`authService` en código): login, callback en `/auth/callback`, `signinSilent`, logout y renovación silenciosa automática (`automaticSilentRenew`).
+- **Cliente HTTP** (`apiFetch` / `apiFetchBlob` en código): inyecta Bearer en rutas autenticadas; reintenta una vez tras `401` con `signinSilent`; si falla, redirige a login con `returnPath`.
 
 Simplificaciones del diagrama C3 (no aparecen como cajas o flechas):
 
-- `**Catalog Service**` representa la capa `services/*` (catálogo, media, notificaciones, etc.); el patrón es el mismo en todos.
-- `**API Client Interceptor**` es la lógica de token y reintento en `apiFetch`, no un módulo aparte con ese nombre.
+- **Catalog Service** representa la capa `services/*` (catálogo, media, notificaciones, etc.); el patrón es el mismo en todos.
+- **API Client Interceptor** es la lógica de token y reintento en `apiFetch`, no un módulo aparte con ese nombre.
 - Rutas **públicas** del contrato OpenAPI usan `publicApiFetch` hacia el gateway **sin** Bearer ni OIDC; el diagrama solo modela el camino autenticado (`Http` → `Oidc`).
 - El intercambio de código tras el redirect de Keycloak lo ejecuta la vista `AuthCallbackView`, no el guard ni el store en el primer paso.
 
@@ -541,7 +582,7 @@ sequenceDiagram
 
 Notas del diagrama C4 (no dibujadas): error al leer sesión en el guard → `/auth/error?reason=session`; renovación proactiva del token (`automaticSilentRenew`) mediante eventos OIDC hacia el Auth Store, además de los `signinSilent` bajo demanda del guard y de `apiFetch`.
 
-### **3.1.2 Kafka:**
+### **3.2.2 Kafka:**
 
 En el **MVP**, Kafka separa el **alta de un árbol** del **correo a suscriptores** (regla **R7**): solo al crear una ficha con éxito; edición y baja no publican. Un topic (`catalog.ejemplar.evento`): **catalog-service** publica y **notification-service** consume. Contrato del mensaje: [docs/events/kafka-events.md](docs/events/kafka-events.md). Nomenclatura técnica: [ADR-0006](docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md). Configuración local: [services/README.md](services/README.md) (Kafka).
 
@@ -719,7 +760,7 @@ sequenceDiagram
   end
 ```
 
-### **3.1.3 Almacenamiento de fotografías**
+### **3.2.3 Almacenamiento de fotografías**
 
 Los **binarios** viven en un almacén **S3-compatible** (**MinIO** en desarrollo, **S3** en producción); los **metadatos** (árbol, clave de objeto, orden, foto principal, etc.) en PostgreSQL, esquema **`media`**, gestionados por **media-service** tras el **API Gateway**. La SPA **nunca** recibe credenciales de bucket: tras crear la ficha del árbol en **catalog-service**, por cada imagen pide una **URL prefirmada** (`POST /api/media/uploads/presign`), sube el fichero con **PUT directo** al almacén y **confirma** (`POST /api/media/photos/confirm`) para registrar la fila en `media`; la primera confirmación del árbol queda como **foto principal**. La visibilidad de cada foto **hereda** la de la ficha. Contrato HTTP: [openapi.yaml](docs/api/openapi.yaml); historia y criterios: [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md); validaciones, propiedades, principal y EXIF en cliente: [media-upload-hu006.md](docs/engineering/media-upload-hu006.md).
 
@@ -758,7 +799,7 @@ sequenceDiagram
   end
 ```
 
-### **3.1.4 Uso de IA: características de especie (MVP) e identificación/chat (futuro)**
+### **3.2.4 Uso de IA: características de especie (MVP) e identificación/chat (futuro)**
 
 En el MVP solo aplica la consulta de características de especie por **ADMIN** ([HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md)); identificación por imagen y chat: [HU-009](docs/backlog/backlog.md) y [HU-010](docs/backlog/backlog.md) (próxima versión). Detalle de historias: [backlog](docs/backlog/backlog.md) §3.
 
@@ -776,47 +817,6 @@ sequenceDiagram
   GW->>AIS: Proxy_JWT
   AIS->>CAT: Remitir_informacion
 ```
-
-
-### **3.2. Descripción de componentes principales**
-
-A continuación se detallan los componentes del diagrama C2 (§3.1), desplegados o consumidos por la plataforma. No se listan dependencias externas como el proveedor de mapas  (**OpenStreetMap** / **Leaflet**) ni el proveedor de IA.
-
-#### Capa de aplicación y entrada
-
-| Componente | Tecnología | Responsabilidad |
-| --- | --- | --- |
-| **SPA** (`frontend/`) | Vue 3, Vite, TypeScript | Consulta pública, fichas, mapa, fotos y administración. |
-| **API Gateway** (`api-gateway`) | Spring Cloud Gateway (WebFlux), Spring Boot 4 | Entrada HTTP (**8080**). Enruta a los microservicios bajao `/api/` [openapi.yaml](docs/api/openapi.yaml). Valida JWT (Keycloak) y reenvía el token a los microservicios. |
-
-#### Microservicios de dominio
-
-| Componente | Tecnología | Responsabilidad |
-| --- | --- | --- |
-| **catalog-service** | Spring Boot 4, JPA, Flyway, PostgreSQL; MongoDB, Redis en perfil `dev`; productor Kafka | Esquema `catalog`. Tras el alta de ejemplar publica `EJEMPLAR_CREADO` en `catalog.ejemplar.evento` ([kafka-events.md](docs/events/kafka-events.md)). |
-| **media-service** | Spring Boot 4, JPA, Flyway, cliente MinIO (API S3) | Esquema `media` para metadatos; binarios en **MinIO** (dev) o **S3** (prod). Flujo: presign → subida → confirmación. |
-| **notification-service** | Spring Boot 4, JPA, Flyway, Spring Kafka, JavaMail | Esquema `notification`. Consume `catalog.ejemplar.evento` de forma idempotente y envía correo SMTP a suscriptores **ACTIVA** (Mailpit en dev). |
-| **ai-assistant-service** | Spring Boot 4 | Orquestación al proveedor de IA y trazas en esquema `ai` (auditoría de uso). |
-
-#### Identidad, mensajería y almacenamiento
-
-| Componente | Tecnología | Responsabilidad |
-| --- | --- | --- |
-| **Keycloak** | Keycloak 26 (Compose) | IdP OIDC: realm `mtl`, clientes, roles `COLABORADOR` y `ADMIN`, emisión de JWT. |
-| **Kafka** | Apache Kafka (KRaft en dev) | Topic `catalog.ejemplar.evento`: enlaza el alta del ejemplar con el aviso por correo. |
-| **PostgreSQL** | 16 + PostGIS en contenedor | Un servidor; esquemas `catalog`, `media`, `notification` y `ai` (uno por servicio JDBC). |
-| **MongoDB** | 7 (Compose) | Enriquecimiento (especie, ejemplar, notas). |
-| **Redis** | 7 (Compose) | Caché de maestros en **catalog-service** (perfil `dev`; desactivada en tests sin Docker). |
-| **MinIO** | API S3 | Imágenes en dev (bucket `mtl-photos`); en prod, S3 u otro compatible. |
-
-#### Observabilidad y herramientas de desarrollo local
-
-| Componente | Tecnología | Responsabilidad |
-| --- | --- | --- |
-| **Mailpit** | `axllent/mailpit` (Compose) | SMTP y bandeja web de prueba en local; no envía a dominios reales. |
-| **Prometheus** | `prom/prometheus:v3.2.1` (Compose) | Métricas vía `/actuator/prometheus`. |
-| **Grafana** | `grafana/grafana:11.5.2` (Compose) | Dashboard **MTL Microservices**; UI **http://localhost:3000** |
-
 
 
 ### **3.3. Descripción de alto nivel del proyecto y estructura de ficheros**
@@ -842,7 +842,7 @@ proyecto/
 │   ├── adr/                  # Architecture Decision Records
 │   ├── api/                  # OpenAPI (contrato del gateway)
 │   ├── backlog/              # Historias y desgloses de tickets (HU-*)
-│   ├── data-model/           # Modelo de datos (reglas, Mongo, readme §3)
+│   ├── data-model/           # Modelo de datos (reglas, Mongo, readme §4)
 │   ├── engineering/          # Guías: tests Java/Maven (`testing-java.md`), Flyway local (`flyway-dev-reset.md`), mapa canónico (`canonical-sources.md`)
 │   ├── events/               # Contrato de eventos Kafka
 │   ├── onboarding/           # Inicio rápido, ramas Git, guías Vue y diseño frontend
@@ -924,7 +924,7 @@ flowchart LR
 
 ### **3.6. Tests**
 
-Estrategia prevista: pruebas unitarias de dominio; **integración** con **Testcontainers** (PostgreSQL con PostGIS, MongoDB, Kafka) donde aporte valor; **contrato de API** en [docs/api/openapi.yaml](docs/api/openapi.yaml) como referencia para pruebas de contrato y revisiones; tests de capa web y de aceptación sobre flujos críticos (catalogo, notificaciones, IA).
+Estrategia prevista: pruebas unitarias de dominio; **integración** con **Testcontainers** (PostgreSQL con PostGIS, MongoDB, Kafka) donde aporte valor; **contrato de API** en [docs/api/openapi.yaml](docs/api/openapi.yaml) como referencia para pruebas de contrato y revisiones; tests de capa web y de aceptación sobre flujos críticos (catálogo, notificaciones, IA).
 
 **Backend Java (`services/`):** convención `src/test/java` vs `src/testIT/java`, Surefire/Failsafe, IT por capa y E2E de sistema — [docs/engineering/testing-java.md](docs/engineering/testing-java.md) (§2.1; módulo [system-e2e-tests](services/system-e2e-tests/README.md), épica Acceso e identidad HU-001 esc. 2–4).
 
@@ -1268,7 +1268,7 @@ erDiagram
 
 Las entidades físicas se reparten por servicio y almacén como se indica en §3.2: un servidor **PostgreSQL** con cuatro esquemas `catalog`, `media`, `notification` y `ai`; una base **MongoDB** de enriquecimiento (colecciones en [mongo.md](docs/data-model/mongo.md)), con acceso previsto desde **catalog-service** (**HU-015**). El flujo **HU-016** actualiza `especie_detalle` según §6 de `mongo.md` (orquestación en **ai-assistant-service**).
 
-**Usuario de aplicación:** La audditoría de la aplicación se implementa en torno a al usuario proporcionado por el token generado por keycloak como proveedor OIDC. Para evitar duplicidades los diversos esquemas almacenan el identificador estable del proveedor (`sub`) que se guarda en el campo `**subject_oidc`**. En el caso de catalog-service este campo se guarda en una tabla USUARIO_APP con unicidad, no como clave primaria; esto permite trazabilidad sin duplicar la información; las FK de los campos de auditoria creado_por y modificado_por referencian a la clave primaria de esta tabla.
+**Usuario de aplicación:** La auditoría de la aplicación se implementa en torno al usuario proporcionado por el token generado por Keycloak como proveedor OIDC. Para evitar duplicidades los diversos esquemas almacenan el identificador estable del proveedor (`sub`) que se guarda en el campo **`subject_oidc`**. En el caso de catalog-service este campo se guarda en una tabla USUARIO_APP con unicidad, no como clave primaria; esto permite trazabilidad sin duplicar la información; las FK de los campos de auditoría `creado_por` y `modificado_por` referencian a la clave primaria de esta tabla.
 
 ---
 
@@ -1276,29 +1276,29 @@ Las entidades físicas se reparten por servicio y almacén como se indica en §3
 
 **Contrato canónico (OpenAPI 3):** [docs/api/openapi.yaml](docs/api/openapi.yaml) — rutas bajo el API Gateway (`/api/catalog`, `/api/media`, `/api/notifications`, `/api/ai`), seguridad JWT donde aplica, listados paginados (`page`, `size`) y errores en **RFC 9457** (`application/problem+json`).
 
-**Convenciones de diseño:** de cara a homogeneizar el desarrollo. se han definido las siguientes reglas de Cursor `.cursor/rules/api-contract.mdc`, `.cursor/rules/api-design.mdc` y `.cursor/rules/api-security.mdc`.
+**Convenciones de diseño:** de cara a homogeneizar el desarrollo, se han definido las siguientes reglas de Cursor `.cursor/rules/api-contract.mdc`, `.cursor/rules/api-design.mdc` y `.cursor/rules/api-security.mdc`.
 
 **Nomenclatura (BD, API, código, docs):** guía auditable y checklist en [docs/engineering/naming-conventions.md](docs/engineering/naming-conventions.md); decisión HTTP en inglés + persistencia en español en [ADR-0007](docs/adr/0007-english-http-spanish-persistence.md); término `ejemplar` en [ADR-0006](docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md).
 
-**Eventos asíncronos** notificaciones asíncronas asociadas al alte de un ejemplar: [docs/events/kafka-events.md](docs/events/kafka-events.md).
+**Eventos asíncronos:** notificaciones asociadas al alta de un ejemplar: [docs/events/kafka-events.md](docs/events/kafka-events.md).
 
 ---
 
 ## 6. Historias de usuario
 
-A partir del Modelo de análisis (actores, casos de uso, diagrama PlantUML): [docs/use-cases/use-case-summary.md](docs/use-cases/use-case-summary.md) y de la definición del sistema (archivo actual) se ha generado el backlog con la relación de las historias de uauario a implementar [docs/backlog/backlog.md](docs/backlog/backlog.md).
+A partir del Modelo de análisis (actores, casos de uso, diagrama PlantUML): [docs/use-cases/use-case-summary.md](docs/use-cases/use-case-summary.md) y de la definición del sistema (archivo actual) se ha generado el backlog con la relación de las historias de usuario a implementar [docs/backlog/backlog.md](docs/backlog/backlog.md).
 
-La definición y refinamiento de cada una de las historias de usuario incluidas en el backlog, y sus correspondientes ticket de trabajo, se ha realizado mediante los siguientes prompts genéricos que se han guardado como skills de Cursor: `.cursor/skills/hu-refinement-mtl/SKILL.md` (generación/refinamiento de historias) y `.cursor/skills/hu-breakdown-mtl/SKILL.md` (desglose en tickets). Estos prompt generar el correspondiente archivo dentro de la carpeta backlog.
+La definición y refinamiento de cada una de las historias de usuario incluidas en el backlog, y sus correspondientes ticket de trabajo, se ha realizado mediante los siguientes prompts genéricos que se han guardado como skills de Cursor: `.cursor/skills/hu-refinement-mtl/SKILL.md` (generación/refinamiento de historias) y `.cursor/skills/hu-breakdown-mtl/SKILL.md` (desglose en tickets). Estos prompts generan el correspondiente archivo dentro de la carpeta backlog.
 
 El proceso seguido es:
-- 1.- Generación de la Historia de Usuario a partir del backlog con `hu-breakdown-mtl/SKILL.md`
-- 2.- Análisis de  documento generado
-- 3.- Aclaración, definición y/o corrección de los puntos detectados en los apratdos de Riesgos y Aclaraciones pendientes (refinamiento)
-- 4.- Generación de los ticket de trabajo con `hu-refinement-mtl/SKILL.md`
+- 1.- Generación de la Historia de Usuario a partir del backlog con `hu-refinement-mtl/SKILL.md`
+- 2.- Análisis del documento generado
+- 3.- Aclaración, definición y/o corrección de los puntos detectados en los apartados de Riesgos y Aclaraciones pendientes (refinamiento)
+- 4.- Generación de los tickets de trabajo con `hu-breakdown-mtl/SKILL.md`
 
 Por operativa práctica, al comienzo de la historia se hacen unas comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.   
 
-**Ejemplo del proceso: Historia de Usuario — HU-008 (Edición y baja de mis árboles) **
+**Ejemplo del proceso: Historia de Usuario — HU-008 (Edición y baja de mis árboles)**
 
 **Prompt 1:**
 
@@ -1306,15 +1306,15 @@ Vamos a desarrollar la historia HU-008@.cursor/skills/hu-refinement-mtl
 
 **Prompt 2:**
 
-Vamos a revisar los puntos que quedan fuera de la historia. 1.- Añade en HU-006 el ticket para incluir la posibilidad de añadir y borrar fotografías desde la pantalla de edición de Mis arboles 2.- Incluye en  el Backlog una nueva historia histroias para abordar Proyección o enriquecimiento Mongo 3.- Incluye en la historia que estamos abordando la posibiliad de borrar árboles
+Vamos a revisar los puntos que quedan fuera de la historia. 1.- Añade en HU-006 el ticket para incluir la posibilidad de añadir y borrar fotografías desde la pantalla de edición de Mis árboles 2.- Incluye en el Backlog una nueva historia para abordar Proyección o enriquecimiento Mongo 3.- Incluye en la historia que estamos abordando la posibilidad de borrar árboles
 
 **Prompt 3:**
 
-El borrado se rá físico; cuando se borre un árbol se deben eliminar sus fotografías y su ampliación en Mongo; dado que aún no tenemos implementado en Mongo se necesitará un ticket solo para implementar esta acción que por ahora quedará como pendiente. Revisa si con estas aclaraciones podemos cerrar este punto y abordar los dos siguientes que serán Riesgos y Aclaraciones pendientes
+El borrado será físico; cuando se borre un árbol se deben eliminar sus fotografías y su ampliación en Mongo; dado que aún no tenemos implementado en Mongo se necesitará un ticket solo para implementar esta acción que por ahora quedará como pendiente. Revisa si con estas aclaraciones podemos cerrar este punto y abordar los dos siguientes que serán Riesgos y Aclaraciones pendientes
 
 **Prompt 4:**
 
-Respecto al riesgo de Listado sin filtros vamos a añadir en la historia el filtro por especie y por fecha de creación: desde - hasta. Para el borrado de todas las fotos de un árbol vamos a incluir un nuevo endpoint en media-service que será consumido por el microservicio de vatalogo; dejalo anotado en esta historia como ticket que debe modificar los dos microservicios. Ante un fallo parcial del borrado en cascada se producirá un Rollback (no se usará un patrón sagas en el MVP). Dime si queda algo pendiente antes de abordar el desglose de la historia en ticket, no abordes este desglose hasta que yo te lo diga
+Respecto al riesgo de Listado sin filtros vamos a añadir en la historia el filtro por especie y por fecha de creación: desde - hasta. Para el borrado de todas las fotos de un árbol vamos a incluir un nuevo endpoint en media-service que será consumido por el microservicio de catálogo; déjalo anotado en esta historia como ticket que debe modificar los dos microservicios. Ante un fallo parcial del borrado en cascada se producirá un Rollback (no se usará un patrón sagas en el MVP). Dime si queda algo pendiente antes de abordar el desglose de la historia en ticket, no abordes este desglose hasta que yo te lo diga
 
 **Prompt 5:**
 
@@ -1325,24 +1325,24 @@ Respecto al riesgo de Listado sin filtros vamos a añadir en la historia el filt
 
 ## 7. Tickets de trabajo
 
-Como se ha comentado en el punto anterior, para mantener formato homogéneo se usa un prompt genérico que se ha almacenado como skill`.cursor/skills/hu-breakdown-mtl/SKILL.md` (desglose en tickets). Este prompt gerera el correspondiente archivo md dentro de la carpeta backlog.
+Como se ha comentado en el punto anterior, para mantener formato homogéneo se usa un prompt genérico que se ha almacenado como skill `.cursor/skills/hu-breakdown-mtl/SKILL.md` (desglose en tickets). Este prompt genera el correspondiente archivo md dentro de la carpeta backlog.
 
-En la generación ed ticket de trabajo se incluye explicitamente una sección con las rules de Cursor que debe aplicar el agente de IA al implementarlos.
+En la generación de tickets de trabajo se incluye explícitamente una sección con las reglas de Cursor que debe aplicar el agente de IA al implementarlos.
 
 
 **Ejemplo del proceso: Ticket 1 — HU-008**
 
 **Prompt 1:**
 
-Vamos a generar los ticket de la historia; a partir de aquí incluye mis prompt utiliza la información que tienes en el contexto y a partir de la línea 1154 del readme (Ticket 1) solo incluye mi parte, no tu respuesta al prompt. Usa la información que hemos definido y /hu-refinement-mtl HU-008
+Vamos a generar los tickets de la historia; a partir de aquí incluye mis prompts, utiliza la información que tienes en el contexto y a partir de la sección **Ejemplo del proceso: Ticket 1 — HU-008** (§7) solo incluye mi parte, no tu respuesta al prompt. Usa la información que hemos definido y /hu-breakdown-mtl HU-008
 
 **Prompt 2:**
 
-Vamos con TASK-HU-008-01, Cierre OpenAPI catálogo y media (HU-008). Además de las operraciones que propone el ticket vamos a incluir además del endpoint de borrado de todas ls fotografías el endpoint del borrado de una fotografía (va también dentor de /api/media)
+Vamos con TASK-HU-008-01, Cierre OpenAPI catálogo y media (HU-008). Además de las operaciones que propone el ticket vamos a incluir además del endpoint de borrado de todas las fotografías el endpoint del borrado de una fotografía (va también dentro de /api/media)
 
 **Prompt 3** (TASK-HU-008-02 — Listado colaborador con filtros)
 
-así está bien, implementa en endpoint del Listado de TASK-HU-008-02, si tienes alguna duda preguntame antes; recuerda las reglas que se deben seguir ya indicadas en @docs/backlog/HU-008-ticket-breakdown.md para la parte back
+así está bien, implementa el endpoint del Listado de TASK-HU-008-02, si tienes alguna duda preguntame antes; recuerda las reglas que se deben seguir ya indicadas en @docs/backlog/HU-008-ticket-breakdown.md para la parte back
 
 
 ---
@@ -1371,7 +1371,7 @@ Implementa la **HU-004**: alta de suscripción por correo sin cuenta de colabora
 ## Cómo probar (orientativo)
 
 1. **Backend**: arrancar stack local según `services/README.md`; verificar migración y endpoint de alta de suscripción público según OpenAPI.
-2. **Frontend**: `npm run build` / tests en `frontend/`; flujo manual en `/suscripcion` (o ruta configurada) con correo válido y casos de error (409/conflicto si aplica).
+2. **Frontend**: `npm run build` / tests en `frontend/`; flujo manual en `/subscriptions/new` con correo válido y casos de error (409/conflicto si aplica).
 3. **Gateway**: comprobar que las peticiones al notification-service y respuestas de error se propagan de forma coherente.
 
 ## Referencias
@@ -1461,6 +1461,6 @@ Cierra **HU-008** (UC-04): el colaborador puede **listar y filtrar** sus fichas,
 - Revisar orden de cascada en `TreeDeletionService` (media → `commitPhysicalDelete`).
 - Confirmar que **PUT**/**DELETE** no publican en Kafka (solo alta).
 - **TASK-HU-008-11** rechazado a propósito; no esperar IT Failsafe catalog↔media en este PR.
-- Rama: `fecture/actualizacion` → `main`.
+- Rama: `feature/actualizacion` → `main`.
 
 **Pull Request 3**
