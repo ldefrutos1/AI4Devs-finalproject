@@ -1,12 +1,12 @@
 # Backlog inicial — MyTreeLibrary
 
-Fuentes: [readme.md](../../readme.md), [docs/use-cases/use-case-summary.md](../use-cases/use-case-summary.md), [docs/data-model/data-model.md](../data-model/data-model.md), [docs/data-model/mongo.md](../data-model/mongo.md), [docs/events/kafka-events.md](../events/kafka-events.md), [docs/api/openapi.yaml](../api/openapi.yaml), [docs/adr/0001-discovery-y-configuracion-por-orquestador.md](../adr/0001-discovery-y-configuracion-por-orquestador.md), [docs/adr/0002-claves-primarias-numericas-frente-a-uuid.md](../adr/0002-claves-primarias-numericas-frente-a-uuid.md).
+Fuentes: [readme.md](../../readme.md), [docs/use-cases/,](../use-cases/use-case-summary.md) [docs/data-model/](../data-model/data-model.md),[docs/events/kafka-events.md](../events/kafka-events.md), [docs/api/openapi.yaml](../api/openapi.yaml), [adr/](../use-cases/use-case-summary.md)
 
 ---
 
 ## 1. Resumen del MVP en 3 a 5 líneas
 
-MyTreeLibrary es una plataforma web para aficionados a la naturaleza que permite registrar para consulta pública ejemplares de árboles singulares con datos, fotografías y ubicación; ofrece suscripción de notificación de novedades por correo sin necesiada de cuenta de usuario. El sistema incluye  integración con IA. La arquitectura es SPA con microservicios Java y autenticación por JWT.
+MyTreeLibrary es una plataforma web para aficionados a la naturaleza que permite registrar para consulta pública ejemplares de árboles singulares almacenando datos, fotografías y ubicación. Orece posibilidad de recibir notificaciones de nuevas incorporaciones al catálogo mediante correo electrónico sin necesiadad de crear una cuenta de usuario. El sistema incluye  integración con IA. La arquitectura es SPA con microservicios Java y autenticación por JWT.
 
 ---
 

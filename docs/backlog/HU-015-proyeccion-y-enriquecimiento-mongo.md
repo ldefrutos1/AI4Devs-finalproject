@@ -1,19 +1,6 @@
 # HU-015 — Proyección y enriquecimiento Mongo
 
-## 1. Validación de la información existente
-
-| Aspecto | Estado |
-|---------|--------|
-| **Título** | *Proyección y enriquecimiento Mongo* — alineado con [mongo.md](../data-model/mongo.md) y readme §3.2 (Mongo como enriquecimiento; PostgreSQL como autoridad). |
-| **Formato “Como… quiero… para…”** | Definido en [backlog.md](backlog.md) §3. |
-| **Estimación (S/M/L)** | **L** — primera entrega con colecciones, sincronización/proyección desde SQL y criterios de invalidación. |
-| **Prioridad** | **Media** — pospuesta explícitamente en backlog §4–§5 respecto al MVP de consulta/alta; desbloquea búsquedas enriquecidas sin sustituir el maestro relacional. |
-| **Inconsistencias detectadas** | No existe caso de uso independiente en [use-case-summary.md](../use-cases/use-case-summary.md); la historia agrupa trabajo técnico de **catalog-service** documentado en readme y `mongo.md`. |
-| **Tamaño / división** | Historia grande; conviene desglosar en tickets tras refinamiento detallado (proyección mínima de especie vs. notas de ejemplar, eventos de sincronización). |
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 | Campo | Valor |
 |-------|--------|

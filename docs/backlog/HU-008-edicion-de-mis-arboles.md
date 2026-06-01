@@ -1,20 +1,6 @@
 # HU-008 — Edición y baja de mis árboles
 
-## 1. Validación de la información existente
-
-| Aspecto | Estado |
-|---------|--------|
-| **Título** | Actualizado en backlog: *Edición y baja de mis árboles* (incluye eliminación de fichas propias). |
-| **Formato “Como… quiero… para…”** | Correcto; el backlog enlaza **UC-04** y la restricción de propiedad (“únicamente los árboles que dí de alta yo”); la redacción refinada mantiene ese foco en el colaborador sin notas al pie en el cuerpo de la historia. |
-| **Estimación (S/M/L)** | **M** en backlog; el alcance entregado (filtros, cascada multi-servicio, **PUT**/**DELETE**) justificó esfuerzo **medio–alto** en implementación. |
-| **Prioridad** | **Alta** alineada con MVP y con la jerarquía de páginas del readme (§2.3). |
-| **Inconsistencias detectadas** | **Cerrado:** OpenAPI con `GET`/`PUT`/`DELETE` en `/api/catalog/trees` y borrado masivo en media; **ADMIN** sobre cualquier ficha; galería en edición vía **HU-006** (**TASK-HU-006-14**). **Deuda MVP documentada:** rollback compensatorio tras borrado de fotos (escenario BDD 8); borrado Mongo real (**TASK-HU-015-01**); **TASK-HU-008-11** (IT catalog↔media) **rechazado**. |
-| **Estado** | **Cerrada** — tickets en [HU-008-ticket-breakdown.md](HU-008-ticket-breakdown.md); verificación manual en [frontend/README.md](../../frontend/README.md) (apartado HU-008). |
-| **Tamaño / división** | Entregado: edición, **baja** en cascada, **filtros** en listado, endpoints **catalog** + **media**, UI **Mis árboles** y edición; fotos en edición (**HU-006**); hook Mongo **stub**. |
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 | Campo | Valor |
 |-------|--------|
@@ -109,7 +95,7 @@ Ver [HU-008-ticket-breakdown.md](HU-008-ticket-breakdown.md) (`TASK-HU-008-01` �
 
 *Ninguna.* Refinamiento cerrado; desglose en [HU-008-ticket-breakdown.md](HU-008-ticket-breakdown.md).
 
-## 3. Criterios de aceptación (BDD)
+## 2. Criterios de aceptación (BDD)
 
 ### Referencias
 
@@ -163,7 +149,7 @@ Ver [HU-008-ticket-breakdown.md](HU-008-ticket-breakdown.md) (`TASK-HU-008-01` �
 - **Cuando** falla el borrado del árbol en PostgreSQL (o el hook Mongo una vez implementado)  
 - **Entonces** *(objetivo de refinamiento)* se aplicaría **rollback** de lo ejecutado, error al cliente y estado consistente. **En el MVP cerrado:** no hay compensación automática; queda como mejora futura (sin saga).
 
-## 4. Evaluación INVEST (resumen)
+## 3. Evaluación INVEST (resumen)
 
 | Criterio | Comentario |
 |----------|------------|
@@ -174,6 +160,6 @@ Ver [HU-008-ticket-breakdown.md](HU-008-ticket-breakdown.md) (`TASK-HU-008-01` �
 | **Small** | Límite alto: edición + baja con rollback + filtros + ticket **catalog + media**; acotado por **TASK-HU-006-14** y **TASK-HU-015-01**. |
 | **Testable** | Sí: API (filtros, propiedad, baja, aborto por media), UI Mis árboles, tests automáticos y checklist manual HU-008; rollback (esc. 8) fuera del corte. |
 
-## 5. Esfuerzo estimado de implementación
+## 4. Esfuerzo estimado de implementación
 
 **Entregado** (orden de magnitud medio–alto frente al **M** del backlog): **catalog-service** (listado con filtros, GET por id, **PUT**, **DELETE** con orquestación), **media-service** (borrado masivo por árbol), **OpenAPI**, **frontend** (Mis árboles, edición, galería vía **HU-006**). Cifra en persona-días: **no fijada en fuentes**.

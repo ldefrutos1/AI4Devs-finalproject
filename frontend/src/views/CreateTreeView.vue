@@ -247,7 +247,7 @@ onMounted(async () => {
         <TreePhotoUploadPicker v-model="selectedPhotoFiles" @first-photo-gps="onFirstPhotoGps" />
       </div>
 
-      <div class="field field-full">
+      <div class="field field-full tree-form-map-slot">
         <TreeLocationMapPreview
           :latitude="form.latitude"
           :longitude="form.longitude"

@@ -189,7 +189,7 @@ onMounted(async () => {
 
         <div v-else-if="hasSpeciesRows" class="catalog-toolbar__panel admin-masters-table-panel">
           <div class="mtl-admin-table-wrap">
-            <table class="mtl-admin-table" :aria-label="t('adminMasters.listTitle')">
+            <table class="mtl-admin-table mtl-admin-table--stack" :aria-label="t('adminMasters.listTitle')">
               <thead>
                 <tr>
                   <th scope="col">{{ t('adminMasters.columns.species') }}</th>
@@ -199,9 +199,9 @@ onMounted(async () => {
               </thead>
               <tbody>
                 <tr v-for="item in speciesList" :key="item.id">
-                  <td>{{ item.label }}</td>
-                  <td>{{ item.genusLabel }}</td>
-                  <td class="mtl-admin-table__actions">
+                  <td :data-label="t('adminMasters.columns.species')">{{ item.label }}</td>
+                  <td :data-label="t('adminMasters.columns.genus')">{{ item.genusLabel }}</td>
+                  <td class="mtl-admin-table__actions" :data-label="t('adminMasters.columns.actions')">
                     <button
                       type="button"
                       class="btn btn-outline-primary btn-sm"

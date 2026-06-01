@@ -1,19 +1,6 @@
 # HU-012 — Gestión de suscripciones a notificaciones
 
-## 1. Validación de la información existente
-
-| Aspecto | Estado |
-|---------|--------|
-| **Título** | Correcto y alineado con el backlog: *Gestión de suscripciones a notificaciones*. |
-| **Formato “Como… quiero… para…”** | Correcto en el backlog; la redacción refinada lo mantiene en una sola frase sin notas al pie en el cuerpo de la historia. |
-| **Estimación (S/M/L)** | **M** coherente con el backlog; no se modifica. |
-| **Prioridad** | **Media** coherente con el backlog; no se modifica. |
-| **Inconsistencias detectadas** | **UC-08**, modelo §2 y **OpenAPI** alineados: **GET** `/api/notifications/subscriptions` (paginado, filtro opcional `estadoSuscripcion`, esquema de ítem y página) y **PATCH** `/api/notifications/subscriptions/{subscriptionId}` con cuerpo `{ "estadoSuscripcion": "ACTIVA" \| "CANCELADA" }`, respuesta **200** idempotente y errores **Problem** (ver [openapi.yaml](../api/openapi.yaml)). La implementación en **notification-service** debe mantenerse acorde a ese contrato. |
-| **Tamaño / división** | Acotada a gestión **ADMIN** sobre **SUSCRIPTOR** y pantalla prevista; reportes avanzados, exportaciones o motor de plantillas de correo quedan fuera. |
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 | Campo | Valor |
 |-------|--------|
@@ -64,7 +51,7 @@ Como usuario con rol administrador, quiero consultar y gestionar los registros d
 - **GET administrativo:** paginación `page` / `size` (misma forma de página que maestros de catálogo en OpenAPI), filtro opcional `estadoSuscripcion`, orden por defecto en servidor **altaEn** descendente.
 - **Idempotencia:** si el estado solicitado ya es el persistido, **PATCH** responde **200** con el ítem sin tratarlo como error.
 
-## 3. Criterios de aceptación (BDD)
+## 2. Criterios de aceptación (BDD)
 
 ### Referencias
 
@@ -88,7 +75,7 @@ Como usuario con rol administrador, quiero consultar y gestionar los registros d
 - **Cuando** un **ADMIN** solicita **PATCH** con `estadoSuscripcion` **ACTIVA** según el contrato  
 - **Entonces** el estado vuelve a **ACTIVA** y el suscriptor puede ser tenido en cuenta de nuevo como destinatario válido según las reglas de notificación por alta de ficha cuando esas notificaciones estén implementadas, sin que el flujo público haya modificado el estado por sí solo.
 
-## 4. Evaluación INVEST (resumen)
+## 3. Evaluación INVEST (resumen)
 
 | Criterio | Comentario |
 |----------|------------|
@@ -99,6 +86,6 @@ Como usuario con rol administrador, quiero consultar y gestionar los registros d
 | **Small** | Tamaño medio acotado a listado y transiciones de estado más pantalla admin; reportes o analítica ampliarían el alcance. |
 | **Testable** | Sí: verificable por API con JWT de **ADMIN**, por estados en base de datos y por pruebas de interfaz de la ruta de administración. |
 
-## 5. Esfuerzo estimado de implementación
+## 4. Esfuerzo estimado de implementación
 
 Orden de magnitud **medio** para **notification-service** (consulta paginada, transiciones de estado con validaciones, seguridad por rol, pruebas) más **frontend** (vista en ruta de administración, tabla o listado, acciones y manejo de errores) y actualización del contrato **OpenAPI** donde falte detalle. Cifra concreta de persona-días: **no fijada en fuentes**; depende del equipo.

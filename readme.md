@@ -112,9 +112,11 @@ graph TD
 
 ### **2.2.2 Diagrama de Casos de Uso del sistema**
 
+A continuación se incluye el modelo de casos de uso del sistema.
+
 ![Casos de uso](./docs/use-cases/use-case-model.png)
 
-*Fuentes:* [resumen de casos de uso](docs/use-cases/use-case-summary.md) · [modelo PlantUML](docs/use-cases/use-case-model.puml)
+*El listado de actores y casos de uso se puedde consultar en:* [resumen de casos de uso](docs/use-cases/use-case-summary.md) · [modelo PlantUML](docs/use-cases/use-case-model.puml)
 
 ### **2.3. Diseño y experiencia de usuario:**
 
@@ -778,23 +780,23 @@ sequenceDiagram
 
 ### **3.2. Descripción de componentes principales**
 
-Componentes del diagrama C2 (§3.1), desplegados o consumidos por la plataforma. No se listan dependencias solo del navegador (**OpenStreetMap** / **Leaflet**) ni el proveedor de IA externo (vía **ai-assistant-service** cuando exista el flujo).
+A continuación se detallan los componentes del diagrama C2 (§3.1), desplegados o consumidos por la plataforma. No se listan dependencias externas como el proveedor de mapas  (**OpenStreetMap** / **Leaflet**) ni el proveedor de IA.
 
 #### Capa de aplicación y entrada
 
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
-| **SPA** (`frontend/`) | Vue 3, Vite, TypeScript, Pinia, Vue Router, `oidc-client-ts`, Leaflet | Consulta pública, fichas, mapa, fotos y administración (maestros, suscripciones). OIDC (Authorization Code + PKCE) con Keycloak; peticiones a `/api/*` vía **API Gateway**. |
-| **API Gateway** (`api-gateway`) | Spring Cloud Gateway (WebFlux), Spring Boot 4 | Entrada HTTP (**8080**). Enruta `/api/catalog`, `/api/media`, `/api/notifications` y `/api/ai`. Valida JWT (Keycloak) y reenvía el token a los microservicios. Rutas públicas según [openapi.yaml](docs/api/openapi.yaml). Actuator: salud y métricas. |
+| **SPA** (`frontend/`) | Vue 3, Vite, TypeScript | Consulta pública, fichas, mapa, fotos y administración. |
+| **API Gateway** (`api-gateway`) | Spring Cloud Gateway (WebFlux), Spring Boot 4 | Entrada HTTP (**8080**). Enruta a los microservicios bajao `/api/` [openapi.yaml](docs/api/openapi.yaml). Valida JWT (Keycloak) y reenvía el token a los microservicios. |
 
 #### Microservicios de dominio
 
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
-| **catalog-service** | Spring Boot 4, JPA, Flyway, PostgreSQL; Redis en perfil `dev`; productor Kafka | Esquema `catalog`: maestros, provincias (semillas) y fichas (`ejemplar`; coordenadas `NUMERIC`, sin PostGIS en el DDL del MVP). Consulta pública; operaciones de colaborador y **ADMIN**. Tras el alta, publica `EJEMPLAR_CREADO` en `catalog.ejemplar.evento` ([kafka-events.md](docs/events/kafka-events.md)). La baja (HU-008) coordina **media-service**. Caché Redis de maestros en `dev`. Acceso Mongo previsto para proyección y `ejemplar_detalle` (**HU-015**; [mongo.md](docs/data-model/mongo.md)); integración en curso (borrado en stub). |
-| **media-service** | Spring Boot 4, JPA, Flyway, cliente MinIO (API S3) | Esquema `media` para metadatos; binarios en **MinIO** (dev) o **S3** (prod). Flujo: presign → subida → confirmación; foto principal y galería. Miniatura pública: `GET /api/media/public/trees/{treeId}/primary-photo`. |
-| **notification-service** | Spring Boot 4, JPA, Flyway, Spring Kafka, JavaMail | Esquema `notification`: suscripciones (alta pública; gestión **ADMIN**). Consume `catalog.ejemplar.evento` de forma idempotente y envía correo SMTP a suscriptores **ACTIVA** (Mailpit en dev). |
-| **ai-assistant-service** | Spring Boot 4 (en construcción) | Orquestación al proveedor de IA y trazas en esquema `ai` (auditoría de uso). **HU-016** pendiente; maestros en **catalog-service**. Resultados orientativos, no determinación científica. |
+| **catalog-service** | Spring Boot 4, JPA, Flyway, PostgreSQL; MongoDB, Redis en perfil `dev`; productor Kafka | Esquema `catalog`. Tras el alta de ejemplar publica `EJEMPLAR_CREADO` en `catalog.ejemplar.evento` ([kafka-events.md](docs/events/kafka-events.md)). |
+| **media-service** | Spring Boot 4, JPA, Flyway, cliente MinIO (API S3) | Esquema `media` para metadatos; binarios en **MinIO** (dev) o **S3** (prod). Flujo: presign → subida → confirmación. |
+| **notification-service** | Spring Boot 4, JPA, Flyway, Spring Kafka, JavaMail | Esquema `notification`. Consume `catalog.ejemplar.evento` de forma idempotente y envía correo SMTP a suscriptores **ACTIVA** (Mailpit en dev). |
+| **ai-assistant-service** | Spring Boot 4 | Orquestación al proveedor de IA y trazas en esquema `ai` (auditoría de uso). |
 
 #### Identidad, mensajería y almacenamiento
 
@@ -802,8 +804,8 @@ Componentes del diagrama C2 (§3.1), desplegados o consumidos por la plataforma.
 | --- | --- | --- |
 | **Keycloak** | Keycloak 26 (Compose) | IdP OIDC: realm `mtl`, clientes, roles `COLABORADOR` y `ADMIN`, emisión de JWT. |
 | **Kafka** | Apache Kafka (KRaft en dev) | Topic `catalog.ejemplar.evento`: enlaza el alta del ejemplar con el aviso por correo. |
-| **PostgreSQL** | 16 + PostGIS en contenedor | Un servidor; esquemas `catalog`, `media`, `notification` y `ai` (uno por servicio JDBC). Coordenadas en `catalog` como `NUMERIC` ([V1__baseline.sql](services/catalog-service/src/main/resources/db/migration/V1__baseline.sql)); uso espacial avanzado en iteraciones posteriores. |
-| **MongoDB** | 7 (Compose) | Enriquecimiento (especie, ejemplar, notas); ver [mongo.md](docs/data-model/mongo.md). Integración desde **catalog-service** en curso; no sustituye PostgreSQL. |
+| **PostgreSQL** | 16 + PostGIS en contenedor | Un servidor; esquemas `catalog`, `media`, `notification` y `ai` (uno por servicio JDBC). |
+| **MongoDB** | 7 (Compose) | Enriquecimiento (especie, ejemplar, notas). |
 | **Redis** | 7 (Compose) | Caché de maestros en **catalog-service** (perfil `dev`; desactivada en tests sin Docker). |
 | **MinIO** | API S3 | Imágenes en dev (bucket `mtl-photos`); en prod, S3 u otro compatible. |
 
@@ -811,11 +813,11 @@ Componentes del diagrama C2 (§3.1), desplegados o consumidos por la plataforma.
 
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
-| **Mailpit** | `axllent/mailpit` (Compose) | SMTP y bandeja web de prueba en local; no envía a dominios reales ([infra/compose/README.md](infra/compose/README.md)). |
-| **Prometheus** | `prom/prometheus:v3.2.1` (Compose) | Métricas vía `/actuator/prometheus` (host 8080–8084); UI **http://localhost:9090**. |
-| **Grafana** | `grafana/grafana:11.5.2` (Compose) | Dashboard **MTL Microservices**; UI **http://localhost:3000** (`GRAFANA_ADMIN_*` en `.env`). Ver [platform/observability/README.md](platform/observability/README.md). |
+| **Mailpit** | `axllent/mailpit` (Compose) | SMTP y bandeja web de prueba en local; no envía a dominios reales. |
+| **Prometheus** | `prom/prometheus:v3.2.1` (Compose) | Métricas vía `/actuator/prometheus`. |
+| **Grafana** | `grafana/grafana:11.5.2` (Compose) | Dashboard **MTL Microservices**; UI **http://localhost:3000** |
 
-*No listados aquí:* **`system-e2e-tests`** (pruebas E2E vía gateway, §3.6) y **Docker Compose** (infra local, §3.4).
+
 
 ### **3.3. Descripción de alto nivel del proyecto y estructura de ficheros**
 
@@ -843,8 +845,15 @@ proyecto/
 │   ├── data-model/           # Modelo de datos (reglas, Mongo, readme §3)
 │   ├── engineering/          # Guías: tests Java/Maven (`testing-java.md`), Flyway local (`flyway-dev-reset.md`), mapa canónico (`canonical-sources.md`)
 │   ├── events/               # Contrato de eventos Kafka
+│   ├── onboarding/           # Inicio rápido, ramas Git, guías Vue y diseño frontend
 │   ├── security/             # JWT, gateway, estrategia de validación
+│   ├── software-revisions/   # Revisiones y auditorías del proyecto
 │   └── use-cases/            # Casos de uso
+├── scripts/                  # Atajos PowerShell locales (`dev/`); ver README.md
+├── .cursor/
+│   ├── rules/                # Reglas Cursor (API, Spring, seguridad…)
+│   └── skills/               # Skills de encargo, refinamiento HU, BD…
+├── .github/                  # Plantillas de pull request
 └── readme.md
 ```
 
@@ -852,9 +861,11 @@ proyecto/
 
 **Desarrollo:** Docker Compose (o equivalente) con **un** PostgreSQL con extensión **PostGIS** (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO, Kafka, Keycloak, **Mailpit** (SMTP de prueba para notificaciones en local), **Prometheus** (`prom/prometheus:v3.2.1`) y **Grafana** (`grafana/grafana:11.5.2`) para métricas y dashboards ([ADR-0005](docs/adr/0005-microservices-observabilty-spring-boot.md)); los microservicios Spring Boot suelen ejecutarse en el **host** (puertos 8080–8084) para que Prometheus haga scrape vía `host.docker.internal`, o como contenedores si se adaptan los targets.
 
+Detalle de servicios, puertos y arranque en Compose: [infra/compose/README.md](infra/compose/README.md).
+
 **Despliegue Producción:** orquestación (Kubernetes), secretos externos, Keycloak y Kafka en HA según entorno, bases de datos gestionadas y almacenamiento de objetos S3 en nube.
 
-**Decisiones documentadas:** descubrimiento de servicios y configuración **sin Eureka ni Spring Cloud Config** (asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md). Claves primarias **numéricas** en SQL frente a UUID — [ADR-0002](docs/adr/0002-claves-primarias-numericas-frente-a-uuid.md). Observabilidad sencilla (Actuator, Prometheus, Grafana, logs JSON) — [ADR-0005](docs/adr/0005-microservices-observabilty-spring-boot.md); guía operativa en [platform/observability/README.md](platform/observability/README.md).
+**Decisiones documentadas:** el descubrimiento de servicios y configuración de los microservicios se hace **sin Eureka ni Spring Cloud Config** (asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md).
 
 ```mermaid
 flowchart LR
@@ -905,7 +916,6 @@ flowchart LR
 | Autorización              | Roles de realm `COLABORADOR` y `ADMIN`; políticas en recursos sensibles                                                                                                                 |
 | Gateway                   | Validación de JWT en el gateway (`spring-boot-starter-oauth2-resource-server`); rutas públicas según OpenAPI; **correlación** `X-Correlation-Id` (gateway → microservicios, Problem y MDC) |
 | Almacenamiento de objetos | Buckets privados; **URLs prefirmadas** de corta duración; sin credenciales en el cliente                                                                                                |
-| Suscripciones y privacidad | En el **MVP** solo se solicita **correo electrónico** para el aviso por alta de ficha; **no** se piden otros datos personales (nombre, teléfono, documento, etc.). La baja operativa es por estado (**ACTIVA** / **CANCELADA**) gestionada por **ADMIN**; minimización de datos en logs y APIs según contrato y modelo. |
 | Transporte                | TLS en producción; CORS restringido al origen del SPA                                                                                                                                   |
 | Observabilidad            | Actuator + Prometheus scrape + Grafana ([platform/observability/README.md](platform/observability/README.md)) |
 
@@ -917,6 +927,9 @@ flowchart LR
 Estrategia prevista: pruebas unitarias de dominio; **integración** con **Testcontainers** (PostgreSQL con PostGIS, MongoDB, Kafka) donde aporte valor; **contrato de API** en [docs/api/openapi.yaml](docs/api/openapi.yaml) como referencia para pruebas de contrato y revisiones; tests de capa web y de aceptación sobre flujos críticos (catalogo, notificaciones, IA).
 
 **Backend Java (`services/`):** convención `src/test/java` vs `src/testIT/java`, Surefire/Failsafe, IT por capa y E2E de sistema — [docs/engineering/testing-java.md](docs/engineering/testing-java.md) (§2.1; módulo [system-e2e-tests](services/system-e2e-tests/README.md), épica Acceso e identidad HU-001 esc. 2–4).
+
+
+*No listados aquí:* **`system-e2e-tests`** (pruebas E2E vía gateway, §3.6) y **Docker Compose** (infra local, §3.4).
 
 ---
 

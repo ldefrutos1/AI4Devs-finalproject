@@ -1,19 +1,6 @@
 # HU-005 — Alta de ficha de árbol
 
-## 1. Validación de la información existente
-
-| Aspecto | Estado |
-|---------|--------|
-| **Título** | Correcto y alineado con el backlog: *Alta de ficha de árbol*. |
-| **Formato “Como… quiero… para…”** | Correcto; el backlog añade explícitamente coordenadas (R2), maestros (R1, R8) y UC-03; la redacción refinada unifica todo en una frase sin notas al pie en el cuerpo de la historia. |
-| **Estimación (S/M/L)** | **L** coherente con alcance técnico (persistencia, validaciones, auditoría, Kafka). |
-| **Prioridad** | **Alta** alineada con MVP. |
-| **Inconsistencias detectadas** | ~~OpenAPI `object` genérico~~ **cerrado:** [openapi.yaml](../api/openapi.yaml) define **CreateEjemplarRequest** / **CreatedEjemplarResponse**. Listado colaborador y edición: **HU-008** (`GET /api/catalog/trees`). |
-| **Tamaño / división** | Historia grande pero acotada por “Queda fuera”: fotos —subida **HU-006**, consulta **HU-014**—, IA (HU-009), edición (HU-008). Si el equipo difería Kafka en un segundo despliegue, convendría explicitar entregables parciales (riesgo para R7/cadena de notificaciones). |
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 | Campo | Valor |
 |-------|--------|
@@ -69,7 +56,7 @@ Como colaborador autenticado, quiero registrar un árbol con datos descriptivos,
 - **Política de datos iniciales** o orden mínimo entre semillas Flyway / mantenimiento taxonómico (**HU-011**) y primera alta (**HU-005**).
 - Si la publicación Kafka debe ser **síncrona al commit** transaccional o mecanismo de compensación ante fallo downstream (solo documentado como práctica general de idempotencia en consumidor).
 
-## 3. Criterios de aceptación (BDD)
+## 2. Criterios de aceptación (BDD)
 
 ### Referencias
 
@@ -93,7 +80,7 @@ UC-03; reglas R1, R2, R3, R7, R8, R9; readme (registro de árbol, modelo lógico
 - **Cuando** un cliente **sin** Bearer válido o sin rol de colaborador según política de producto invoca la creación  
 - **Entonces** no se crea la ficha (p. ej. 401/403 según diseño de seguridad) y no se emite evento de alta; y cuando la creación sea exitosa, queda traza acorde a **AUDITORIA_CATALOGO** para la operación relevante (R3).
 
-## 4. Evaluación INVEST (resumen)
+## 3. Evaluación INVEST (resumen)
 
 | Criterio | Comentario |
 |----------|------------|
@@ -104,6 +91,6 @@ UC-03; reglas R1, R2, R3, R7, R8, R9; readme (registro de árbol, modelo lógico
 | **Small** | Límite: tamaño grande; si el equipo cierra primero solo persistencia SQL sin Kafka, habría que partir en entregables coordinados (riesgo de incumplir R7 en cadena). |
 | **Testable** | Sí: verificable por API y BD, incluyendo presencia del mensaje en **Kafka** según contrato en [kafka-events.md](../events/kafka-events.md). |
 
-## 5. Esfuerzo estimado de implementación
+## 4. Esfuerzo estimado de implementación
 
 Orden de magnitud **alto dentro del sprint del MVP** para **catalog-service**: modelo/DTO, validaciones, persistencia con coordenadas **numéricas** (MVP), integración Flyway, **publicación Kafka (TASK-05)**, auditoría y pruebas de integración (Testcontainers alineado al readme). Front: formulario de alta y manejo de errores. Cifra concreta de persona-días: **no fijada en fuentes**; depende del equipo.

@@ -379,7 +379,7 @@ onMounted(async () => {
           </p>
         </section>
 
-        <section class="tree-detail-panel" aria-labelledby="tree-edit-map-heading">
+        <section class="tree-detail-panel tree-form-map-slot" aria-labelledby="tree-edit-map-heading">
           <h2 id="tree-edit-map-heading" class="tree-detail-panel__title">
             {{ t('treesDetail.map.title') }}
           </h2>

@@ -1,19 +1,6 @@
 # HU-007 — Aviso por correo al crear una ficha
 
-## 1. Validación de la información existente
-
-| Aspecto | Estado |
-|---------|--------|
-| **Título** | Correcto y alineado con el backlog: *Aviso por correo al crear una ficha*. |
-| **Formato “Como… quiero… para…”** | Correcto; describe claramente valor para persona suscrita y evento disparador (alta de ficha). |
-| **Estimación (S/M/L)** | **M** coherente para alcance MVP centrado en consumo de evento, idempotencia y envío de correo. |
-| **Prioridad** | **Alta** alineada con objetivo de notificación del MVP. |
-| **Inconsistencias detectadas** | No se detectan contradicciones con `backlog.md`; el desglose técnico define explícitamente el límite entre productor (`catalog-service`) y consumidor (`notification-service`). |
-| **Tamaño / división** | Tamaño adecuado para **M** si se mantiene el corte en “solo alta” (`EJEMPLAR_CREADO`) y no se amplía a otros tipos de eventos o campañas. |
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 | Campo | Valor |
 |-------|--------|
@@ -69,7 +56,7 @@ Como persona suscrita por correo, quiero recibir un aviso cuando exista el alta 
 - Redacción concreta del cuerpo del email (texto fijo permitido en MVP; sin plantillas).
 - Evidencia mínima de cierre manual/E2E cuando no haya suscriptores (caso no-op).
 
-## 3. Criterios de aceptación (BDD)
+## 2. Criterios de aceptación (BDD)
 
 ### Referencias
 
@@ -93,7 +80,7 @@ Backlog `HU-007`, [HU-007-ticket-breakdown.md](HU-007-ticket-breakdown.md), [kaf
 - **Cuando** se ejecuta el flujo de notificación  
 - **Entonces** el sistema completa un no-op controlado y deja traza suficiente sin error funcional.
 
-## 4. Evaluación INVEST (resumen)
+## 3. Evaluación INVEST (resumen)
 
 | Criterio | Comentario |
 |----------|------------|
@@ -104,6 +91,6 @@ Backlog `HU-007`, [HU-007-ticket-breakdown.md](HU-007-ticket-breakdown.md), [kaf
 | **Small** | Aceptable para **M** si se limita a `EJEMPLAR_CREADO` y no se amplía a otros eventos. |
 | **Testable** | Sí: verificable con pruebas de integración y escenarios de duplicado/no-op. |
 
-## 5. Esfuerzo estimado de implementación
+## 4. Esfuerzo estimado de implementación
 
 Orden de magnitud **medio (M)**, concentrado en `notification-service`: modelo de persistencia, listener Kafka, deduplicación, envío de correo y pruebas de integración con Kafka/BD. El riesgo principal de esfuerzo está en reintentos SMTP e idempotencia robusta bajo reentregas.

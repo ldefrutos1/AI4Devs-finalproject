@@ -1,19 +1,6 @@
 # HU-016 — Consulta de características de especie (ADMIN, MVP)
 
-## 1. Validación de la información existente
-
-| Aspecto | Estado |
-|---------|--------|
-| **Título** | *Consulta de características de especie (ADMIN, MVP)* — alineado con readme §2 (Integración con IA) y §3.1.4. |
-| **Formato “Como… quiero… para…”** | Definido en [backlog.md](backlog.md) §3. |
-| **Estimación (S/M/L)** | **M** — orquestación en **ai-assistant-service**, contrato API, UI acotada en administración de maestros, auditoría **AUDITORIA_USO_IA** y persistencia mínima en Mongo (`especie_detalle`). |
-| **Prioridad** | **Media** — única capacidad de IA del MVP; no bloquea consulta pública ni catálogo colaborador. |
-| **Alcance MVP vs futuro** | **HU-009** (identificación por imagen, UC-05) y **HU-010** (chat, UC-06) quedan en **Próxima versión**; rutas de producto `/ai/identify` y `/ai/chat` sin implementar en este corte. |
-| **Tamaño / división** | Historia acotada; desglose en tickets tras refinamiento (OpenAPI, backend IA, UI admin, Mongo/auditoría). |
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 | Campo | Valor |
 |-------|--------|
@@ -70,7 +57,7 @@ Como usuario con rol **ADMIN**, quiero consultar o solicitar el enriquecimiento 
 - Campos mínimos obligatorios en la respuesta y en el documento Mongo del primer corte.
 - Relación de tickets con **HU-015** (quién implementa el repositorio Mongo).
 
-## 3. Criterios de aceptación (BDD)
+## 2. Criterios de aceptación (BDD)
 
 ### Referencias
 
@@ -98,7 +85,7 @@ readme §2, §3.1.4; [mongo.md](../data-model/mongo.md) (`especie_detalle`); [da
 
 ---
 
-## 4. Enlaces
+## 3. Enlaces
 
 - Backlog: [backlog.md](backlog.md) §3 (**HU-016**).
 - Próximas versiones: **HU-009**, **HU-010**.

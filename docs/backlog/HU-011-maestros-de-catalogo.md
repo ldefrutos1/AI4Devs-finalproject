@@ -1,19 +1,6 @@
 # HU-011 — Maestros de catálogo
 
-## 1. Validación de la información existente
-
-| Aspecto | Estado |
-|---------|--------|
-| **Título** | Correcto y alineado con el backlog: *Maestros de catálogo* (alcance operativo: maestros **taxonómicos**). |
-| **Formato “Como… quiero… para…”** | Correcto en el backlog; coherente con **R8** y **UC-07** (solo taxonomía; provincias fuera). |
-| **Estimación (S/M/L)** | Revisada a **M**: tres tablas pequeñas, patrones reutilizables del catálogo y UI admin acotada a una pantalla de especie con altas auxiliares; ver desglose [HU-011-ticket-breakdown.md](HU-011-ticket-breakdown.md). |
-| **Prioridad** | **Media** coherente con el backlog; no se modifica. |
-| **Inconsistencias detectadas (corregidas)** | Provincias excluidas del mantenimiento admin; estimación ajustada de **L** a **M**; aclaraciones de refinamiento cerradas en §2 (decisiones) y tickets **TASK-HU-011-01** en adelante. |
-| **Tamaño / división** | Historia **M**, acotada por matriz CRUD y UI única; no requiere división en varias HUs. |
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 | Campo | Valor |
 |-------|--------|
@@ -70,7 +57,7 @@ Como usuario con rol administrador, quiero gestionar los datos de referencia tax
 
 Ninguna: cerradas en la tabla anterior y en [HU-011-ticket-breakdown.md](HU-011-ticket-breakdown.md).
 
-## 3. Criterios de aceptación (BDD)
+## 2. Criterios de aceptación (BDD)
 
 ### Referencias
 
@@ -94,7 +81,7 @@ Ninguna: cerradas en la tabla anterior y en [HU-011-ticket-breakdown.md](HU-011-
 - **Cuando** un **ADMIN** solicita **DELETE** de esa especie  
 - **Entonces** la operación no elimina la fila y recibo error de cliente coherente con el contrato (p. ej. **409**), sin incoherencia respecto a **R1**.
 
-## 4. Evaluación INVEST (resumen)
+## 3. Evaluación INVEST (resumen)
 
 | Criterio | Comentario |
 |----------|------------|
@@ -105,6 +92,6 @@ Ninguna: cerradas en la tabla anterior y en [HU-011-ticket-breakdown.md](HU-011-
 | **Small** | Sí para un sprint con alcance MVP acordado. |
 | **Testable** | Sí: API, UI, auditoría, evicción de caché y regla FK en baja. |
 
-## 5. Esfuerzo estimado de implementación
+## 4. Esfuerzo estimado de implementación
 
 Orden de magnitud **medio** (**M**): **catalog-service** (escritura taxonómica acotada, auditoría, caché), **frontend** (pantalla única con popups), **OpenAPI** y pruebas. Ver [HU-011-ticket-breakdown.md](HU-011-ticket-breakdown.md).

@@ -1,21 +1,6 @@
 # HU-003 — Localización en mapa dentro del detalle de árbol
 
-## 1. Validación de la información existente
-
-
-| Aspecto                           | Estado                                                                                                                                                                                                         |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Título**                        | Correcto y alineado con backlog: *Localización en mapa dentro del detalle de árbol*.                                                                                                                           |
-| **Formato “Como… quiero… para…”** | Correcto; define claramente actor público, acción de visualizar mapa en detalle y beneficio de contexto geográfico sin salir del flujo de consulta.                                                            |
-| **Estimación (S/M/L)**            | **M** coherente para alcance MVP (detalle público + representación en mapa).                                                                                                                                   |
-| **Prioridad**                     | **Alta** coherente con valor de la consulta pública en el producto.                                                                                                                                            |
-| **Inconsistencias detectadas**    | No hay contradicción de fondo con `readme.md` ni backlog; sí existe dependencia funcional estrecha con **HU-002** que requiere coordinación para evitar duplicidades de implementación en la vista de detalle. |
-| **Tamaño / división**             | Tamaño adecuado para **M** si se mantiene foco en visualización de localización dentro del detalle (sin introducir geobúsqueda, clustering o filtros avanzados).                                               |
-
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 
 | Campo                         | Valor                                            |
@@ -72,7 +57,7 @@ Como usuario de la aplicación, quiero ver en el detalle de cada árbol publicad
 - Acordar nivel de interacción del mapa en MVP (solo visualización, zoom/pan básico, sin herramientas adicionales).
 - Concretar estrategia de implementación paralela HU-002/HU-003 en un único componente de detalle para evitar retrabajo.
 
-## 3. Criterios de aceptación (BDD)
+## 2. Criterios de aceptación (BDD)
 
 ### Referencias
 
@@ -96,7 +81,7 @@ Backlog `HU-003` (tabla §3), `readme.md` §1.2 (consulta pública y visualizaci
 - **Cuando** un visitante abre su detalle público  
 - **Entonces** la página no falla y muestra un estado controlado indicando que la localización no está disponible.
 
-## 4. Evaluación INVEST (resumen)
+## 3. Evaluación INVEST (resumen)
 
 
 | Criterio          | Comentario                                                                                                          |
@@ -109,6 +94,6 @@ Backlog `HU-003` (tabla §3), `readme.md` §1.2 (consulta pública y visualizaci
 | **Testable**      | Sí: verificable con escenarios de detalle con/sin coordenadas y navegación pública integrada con HU-002.            |
 
 
-## 5. Esfuerzo estimado de implementación
+## 4. Esfuerzo estimado de implementación
 
 Orden de magnitud **medio (M)** para MVP: integración de mapa en detalle público, ajuste del contrato de datos de localización en backend/gateway si procede y validación de estados de interfaz con coordenadas válidas y no disponibles. Al implementarse en paralelo con **HU-002**, parte del esfuerzo se optimiza al compartir la misma pantalla de detalle.

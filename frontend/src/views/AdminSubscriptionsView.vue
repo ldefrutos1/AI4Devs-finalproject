@@ -207,7 +207,7 @@ function onDismissModal(): void {
 
       <div v-else class="catalog-toolbar__panel admin-subscriptions-table-panel">
         <div class="mtl-admin-table-wrap">
-          <table class="mtl-admin-table" :aria-label="t('adminSubscriptions.title')">
+          <table class="mtl-admin-table mtl-admin-table--stack" :aria-label="t('adminSubscriptions.title')">
             <thead>
               <tr>
                 <th scope="col">{{ t('adminSubscriptions.fields.email') }}</th>
@@ -220,12 +220,16 @@ function onDismissModal(): void {
             </thead>
             <tbody>
               <tr v-for="row in items" :key="row.subscriptionId">
-                <td>{{ row.email }}</td>
-                <td>{{ estadoLabel(row.estadoSuscripcion) }}</td>
-                <td>{{ formatDate(row.altaEn) }}</td>
-                <td>{{ formatDate(row.confirmadoEn) }}</td>
-                <td>{{ formatDate(row.bajaEn) }}</td>
-                <td class="mtl-admin-table__actions">
+                <td :data-label="t('adminSubscriptions.fields.email')">{{ row.email }}</td>
+                <td :data-label="t('adminSubscriptions.fields.estado')">
+                  {{ estadoLabel(row.estadoSuscripcion) }}
+                </td>
+                <td :data-label="t('adminSubscriptions.fields.altaEn')">{{ formatDate(row.altaEn) }}</td>
+                <td :data-label="t('adminSubscriptions.fields.confirmadoEn')">
+                  {{ formatDate(row.confirmadoEn) }}
+                </td>
+                <td :data-label="t('adminSubscriptions.fields.bajaEn')">{{ formatDate(row.bajaEn) }}</td>
+                <td class="mtl-admin-table__actions" :data-label="t('adminSubscriptions.fields.actions')">
                   <button
                     v-if="row.estadoSuscripcion === 'ACTIVA'"
                     type="button"

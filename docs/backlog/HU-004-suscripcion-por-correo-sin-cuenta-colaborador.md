@@ -1,19 +1,6 @@
 # HU-004 — Suscripción por correo sin cuenta colaborador
 
-## 1. Validación de la información existente
-
-| Aspecto | Estado |
-|---------|--------|
-| **Título** | Alineado con el backlog: cubre alta de suscriptor **sin** cuenta de Colaborador. |
-| **Formato “Como… quiero… para…”** | Presente en el backlog con UC-02; la historia refinada en §2 unifica redacción y beneficio sin referencias entre paréntesis en el cuerpo de la historia de usuario. |
-| **Estimación (S/M/L)** | **M** — se mantiene. |
-| **Prioridad** | **Alta** — se mantiene. |
-| **Inconsistencias detectadas** | Coherencia cerrada para el MVP: alta en **ACTIVA** sin correo de confirmación; [**data-model §2**](../data-model/data-model.md) y OpenAPI alineados. |
-| **Tamaño / división** | Acotada si se excluye envío masivo de correos y consumo Kafka (**[HU-007](backlog.md)**) y la **gestión administrativa** de registros (**[HU-012](backlog.md)**). |
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 | Campo | Valor |
 |-------|--------|
@@ -63,7 +50,7 @@ Como visitante sin cuenta en la plataforma, quiero registrarme con mi correo ele
 - **Correo existente en CANCELADA:** **`409 Conflict`** + mensaje explícito; **sin** paso a **ACTIVA** en esta historia (solo **ADMIN** / **HU-012**).
 - **Cuerpo del `201`:** objeto **`{ email }`** acorde al contrato OpenAPI.
 
-## 3. Criterios de aceptación (BDD)
+## 2. Criterios de aceptación (BDD)
 
 ### Referencias
 
@@ -99,7 +86,7 @@ UC-02; regla R7 (**ACTIVA**, [data-model.md](../data-model/data-model.md)); read
 - **Cuando** se completa con éxito **solo** el alta del suscriptor definido en esta historia  
 - **Entonces** el sistema **no** debe dar por cumplido el envío de avisos por nuevas altas ni consumir **`catalog.ejemplar.evento`** en el marco únicamente de **HU-004** (eso queda exclusivamente para la historia correspondiente)
 
-## 4. Evaluación INVEST (resumen)
+## 3. Evaluación INVEST (resumen)
 
 | Criterio | Comentario |
 |----------|------------|
@@ -110,6 +97,6 @@ UC-02; regla R7 (**ACTIVA**, [data-model.md](../data-model/data-model.md)); read
 | **Small** | Razonable si se mantienen fuera HU-007 y HU-012 como en “Queda fuera”. |
 | **Testable** | Sí: verificable por API (códigos, persistencia en BD) y por prueba de UI mínima en `/subscriptions/new`. |
 
-## 5. Esfuerzo estimado de implementación
+## 4. Esfuerzo estimado de implementación
 
 Orden de magnitud **medio** para **notification-service** (persistencia **SUSCRIPTOR** en **ACTIVA**, validación de email, endpoint detrás de gateway) y **frontend** (formulario en `/subscriptions/new`). Cifra de persona-días: **no fijada en fuentes**.

@@ -1,19 +1,6 @@
 # HU-014 — Consulta de fotografías del árbol
 
-## 1. Validación de la información existente
-
-| Aspecto | Estado |
-|---------|--------|
-| **Título** | Alineado con el backlog: *Consulta de fotografías del árbol*; complementa **HU-006**. |
-| **Formato “Como… quiero… para…”** | Correcto; cubre visitante y usuarios autenticados según contexto y reglas R4–R5. |
-| **Estimación (S/M/L)** | **M**: listados o proyecciones de metadatos, autorización por rol y categoría, URLs prefirmadas de **lectura** (si aplica), integración mínima en detalle público y/o ficha de edición. |
-| **Prioridad** | **Alta** para cerrar el valor de las fotos más allá del almacenamiento. |
-| **Inconsistencias detectadas** | Sin inconsistencias críticas en este corte: el contrato de galería por árbol y la categoría literal (`PUBLIC`/`PRIVATE`) están cerrados en [docs/api/openapi.yaml](../api/openapi.yaml). Mantener revisión de coherencia con [docs/data-model/data-model.md](../data-model/data-model.md) en evolutivos (miniaturas/CDN, políticas avanzadas). |
-| **Tamaño / división** | Adecuado para **M** si se acota a consulta y visualización sin editor avanzado, tratamiento de imágenes ni IA (**HU-009**). |
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 | Campo | Valor |
 |-------|--------|
@@ -71,7 +58,7 @@ Como visitante o usuario autenticado quiero ver las fotografías almacenadas en 
 - Criterio de ausencia de fotos en API de galería: respuesta **200** con **lista vacía**.
 - Sin pendientes funcionales adicionales para pasar a cierre documental del corte.
 
-## 3. Criterios de aceptación (BDD)
+## 2. Criterios de aceptación (BDD)
 
 ### Referencias
 
@@ -95,7 +82,7 @@ Como visitante o usuario autenticado quiero ver las fotografías almacenadas en 
 - **Cuando** solicito el conjunto de fotos para listado o detalle  
 - **Entonces** en anónimo solo veo públicas, en autenticado veo públicas+privadas según permisos, y si solo hay una foto se muestra imagen única sin controles de carrusel.
 
-## 4. Evaluación INVEST (resumen)
+## 3. Evaluación INVEST (resumen)
 
 | Criterio | Comentario |
 |----------|------------|
@@ -106,11 +93,11 @@ Como visitante o usuario autenticado quiero ver las fotografías almacenadas en 
 | **Small** | Razonable en **M** si no se añade IA ni notificaciones. |
 | **Testable** | Sí: pruebas de API por rol y pruebas de integración con MinIO/gateway según política del equipo. |
 
-## 5. Esfuerzo estimado de implementación
+## 4. Esfuerzo estimado de implementación
 
 Orden de magnitud **medio (M)**: contrato de lectura, autorización en **media-service**, prefirmadas de descarga si procede, pruebas y UI mínima en detalle (y opcionalmente en edición). Cifra en persona-días: **no fijada en fuentes**.
 
-## 6. Estado de implementación en código (corte HU-014, 2026)
+## 5. Estado de implementación en código (corte HU-014, 2026)
 
 Objetivo: dejar trazada en documentación lo ya construido frente a la HU completa (secciones 2–3).
 

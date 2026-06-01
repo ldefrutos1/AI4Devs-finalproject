@@ -1,19 +1,6 @@
 # HU-002 — Fichas publicadas (lista y detalle)
 
-## 1. Validación de la información existente
-
-| Aspecto | Estado |
-|---------|--------|
-| **Título** | Correcto y alineado con backlog: *Fichas publicadas (lista y detalle)*. |
-| **Formato “Como… quiero… para…”** | Correcto; define actor público sin sesión, acción de consulta y beneficio de información sin autenticación, alineado con UC-01. |
-| **Estimación (S/M/L)** | **M** coherente para un alcance MVP de consulta pública con listado y detalle. |
-| **Prioridad** | **Alta** coherente con valor de producto (consulta pública como capacidad base del MVP). |
-| **Inconsistencias detectadas** | Existe frontera funcional a concretar con **HU-003** (mapa en detalle): HU-002 cubre lista y detalle de ficha publicada; la localización en mapa se refina en HU-003 para evitar duplicidad de alcance. |
-| **Tamaño / división** | Tamaño adecuado para **M** si se mantiene el foco en lectura pública (sin edición, sin autenticación y sin lógica de notificaciones). |
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 | Campo | Valor |
 |-------|--------|
@@ -74,7 +61,7 @@ Como visitante sin cuenta, quiero consultar el listado y el detalle de las ficha
 - Evidencia de **datos semilla** o dataset mínimo de fichas publicadas para validación funcional en entornos de prueba.
 - Vista de **detalle** en frontend: la ruta puede existir antes de la pantalla definitiva; el contrato del detalle público ya está definido para alinear **HU-003** (mapa).
 
-## 3. Criterios de aceptación (BDD)
+## 2. Criterios de aceptación (BDD)
 
 ### Referencias
 
@@ -98,7 +85,7 @@ Backlog `HU-002` (tabla §3), `readme.md` §1.2 (consulta pública y visualizaci
 - **Cuando** un visitante consulta listado o detalle públicos  
 - **Entonces** solo se muestran fichas publicadas y el acceso a contenido no publicado no se expone en el flujo público.
 
-## 4. Evaluación INVEST (resumen)
+## 3. Evaluación INVEST (resumen)
 
 | Criterio | Comentario |
 |----------|------------|
@@ -109,6 +96,6 @@ Backlog `HU-002` (tabla §3), `readme.md` §1.2 (consulta pública y visualizaci
 | **Small** | Sí para **M** si se evita añadir filtros avanzados y se mantiene separación con HU-003 (mapa). |
 | **Testable** | Sí: verificable con pruebas de navegación pública, respuestas API de lectura y control de visibilidad de fichas no publicadas. |
 
-## 5. Esfuerzo estimado de implementación
+## 4. Esfuerzo estimado de implementación
 
 Orden de magnitud **medio (M)** para MVP: implementación de vistas públicas de listado y detalle, integración con endpoints públicos de catálogo en gateway, manejo de estados de interfaz y validaciones de visibilidad en backend según estado de publicación. El esfuerzo depende de la disponibilidad de datos publicados en entorno de prueba y del cierre del contrato de campos de respuesta.

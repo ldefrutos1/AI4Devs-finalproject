@@ -1,20 +1,6 @@
 # HU-006 — Subida de fotografías al árbol
 
-## 1. Validación de la información existente
-
-| Aspecto | Estado |
-|---------|--------|
-| **Título** | Correcto y alineado con el backlog: *Subida de fotografías al árbol*; la **consulta** queda en **HU-014**. |
-| **Formato “Como… quiero… para…”** | Correcto; **usuario autenticado** con acceso de edición según rol (**COLABORADOR** y **ADMIN**, coherente con readme y fila de [backlog.md](backlog.md)); subida segura y visibilidad alineadas a las reglas de fotografía del modelo de datos. |
-| **Estimación (S/M/L)** | **M** coherente con alcance típico de primer corte (presign, persistencia de metadatos, bucket MinIO, UI mínima). |
-| **Prioridad** | **Alta** alineada con MVP. |
-| **Inconsistencias detectadas** | **Cerrado** (TASK-HU-006-06): contrato media en [openapi.yaml](../api/openapi.yaml); guía: [media-upload-hu006.md](../engineering/media-upload-hu006.md). Ampliación edición (**TASK-HU-006-14**): cerrada. |
-| **Estado** | **Cerrada** (tickets en [HU-006-ticket-breakdown.md](HU-006-ticket-breakdown.md)) |
-| **Tamaño / división** | Adecuado para **M** si se acota a usuarios autenticados con permiso sobre la ficha (**COLABORADOR** y **ADMIN**), metadatos en `media-service` y subida a MinIO vía gateway; riesgo de crecimiento si se mezcla la galería de consulta (**HU-014**) o tratamiento de imágenes en la misma entrega. |
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 | Campo | Valor |
 |-------|--------|
@@ -82,7 +68,7 @@ Resumen técnico actualizado: [media-upload-hu006.md](../engineering/media-uploa
 - Regla de EXIF cerrada: si la primera imagen tiene latitud y longitud válidas, **sobrescribe** los valores actuales de coordenadas en pantalla.
 - En la primera versión la visibilidad de las fotografías se hereda de la visibilidad del árbol: las fotografías de un árbol público tienen visibilidad pública
 
-## 3. Criterios de aceptación (BDD)
+## 2. Criterios de aceptación (BDD)
 
 ### Referencias
 
@@ -106,7 +92,7 @@ Readme (microservicio **media-service**, **MinIO**, enrutado `/api/media`); [doc
 - **Cuando** intento solicitar una subida sobre un árbol no autorizado o de una imagen que supera el límite de tamaño configurado  
 - **Entonces** la operación no tiene efecto no autorizado y recibo un error coherente con la convención de errores de la API, sin filtrar detalles internos del almacén.
 
-## 4. Evaluación INVEST (resumen)
+## 3. Evaluación INVEST (resumen)
 
 | Criterio | Comentario |
 |----------|------------|
@@ -117,6 +103,6 @@ Readme (microservicio **media-service**, **MinIO**, enrutado `/api/media`); [doc
 | **Small** | Razonable para **M** si no se mezcla IA, notificaciones ni la galería de lectura (**HU-014**) en la misma historia. |
 | **Testable** | Sí: pruebas de API, permisos y comprobación de objeto en MinIO en entorno de integración o testcontainers según política del equipo. |
 
-## 5. Esfuerzo estimado de implementación
+## 4. Esfuerzo estimado de implementación
 
 Orden de magnitud **medio (M)** para el MVP: arranque de **media-service** (proyecto Maven, configuración S3/MinIO, Flyway en esquema `media`), implementación de **presign** y persistencia de metadatos (incluida marca de foto principal), enrutado en **api-gateway**, ajuste de **OpenAPI**, validación de tamaño por propiedad de aplicación (default 20 MB), lectura EXIF en cliente para autocompletar coordenadas de la primera imagen y pruebas automatizadas mínimas. Cifra en persona-días: **no fijada en fuentes**; depende del equipo y del alcance exacto de UX de subida en el mismo entregable.

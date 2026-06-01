@@ -1,19 +1,6 @@
 # HU-013 — Estructura de páginas, navegación y guardas por rol (MVP)
 
-## 1. Validación de la información existente
-
-| Aspecto | Estado |
-|---------|--------|
-| **Título** | Correcto y alineado con backlog: *Estructura de páginas, navegación y guardas por rol (MVP)*. |
-| **Formato “Como… quiero… para…”** | Correcto; define valor transversal para público, colaborador y rol **ADMIN**. |
-| **Estimación (S/M/L)** | **M** coherente para un alcance de estructura base (rutas, placeholders, navegación y seguridad de acceso) sin completar funcionalidad de todas las vistas. |
-| **Prioridad** | **Alta** coherente con MVP, al habilitar recorridos end-to-end y reducir incertidumbre de integración frontend/auth. |
-| **Inconsistencias detectadas** | No hay contradicción directa entre backlog y readme tras alinear la consulta pública como **listado + detalle con mapa integrado**; se usa el término `ADMIN` alineado con la definición de roles en Keycloak. |
-| **Tamaño / división** | Historia amplia pero acotable: incluye estructura y guardas; no incluye implementación funcional completa de páginas pendientes (solo placeholders con título). Si creciera el alcance de UI, convendría dividir navegación base vs administración. |
-
----
-
-## 2. Historia refinada
+## 1. Historia refinada
 
 | Campo | Valor |
 |-------|--------|
@@ -70,7 +57,7 @@ Como usuario público, colaborador o usuario con rol **ADMIN**, quiero disponer 
 - Confirmación de mapeo único de roles en frontend para mostrar `ADMIN` de forma consistente en navegación, guardas y copy funcional.
 - En el breakdown de HU-013 deberá existir un ticket explícito de **control de alcance** para verificar que las pantallas pendientes se quedan en placeholder y no incorporan lógica de backend en esta fase.
 
-## 3. Criterios de aceptación (BDD)
+## 2. Criterios de aceptación (BDD)
 
 ### Referencias
 
@@ -94,7 +81,7 @@ Backlog `HU-013`; `readme.md` §1.2 (consulta pública), §1.3 (jerarquía de p�
 - **Cuando** accedo a esa ruta con el perfil permitido  
 - **Entonces** se muestra un placeholder con título y navegación operativa, manteniendo las mismas reglas de acceso por rol que la versión final.
 
-## 4. Evaluación INVEST (resumen)
+## 3. Evaluación INVEST (resumen)
 
 | Criterio | Comentario |
 |----------|------------|
@@ -105,6 +92,6 @@ Backlog `HU-013`; `readme.md` §1.2 (consulta pública), §1.3 (jerarquía de p�
 | **Small** | Aceptable para M si se respeta límite de placeholders; deja de ser pequeña si se intenta completar lógica funcional de cada página. |
 | **Testable** | Sí: **Vitest** (router/guardas, **TASK-HU-013-10**). Recorrido UI según [testing-java.md](../engineering/testing-java.md) §2.1.1 (fila HU-013). API por rol: **HU-001** / `system-e2e-tests`. |
 
-## 5. Esfuerzo estimado de implementación
+## 4. Esfuerzo estimado de implementación
 
 Orden de magnitud **medio (M)** para frontend: definición de rutas, guardas por rol, menú mínimo por perfil, home adaptada por tipo de usuario y creación de placeholders para páginas pendientes. El esfuerzo aumenta si se amplía alcance a implementación funcional completa de las vistas actualmente planificadas como placeholders.
