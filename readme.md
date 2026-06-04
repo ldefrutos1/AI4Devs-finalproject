@@ -402,34 +402,22 @@ A continuación se detallan los componentes del diagrama C2 (§3.1), desplegados
 
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
-| **SPA** (`frontend/`) | Vue 3, Vite, TypeScript | Consulta pública, fichas, mapa, fotos y administración. |
-| **API Gateway** (`api-gateway`) | Spring Cloud Gateway (WebFlux), Spring Boot 4 | Entrada HTTP (**8080**). Enruta a los microservicios bajo `/api/` [openapi.yaml](docs/api/openapi.yaml). Valida JWT (Keycloak) y reenvía el token a los microservicios. |
+| **SPA** (`frontend/`) | Vue 3, Vite, TypeScript | Frontal de la aplicación. |
+| **API Gateway** (`api-gateway`) | Spring Cloud Gateway (WebFlux), Spring Boot 4 | Puerta de entrada: enruta a los microservicios, aplica filtros de seguridad y correlación |
 
 #### Microservicios de dominio
 
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
-| **catalog-service** | Spring Boot 4, JPA, Flyway, PostgreSQL; MongoDB, Redis en perfil `dev`; productor Kafka | Esquema `catalog`. Tras el alta de ejemplar publica `EJEMPLAR_CREADO` en `catalog.ejemplar.evento` ([kafka-events.md](docs/events/kafka-events.md)). |
-| **media-service** | Spring Boot 4, JPA, Flyway, cliente MinIO (API S3) | Esquema `media` para metadatos; binarios en **MinIO** (dev) o **S3** (prod). Flujo: presign → subida → confirmación. |
-| **notification-service** | Spring Boot 4, JPA, Flyway, Spring Kafka, JavaMail | Esquema `notification`. Consume `catalog.ejemplar.evento` de forma idempotente y envía correo SMTP a suscriptores **ACTIVA** (Mailpit en dev). |
-| **ai-assistant-service** | Spring Boot 4 | Orquestación al proveedor de IA y trazas en esquema `ai` (auditoría de uso). |
-
-#### Identidad, mensajería y almacenamiento
-
-| Componente | Tecnología | Responsabilidad |
-| --- | --- | --- |
-| **Keycloak** | Keycloak 26 (Compose) | IdP OIDC: realm `mtl`, clientes, roles `COLABORADOR` y `ADMIN`, emisión de JWT. |
-| **Kafka** | Apache Kafka (KRaft en dev) | Topic `catalog.ejemplar.evento`: enlaza el alta del ejemplar con el aviso por correo. |
-| **PostgreSQL** | 16 + PostGIS en contenedor | Un servidor; esquemas `catalog`, `media`, `notification` y `ai` (uno por servicio JDBC). |
-| **MongoDB** | 7 (Compose) | Enriquecimiento (especie, ejemplar, notas). |
-| **Redis** | 7 (Compose) | Caché de maestros en **catalog-service** (perfil `dev`; desactivada en tests sin Docker). |
-| **MinIO** | API S3 | Imágenes en dev (bucket `mtl-photos`); en prod, S3 u otro compatible. |
+| **catalog-service** | Spring Boot 4, JPA, Flyway, PostgreSQL, MongoDB, Redis ; productor Kafka | Catálogo de ejemplares. |
+| **media-service** | Spring Boot 4, JPA, Flyway, cliente MinIO (API S3) | Almacenamiento de imágenes. |
+| **notification-service** | Spring Boot 4, JPA, Flyway, Spring Kafka, JavaMail | Notificación de novedades. |
+| **ai-assistant-service** | Spring Boot 4 | Comunicación con LLM. |
 
 #### Observabilidad y herramientas de desarrollo local
 
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
-| **Mailpit** | `axllent/mailpit` (Compose) | SMTP y bandeja web de prueba en local; no envía a dominios reales. |
 | **Prometheus** | `prom/prometheus:v3.2.1` (Compose) | Métricas vía `/actuator/prometheus`. |
 | **Grafana** | `grafana/grafana:11.5.2` (Compose) | Dashboard **MTL Microservices**; UI **http://localhost:3000** |
 
