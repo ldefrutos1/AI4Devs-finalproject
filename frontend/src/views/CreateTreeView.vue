@@ -177,6 +177,7 @@ onMounted(async () => {
     <form
       v-if="!isLoadingMasters && hasMasters"
       class="tree-form"
+      data-testid="tree-form"
       @submit.prevent="submit"
     >
       <div class="field-full tree-form-species-status-row">
@@ -185,6 +186,7 @@ onMounted(async () => {
           <div class="species-autocomplete">
             <input
               id="speciesId"
+              data-testid="tree-form-species"
               :value="speciesAutocompleteText"
               class="form-control"
               type="text"
@@ -261,6 +263,7 @@ onMounted(async () => {
           <label class="form-label" for="provinceId">{{ t('treeForm.fields.province.label') }}</label>
           <select
             id="provinceId"
+            data-testid="tree-form-province"
             v-model="form.provinceId"
             class="form-control"
             required
@@ -278,6 +281,7 @@ onMounted(async () => {
           <label class="form-label" for="municipality">{{ t('treeForm.fields.municipality.label') }}</label>
           <input
             id="municipality"
+            data-testid="tree-form-municipality"
             v-model="form.municipality"
             class="form-control"
             type="text"
@@ -306,6 +310,7 @@ onMounted(async () => {
           <label class="form-label" for="latitude">{{ t('treeForm.fields.latitude.label') }}</label>
           <input
             id="latitude"
+            data-testid="tree-form-latitude"
             v-model="form.latitude"
             class="form-control"
             type="number"
@@ -323,6 +328,7 @@ onMounted(async () => {
           <label class="form-label" for="longitude">{{ t('treeForm.fields.longitude.label') }}</label>
           <input
             id="longitude"
+            data-testid="tree-form-longitude"
             v-model="form.longitude"
             class="form-control"
             type="number"
@@ -355,7 +361,12 @@ onMounted(async () => {
         <RouterLink class="btn btn-secondary" :to="{ name: 'home' }">
           {{ t('navigation.home') }}
         </RouterLink>
-        <button class="btn btn-primary tree-form-submit" type="submit" :disabled="isSubmitting">
+        <button
+          class="btn btn-primary tree-form-submit"
+          type="submit"
+          data-testid="tree-form-submit"
+          :disabled="isSubmitting"
+        >
           {{ isSubmitting ? t('treeForm.submitting') : t('treeForm.submit') }}
         </button>
       </div>

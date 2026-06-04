@@ -1,8 +1,8 @@
-# ADR-001: Observabilidad sencilla para microservicios Spring Boot
+# ADR-0005: Observabilidad sencilla para microservicios Spring Boot
 
 ## Estado
 
-Aceptado
+Aceptada
 
 ## Contexto
 
@@ -20,7 +20,7 @@ Se implementará una solución inicial basada en:
 - Grafana
 - Logs estructurados en JSON por consola
 
-Cada microservicio expondrá endpoints de salud y métricas mediante Actuator. Prometheus recolectará las métricas desde los endpoints `/actuator/prometheus`. Grafana se usará para visualizar dashboards y configurar alertas básicas. Los logs se emitirán en formato JSON por consola para facilitar su posterior integración con sistemas centralizados como Loki, Elastic o similares.
+Cada microservicio expone salud y métricas vía Actuator; Prometheus hace scrape de `/actuator/prometheus`; Grafana visualiza dashboards y alertas básicas. Logs estructurados JSON por consola, preparados para centralización posterior (Loki, Elastic, etc.).
 
 ## Diagrama de la solución elegida
 
@@ -53,7 +53,7 @@ Cada microservicio expondrá endpoints de salud y métricas mediante Actuator. P
 ```yaml
 spring:
   application:
-    name: pedidos-service
+    name: catalog-service
 
 management:
   endpoints:
@@ -153,7 +153,7 @@ management:
 └──────────────┘        └──────────────┘
 ```
 
-**Motivo de descarte:** aunque es una arquitectura más completa, introduce más componentes, configuración, operación y curva de aprendizaje de la necesaria para la fase inicial del proyecto.
+**Motivo de descarte:** aunque es una arquitectura más completa, introduce más componentes, configuración, operación y curva de aprendizaje de las necesarias para la fase inicial del proyecto.
 
 ### Alternativa 3: Solución comercial APM
 
@@ -183,12 +183,6 @@ management:
 ```
 
 **Motivo de descarte:** puede ser potente, pero implica coste adicional, dependencia de proveedor y posible sobredimensionamiento para las necesidades iniciales.
-
-## Decisión final
-
-Se adopta la solución sencilla con Actuator, Micrometer, Prometheus, Grafana y logs JSON por consola.
-
-Esta opción ofrece un equilibrio adecuado entre simplicidad, utilidad operativa y capacidad de evolución futura.
 
 ## Evolución futura
 

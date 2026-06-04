@@ -8,6 +8,8 @@ defineProps<{
   confirmLabel: string
   /** Si es true, el botón principal usa estilo destructivo (`btn-danger`). */
   confirmDanger?: boolean
+  /** `data-testid` opcional para el botón de confirmar (selectores E2E estables). */
+  confirmTestId?: string
 }>()
 
 const emit = defineEmits<{
@@ -104,6 +106,7 @@ onBeforeUnmount(() => {
           type="button"
           class="btn btn-sm mtl-confirm-dialog-confirm"
           :class="confirmDanger ? 'btn-danger' : 'btn-primary'"
+          :data-testid="confirmTestId"
           @click="onConfirmClick"
         >
           {{ confirmLabel }}

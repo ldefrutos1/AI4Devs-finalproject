@@ -1,5 +1,5 @@
 # Scrape de microservicios Spring Boot en el host (mvn spring-boot:run).
-# ADR-0005: docs/adr/0005-microservices-observabilty-spring-boot.md
+# ADR-0005: docs/adr/0005-microservices-observability-spring-boot.md
 
 global:
   scrape_interval: 15s

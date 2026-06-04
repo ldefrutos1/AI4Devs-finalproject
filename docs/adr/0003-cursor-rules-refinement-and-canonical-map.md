@@ -16,7 +16,7 @@ Se buscaba **menos texto duplicado** entre `.cursor/rules/*.mdc`, `AGENTS.md` y 
 
 ## Lista aplicada (referencia)
 
-Orden del refuerzo “menos verbose, más enlaces”:
+Orden del refuerzo «menos verbose, más enlaces»:
 
 1. **Prioridad 1:** `.cursor/rules/spring-boot-4-backend.mdc`, `data-model-design.mdc`, `api-design.mdc`, `api-security.mdc`, `logging.mdc`
 2. **Prioridad 2:** `AGENTS.md`, `docs/README.md`, `docs/engineering/testing-java.md` §3

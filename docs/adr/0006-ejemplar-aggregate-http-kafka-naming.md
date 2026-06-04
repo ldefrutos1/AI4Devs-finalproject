@@ -1,4 +1,4 @@
-# ADR-0006: Ejemplar aggregate naming (persistence, HTTP, Kafka)
+# ADR-0006: Nomenclatura del agregado `ejemplar` (persistencia, HTTP, Kafka)
 
 ## Estado
 
@@ -17,7 +17,7 @@ El agregado de ficha singular se denomina **ejemplar** en dominio y en persisten
 
 El contrato HTTP y los eventos Kafka deben reflejar ese modelo y [ADR-0007](0007-english-http-spanish-persistence.md): rutas y propiedades JSON en **inglés**; persistencia y payload Kafka interno en **español**.
 
-En el MVP se aceptó **pérdida de datos locales** y **sin compatibilidad hacia atrás** (reset de volúmenes Compose y migraciones Flyway).
+En el MVP se aceptó **reset de datos locales** sin compatibilidad hacia atrás (volúmenes Compose y migraciones Flyway).
 
 ## Decisión
 

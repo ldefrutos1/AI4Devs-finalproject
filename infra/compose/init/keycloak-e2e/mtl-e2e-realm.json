@@ -1,0 +1,77 @@
+{
+  "realm": "mtl-e2e",
+  "enabled": true,
+  "displayName": "MyTreeLibrary (E2E)",
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": false,
+  "accessTokenLifespan": 1800,
+  "ssoSessionIdleTimeout": 3600,
+  "ssoSessionMaxLifespan": 7200,
+  "roles": {
+    "realm": [
+      {
+        "name": "COLABORADOR",
+        "description": "Colaborador del catalogo (registro y edicion de arboles)."
+      },
+      {
+        "name": "ADMIN",
+        "description": "Administrador (maestros, gestion de suscripciones)."
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "mtl-spa",
+      "name": "MyTreeLibrary SPA (E2E)",
+      "description": "Cliente publico Vue 3 para E2E: Authorization Code con PKCE (S256). Origenes en la red Docker.",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "frontchannelLogout": true,
+      "consentRequired": false,
+      "rootUrl": "http://localhost",
+      "baseUrl": "/",
+      "redirectUris": [
+        "http://localhost/*",
+        "http://frontend/*"
+      ],
+      "webOrigins": [
+        "http://localhost",
+        "http://frontend"
+      ],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost/*"
+      },
+      "fullScopeAllowed": true
+    }
+  ],
+  "users": [
+    {
+      "username": "colaborador",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "colaborador@mtl.test",
+      "firstName": "E2E",
+      "lastName": "Colaborador",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "colaborador_dev",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["COLABORADOR"]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Observabilidad local (MyTreeLibrary)
 
-Stack mínimo según [ADR-0005](../../docs/adr/0005-microservices-observabilty-spring-boot.md): **Spring Boot Actuator**, **Micrometer**, **Prometheus**, **Grafana** y logs JSON en consola.
+Stack mínimo según [ADR-0005](../../docs/adr/0005-microservices-observability-spring-boot.md): **Spring Boot Actuator**, **Micrometer**, **Prometheus**, **Grafana** y logs JSON en consola.
 
 ## Requisitos
 

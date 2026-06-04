@@ -43,6 +43,7 @@ function onNavigate(): void {
       v-if="canShowLogin"
       type="button"
       class="btn btn-sidebar btn-sidebar-primary"
+      data-testid="nav-login"
       @click="emit('login')"
     >
       {{ t('navigation.login') }}

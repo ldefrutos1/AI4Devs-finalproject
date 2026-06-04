@@ -150,6 +150,8 @@ No generes código salvo que pida un snippet ilustrativo de una línea; prioriza
 
 **Prompt 1:**
 
+Tego que incluir testing end to end en el sistema que pruebe el microservicio de alta ejemplar; Quiero usar playwright.. La prueba consisttiría en 1.- Acceder a la aplicación 2.- iniciar sesion con colaborador 3.- dar de alta un ejemplar 4.- consultar mis arboles 5.- borrar el ejemplar. Actua como arquitecto experto y dame una estrategia para implementar la prueba; en la estrategia incluye: carpeta adecuada para contener los ficheros generados; cómo usar docker; como generar frontend y microservicios para la prueba, como integrarla con github para lanzar los test en los merge de PR. Actua como arquitecto experto y hazme un plan. En esta prueba end2end se podrían usar base de datos en memoria. En el plan analiza tambie´n la conveniencia de terer además un test que vaya contra un entorno ya lenatando; es decir en este caso el test no se preocuparía de levantar el entorno sino de ejecutar el test desde playwright. Haz el plan profesional y conforme a las buenas practicas pero lo más sencillo posible; si tienes alguna duda pregunta antes de empezar
+
 **Prompt 2:**
 
 **Prompt 3:**

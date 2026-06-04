@@ -36,6 +36,7 @@ No hay **umbral de cobertura %** obligatorio en CI; sí estas reglas **baratas d
 - Sin token ni flags de habilitación (`MTL_E2E_AUTO_KEYCLOAK_TOKEN`, `MTL_E2E_RUN_SECURITY`), los `*GatewayE2EIT` quedan **desactivados** (`@EnabledIf`); `mvn verify` no exige stack.
 - Los casos actuales de maestros asumen **semilla Flyway** (`V2__…`) y comprueban **`content` no vacío**; incluyen búsqueda con **`q`** para ejercitar SQL con **`unaccent`** (PostgreSQL). Detalle de rutas: README del módulo.
 - Complementan, no sustituyen, los IT del **api-gateway** con **WireMock** (autocontenidos).
+- **E2E de UI (Playwright)** del flujo de producto (login → alta → mis árboles → borrado) en la carpeta **`e2e/`**: documento canónico [testing-e2e.md](testing-e2e.md). Distinto de `system-e2e-tests` (HTTP/JWT sin navegador): el de UI valida OIDC, router y CRUD visible.
 
 #### 2.1.1. Reparto de pruebas — back aislado del front (referencia HU-001)
 
@@ -59,7 +60,7 @@ No hay **umbral de cobertura %** obligatorio en CI; sí estas reglas **baratas d
 | **Contrato OpenAPI** (cuando exista en CI) | Forma de request/response | Comportamiento con Keycloak vivo |
 | **Cypress / Playwright** | OIDC y UX de sesión en SPA | 401/403 de API ni paginación de catálogo |
 
-**CI (MVP):** `mvn verify` en servicios **no exige** E2E de sistema; un job opcional (`e2e-back`) puede ejecutar `system-e2e-tests` con stack + token (ver README del módulo). Trazabilidad de clases: tags `hu001-s0N` y prefijo `Hu001Scenario0N…`.
+**CI (MVP):** `mvn verify` en servicios **no exige** E2E de sistema; un job opcional (`e2e-back`) puede ejecutar `system-e2e-tests` con stack + token (ver README del módulo). Trazabilidad de clases: tags `hu001-s0N` y prefijo `Hu001Scenario0N…`. La **UI E2E (Playwright)** sí corre en PR mediante el workflow [.github/workflows/e2e-playwright.yml](../../.github/workflows/e2e-playwright.yml) (ver [testing-e2e.md](testing-e2e.md) §4).
 
 #### 2.1.2. Diseño del módulo `system-e2e-tests`
 

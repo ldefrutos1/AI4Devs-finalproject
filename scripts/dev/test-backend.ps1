@@ -17,7 +17,8 @@ $goal = if ($Quick) { 'test' } else { 'verify' }
 Write-MtlInfo "Backend: mvn $goal en services/ ($(if ($Quick) { 'solo unitarios' } else { 'unitarios + IT Failsafe' }))"
 
 Invoke-MtlInDirectory -Path $servicesDir -Action {
-    mvn @goal
+    # $goal, no @goal: @ sobre un string en PowerShell hace splat por carácter (verify -> v, e, r…).
+    mvn $goal
     if ($LASTEXITCODE -ne 0) {
         throw "mvn $goal terminó con código $LASTEXITCODE"
     }

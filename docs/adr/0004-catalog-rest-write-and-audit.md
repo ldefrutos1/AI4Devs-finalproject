@@ -6,14 +6,14 @@ Aceptada (nomenclatura HTTP/JPA actualizada según [ADR-0006](0006-ejemplar-aggr
 
 ## Contexto
 
-La HU-005 exige que un colaborador autenticado pueda dar de alta una ficha de árbol (`POST /api/catalog/trees`), con validaciones R1/R2, actor identificable en base de datos y traza en `AUDITORIA_CATALOGO` (R3). El **TASK-HU-005-04** ya implementó la persistencia del ejemplar y la resolución de `usuario_app` en capa de aplicación.
+La HU-005 exige que un colaborador autenticado pueda dar de alta una ficha (`POST /api/catalog/trees`) con validaciones R1/R2, actor identificable en base de datos y traza en `AUDITORIA_CATALOGO` (R3).
 
-Se necesita:
+El diseño debe cubrir:
 
-- Contrato HTTP claro (DTO en `dto`, no entidades JPA en la API).
-- **Duplicación consciente** entre identidad OIDC (Keycloak) y la tabla `usuario_app` para **FKs**, listados y auditoría **sin** consultar Keycloak en cada lectura SQL.
-- **Roles de negocio** solo en el **JWT** (`realm_access.roles`); **no** se persiste `rol` en `usuario_app` para evitar desfase cuando cambian roles en el IdP.
-- Perfil mostrable: columna **`nombre`** (nullable), rellenada desde claims firmados del access token; **solo se actualiza** en BD si el valor normalizado **cambia** respecto al almacenado (misma regla recomendable para `email`).
+- Contrato HTTP con DTO (sin entidades JPA en la API).
+- Identidad OIDC (Keycloak) y tabla `usuario_app` para **FKs**, listados y auditoría **sin** consultar Keycloak en cada lectura SQL.
+- Roles de negocio solo en el **JWT** (`realm_access.roles`); **no** persistir `rol` en `usuario_app`.
+- Perfil en BD: `email` y **`nombre`** (nullable) desde claims del access token; actualizar solo si el valor normalizado **cambia**.
 
 ## Alternativas consideradas
 

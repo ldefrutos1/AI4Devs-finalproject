@@ -39,7 +39,7 @@ No hay umbral de cobertura % obligatorio; sí reglas mínimas por tipo de cambio
 - Tests unitarios/componente: **sin llamadas reales** a Keycloak ni backend.
 - Mockear en borde: `authService`, cliente HTTP, router.
 - No mockear lógica propia que se quiere validar (mocks solo para dependencias externas).
-- Si un flujo requiere integración real (E2E), tratarlo fuera de este documento y no mezclarlo con unitarios Vitest.
+- Si un flujo requiere integración real (E2E), tratarlo fuera de este documento y no mezclarlo con unitarios Vitest: el **E2E de UI (Playwright)** vive en [testing-e2e.md](testing-e2e.md) (carpeta `e2e/`).
 
 ## 5. Definición de hecho para un cambio frontend con lógica
 
@@ -72,6 +72,7 @@ Desde `frontend/`:
 
 ## 7. Referencias relacionadas (sin duplicar)
 
+- **E2E de UI (Playwright):** [testing-e2e.md](testing-e2e.md) — flujo de navegador extremo a extremo (carpeta `e2e/`); este documento cubre solo Vitest.
 - Reglas cortas IA: [frontend-security.mdc](../../.cursor/rules/frontend-security.mdc), [frontend-vue3.mdc](../../.cursor/rules/frontend-vue3.mdc), [quality-and-testing.mdc](../../.cursor/rules/quality-and-testing.mdc).
 - Guía de inicio frontend: [docs/onboarding/vue-development-guide.md](../onboarding/vue-development-guide.md).
 - Estrategia general de calidad del proyecto: [readme.md](../../readme.md) (apartado 2.6).

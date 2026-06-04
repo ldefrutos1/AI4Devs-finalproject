@@ -4,6 +4,8 @@
 
 **E2E (gateway + servicios reales):** `system-e2e-tests` — [README](system-e2e-tests/README.md) (HU-001 esc. 2–4, maestros catálogo); estrategia [testing-java.md](../docs/engineering/testing-java.md) §2.1.
 
+**E2E de UI (Playwright):** flujo de producto (login → alta → mis árboles → borrado) en [e2e/](../e2e/README.md); guía canónica [testing-e2e.md](../docs/engineering/testing-e2e.md). Stack self-contained: [infra/compose/docker-compose.e2e.yml](../infra/compose/docker-compose.e2e.yml).
+
 ## 1. Arranque local coherente
 
 ### Dónde ejecutar Maven
@@ -99,7 +101,7 @@ docker compose up -d prometheus grafana
 
 Orden recomendado: infra de apoyo → microservicios en **`dev`** (puertos de la tabla anterior) → Prometheus/Grafana. Comprobar targets en http://localhost:9090/targets y el dashboard en http://localhost:3000.
 
-Documentación: [platform/observability/README.md](../platform/observability/README.md) · [infra/compose/README.md](../infra/compose/README.md) · [ADR-0005](../docs/adr/0005-microservices-observabilty-spring-boot.md).
+Documentación: [platform/observability/README.md](../platform/observability/README.md) · [infra/compose/README.md](../infra/compose/README.md) · [ADR-0005](../docs/adr/0005-microservices-observability-spring-boot.md).
 
 **Suscripción pública por correo (HU-004):** `POST /api/notifications/subscriptions` está expuesto sin JWT en **`notification-service`** y en el **api-gateway**; en pruebas E2E y desde la SPA use la **URL base del gateway** (`http://localhost:8080`), no el puerto **8083** directo, salvo depuración local consciente.
 

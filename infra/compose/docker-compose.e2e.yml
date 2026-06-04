@@ -1,0 +1,277 @@
+# MTL - Stack E2E autocontenido (Playwright) para el flujo de alta de ejemplar.
+#
+# A diferencia del compose de desarrollo, este fichero NO lo extiende: define
+# por si mismo el stack minimo necesario para el flujo (login -> alta -> mis
+# arboles -> borrado).
+#
+# Incluye Postgres, Mongo, Kafka y Redis:
+#   - Redis: cache de maestros del catalogo (CatalogCacheConfig registra siempre
+#     el RedisCacheManager; el endpoint de especies/provincias lo usa).
+#   - Postgres: persistencia relacional de catalog (esquema catalog) y media.
+#   - Mongo: dependencia futura de catalog-service (hibrido SQL+Mongo). El flujo
+#     no la ejercita, pero se incluye para que el stack quede listo cuando el
+#     starter de Mongo entre en el pom (evita health DOWN por MongoHealthIndicator).
+#   - Kafka: el alta de ejemplar emite el evento EJEMPLAR_CREADO (topic autocreado
+#     al primer envio). No hay consumidor en este stack (no se verifica el correo):
+#     el evento queda publicado.
+#
+# Bases de datos efimeras: Postgres/Mongo/Kafka usan tmpfs (en RAM) y Keycloak
+# arranca con H2 en memoria. Cada ejecucion parte de cero.
+#
+# Uso (desde infra/compose, con los jars ya compilados; ver e2e/README.md):
+#   docker compose -f docker-compose.e2e.yml up --build \
+#     --abort-on-container-exit --exit-code-from playwright
+#   docker compose -f docker-compose.e2e.yml down -v
+
+name: mtl-e2e
+
+services:
+
+  # ── Postgres (PostGIS) efimero: esquemas catalog/media + extensiones ──────
+  postgres:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: mtl
+      POSTGRES_PASSWORD: mtl_dev_password
+      POSTGRES_DB: mtl
+    tmpfs:
+      - /var/lib/postgresql/data
+    volumes:
+      - ./init/postgres:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mtl -d mtl"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - mtl
+
+  # ── Mongo efimero (dependencia futura del catalogo hibrido) ───────────────
+  mongo:
+    image: mongo:7.0
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mtl
+      MONGO_INITDB_ROOT_PASSWORD: mtl_mongo_dev_password
+    tmpfs:
+      - /data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --quiet --eval \"db.adminCommand('ping').ok\" | grep -q 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 20s
+    networks:
+      - mtl
+
+  # ── Kafka (KRaft) efimero: recibe el evento EJEMPLAR_CREADO del alta ──────
+  kafka:
+    image: docker.io/bitnamilegacy/kafka:3.7.1-debian-12-r4
+    environment:
+      KAFKA_CFG_NODE_ID: "0"
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      # El topic del evento se autocrea al primer envio (no usamos un init one-shot:
+      # con --abort-on-container-exit, un contenedor que termina abortaria el stack).
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+    tmpfs:
+      - /bitnami/kafka
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/bitnami/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 40s
+    networks:
+      - mtl
+
+  # ── Redis efimero: cache de maestros del catalogo (CatalogCacheConfig) ────
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - mtl
+
+  # ── Keycloak efimero (H2 en memoria), importa el realm mtl-e2e ────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.7
+    command:
+      - start-dev
+      - --http-enabled=true
+      - --hostname-strict=false
+      - --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    volumes:
+      - ./init/keycloak-e2e:/opt/keycloak/data/import:ro
+    # Sin puerto de host: Playwright accede por la red `mtl` (keycloak:8080). Evita
+    # chocar con el stack de desarrollo (que publica 8180). Para depurar a mano:
+    # docker compose -f docker-compose.e2e.yml logs keycloak
+    networks:
+      - mtl
+
+  # ── catalog-service: alta/listado/borrado de ejemplares ───────────────────
+  catalog-service:
+    image: ${CATALOG_SERVICE_IMAGE:-mtl/catalog-service:e2e}
+    build:
+      context: ../../services/catalog-service
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mtl
+      SPRING_DATA_MONGODB_URI: mongodb://mtl:mtl_mongo_dev_password@mongo:27017/mtl_catalog?authSource=admin
+      MTL_JWT_ISSUER_URI: http://keycloak:8080/realms/mtl-e2e
+      MTL_MEDIA_BASE_URL: http://media-service:8080
+      # Cache de maestros en Redis (perfil dev): CatalogCacheConfig registra el
+      # RedisCacheManager siempre, asi que el endpoint de maestros necesita Redis.
+      MTL_REDIS_HOST: redis
+      MTL_REDIS_PORT: "6379"
+      # Kafka activo: el alta emite EJEMPLAR_CREADO.
+      MTL_CATALOG_KAFKA_ENABLED: "true"
+      MTL_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - mtl
+
+  # ── media-service: borrado en cascada de fotos (no-op sin fotos) ──────────
+  media-service:
+    image: ${MEDIA_SERVICE_IMAGE:-mtl/media-service:e2e}
+    build:
+      context: ../../services/media-service
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mtl
+      MTL_JWT_ISSUER_URI: http://keycloak:8080/realms/mtl-e2e
+      MTL_CATALOG_BASE_URL: http://catalog-service:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - mtl
+
+  # ── api-gateway: punto de entrada /api ────────────────────────────────────
+  api-gateway:
+    image: ${API_GATEWAY_IMAGE:-mtl/api-gateway:e2e}
+    build:
+      context: ../../services/api-gateway
+      dockerfile: Dockerfile
+    environment:
+      MTL_JWT_ISSUER_URI: http://keycloak:8080/realms/mtl-e2e
+      MTL_CATALOG_URI: http://catalog-service:8080
+      MTL_MEDIA_URI: http://media-service:8080
+    depends_on:
+      catalog-service:
+        condition: service_healthy
+      media-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    networks:
+      - mtl
+
+  # ── Frontend Vue (build Vite servido por Nginx, proxy /api -> gateway) ────
+  frontend:
+    image: ${FRONTEND_IMAGE:-mtl/frontend:e2e}
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+      args:
+        # El navegador (contenedor Playwright) alcanza Keycloak por su nombre de red.
+        VITE_OIDC_ISSUER: http://keycloak:8080/realms/mtl-e2e
+        VITE_OIDC_CLIENT_ID: mtl-spa
+        VITE_OIDC_SCOPE: "openid profile email"
+        # Vacio = /api mismo origen (Nginx hace proxy al gateway).
+        VITE_GATEWAY_BASE_URL: ""
+    # Sin puerto de host (igual que el resto del stack e2e): Playwright accede por
+    # la red `mtl` (frontend:80). Evita conflictos con otros stacks en marcha.
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:80/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+    networks:
+      - mtl
+
+  # ── Playwright: ejecuta los specs y sale (su exit code decide el pipeline) ─
+  #
+  # Comparte la pila de red del frontend (network_mode: service:frontend) para que el
+  # navegador cargue la SPA en http://localhost: Chromium trata localhost como "secure
+  # context" y expone window.crypto.subtle (necesario para PKCE y validar el id_token),
+  # cosa que NO ocurre con http://frontend (HTTP + host != localhost). Al compartir la
+  # red del frontend, keycloak/api-gateway siguen resolviendose por nombre en la red mtl.
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.49.0-jammy
+    working_dir: /e2e
+    volumes:
+      - ../../e2e:/e2e
+    environment:
+      BASE_URL: http://localhost
+      E2E_USER: colaborador
+      E2E_PASS: colaborador_dev
+      CI: "true"
+    command:
+      - bash
+      - -lc
+      - >
+        npm ci &&
+        npx wait-on -t 180000
+        http-get://keycloak:8080/realms/mtl-e2e/.well-known/openid-configuration
+        http-get://api-gateway:8080/actuator/health
+        http-get://localhost:80 &&
+        npx playwright test
+    depends_on:
+      frontend:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    network_mode: "service:frontend"
+
+networks:
+  mtl:
+    driver: bridge

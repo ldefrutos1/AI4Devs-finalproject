@@ -12,9 +12,9 @@ Aceptada
 - Un borrador inicial planteó contratos HTTP íntegramente en español, pero el OpenAPI y gran parte del backend **ya** exponían inglés (`speciesId`, `/species`, `latitude`). Forzar español en API implicaba **renombrar lo ya desplegado** y aumentaba riesgo de traducciones literales (`visibilidadMapaPublico` frente a vocabulario ya estable en código). Ese borrador **no se adoptó**.
 - [ADR-0006](0006-ejemplar-aggregate-http-kafka-naming.md) fija el agregado **`ejemplar`** en persistencia y eventos; en el wire HTTP, rutas **`/trees`** y propiedad **`treeId`** (mapeo desde `ejemplar_id`).
 
-## Por qué BD en castellano y HTTP en inglés (justificar la disparidad)
+## Por qué BD en castellano y HTTP en inglés
 
-A primera vista parece **incongruente** usar dos idiomas en capas vecinas. No es incoherencia si se entiende que **no son la misma frontera** ni el mismo público:
+A primera vista parece **incongruente** usar dos idiomas en capas vecinas. No lo es si se entiende que **no comparten frontera ni público**:
 
 | Dimensión | Persistencia (castellano) | Contrato HTTP (inglés) |
 |-----------|---------------------------|-------------------------|
@@ -23,15 +23,9 @@ A primera vista parece **incongruente** usar dos idiomas en capas vecinas. No es
 | **Riesgo del naming** | Un mal nombre en columna (**traducción literal incorrecta**) se fossiliza en Flyway, ERD y conversaciones con negocio | Un nombre en JSON se corrige en DTO/OpenAPI con impacto acotado al contrato |
 | **Estándar del sector** | Esquemas locales en idioma del negocio en productos no internacionales | APIs REST y props en inglés son la convención habitual de integración, aunque el negocio sea local |
 
-En terminología DDD, la BD materializa el **lenguaje ubicuo** acordado con el dominio (español). El contrato REST actúa como **capa anticorrupción / traducción** hacia el consumidor técnico: el dominio **no se redefine** en inglés en SQL; solo se **proyecta** en inglés en el wire format mediante DTO y tabla de mapeo (§ tabla BD → JSON).
+En DDD, la BD materializa el **lenguaje ubicuo** (español); el contrato REST **proyecta** ese modelo en inglés vía DTO (tabla de mapeo más abajo), sin renombrar columnas.
 
-**No es “mezclar idiomas por descuido”:** es **un idioma homogéneo por capa** (español en SQL y Kafka interno; inglés homogéneo en cada JSON de API) y **un mapa explícito** entre capas. Lo que sí sería incongruente — y se prohíbe — es `speciesId` y `nombreComun` en el **mismo** JSON.
-
-**Por qué no poner también la BD en inglés:** traducir `visibilidad_mapa_publico`, `estado_publicacion` o `nombre_comun` a columnas inglesas obligaría a que todo el equipo (y futuros mantenedores) mantengan **dos glosarios** mentales (reunión con cliente en español, esquema en inglés), con errores del tipo `publication_status` vs `publication_state`. La regla de negocio del proyecto es evitar esa traducción en la **fuente de verdad**.
-
-**Por qué no poner también el HTTP en español:** el coste en este repositorio es mayor (renombrar contrato ya desplegado en inglés) y reintroduce traducciones dudosas en propiedades. La opción adoptada minimiza cambios y fija la traducción en **un solo sitio** (mapper/DTO), auditable.
-
-**Recurso `trees` en API:** el segmento de path y la propiedad `treeId` siguen la convención inglesa del resto del catálogo ([ADR-0006](0006-ejemplar-aggregate-http-kafka-naming.md)); la columna SQL sigue siendo `ejemplar_id`.
+**Regla:** un idioma homogéneo por capa; **prohibido** mezclar en el mismo JSON (`speciesId` + `nombreComun`). No traducir columnas SQL al inglés (doble glosario con negocio); no forzar el HTTP al español (coste de renombrar contrato ya en inglés). En API, recurso **`trees`** / propiedad **`treeId`** ([ADR-0006](0006-ejemplar-aggregate-http-kafka-naming.md)); en SQL, `ejemplar_id`.
 
 ## Decisión
 

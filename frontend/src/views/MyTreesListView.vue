@@ -320,14 +320,20 @@ onMounted(async () => {
     <p v-else-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
 
     <template v-else-if="isSuccess">
-      <p class="catalog-results-count muted">
+      <p class="catalog-results-count muted" data-testid="my-trees-results-count">
         {{ t('myTrees.resultsCount', { count: totalResults }) }}
       </p>
 
-      <p v-if="!hasResults" class="status-note">{{ t('myTrees.empty') }}</p>
+      <p v-if="!hasResults" class="status-note" data-testid="my-trees-empty">{{ t('myTrees.empty') }}</p>
 
       <div v-else class="catalog-grid">
-        <article v-for="tree in trees" :key="tree.treeId" class="catalog-card">
+        <article
+          v-for="tree in trees"
+          :key="tree.treeId"
+          class="catalog-card"
+          data-testid="my-trees-card"
+          :data-tree-id="tree.treeId"
+        >
           <RouterLink class="catalog-card__thumb-link" :to="editRoute(tree.treeId)">
             <img
               class="catalog-card__thumb"
@@ -351,7 +357,11 @@ onMounted(async () => {
                 mapVisibilityLabel(tree.publicMapVisibility)
               }}</span>
             </div>
-            <RouterLink class="catalog-card__detail-link" :to="editRoute(tree.treeId)">
+            <RouterLink
+              class="catalog-card__detail-link"
+              data-testid="my-trees-card-edit-link"
+              :to="editRoute(tree.treeId)"
+            >
               {{ t('myTrees.edit') }}
             </RouterLink>
           </div>

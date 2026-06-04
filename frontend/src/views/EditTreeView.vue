@@ -495,6 +495,7 @@ onMounted(async () => {
           <button
             type="button"
             class="btn btn-outline-danger"
+            data-testid="tree-delete-button"
             :disabled="isSubmitting || isDeleting"
             @click="openDeleteConfirm"
           >
@@ -527,6 +528,7 @@ onMounted(async () => {
       :cancel-label="t('treeEdit.deleteConfirm.cancel')"
       :confirm-label="t('treeEdit.deleteConfirm.confirm')"
       :confirm-danger="true"
+      confirm-test-id="tree-delete-confirm"
       @confirm="onConfirmDelete"
     />
 

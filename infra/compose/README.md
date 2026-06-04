@@ -38,7 +38,7 @@ Dentro de la red Docker, Kafka PLAINTEXT: `kafka:9092`. El SMTP de Mailpit dentr
 
 ## Observabilidad (Prometheus + Grafana)
 
-Stack según [ADR-0005](../../docs/adr/0005-microservices-observabilty-spring-boot.md). Configuración en [platform/observability/](../../platform/observability/README.md).
+Stack según [ADR-0005](../../docs/adr/0005-microservices-observability-spring-boot.md). Configuración en [platform/observability/](../../platform/observability/README.md).
 
 Prometheus hace **scrape** de los microservicios Spring Boot en el **host** (`localhost:8080`–`8084`, perfil `dev` con `mvn spring-boot:run`). Los contenedores usan `host.docker.internal` (en Linux, `extra_hosts: host-gateway` en el servicio `prometheus`).
 

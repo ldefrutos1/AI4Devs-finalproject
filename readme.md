@@ -219,7 +219,7 @@ En `[infra/compose/](infra/compose/)` hay un `docker-compose.yml` que levanta la
 - Ejecutar `docker compose up -d` desde `infra/compose/` (incluye Prometheus y Grafana).
 - Opcional, solo observabilidad: `docker compose pull prometheus grafana` y `docker compose up -d prometheus grafana` (requiere microservicios en el host en puertos **8080–8084** con perfil `dev` para que el scrape muestre targets **UP**).
 
-#### Detalle y puertos: [infra/compose/README.md](infra/compose/README.md). Observabilidad: [platform/observability/README.md](platform/observability/README.md) · [ADR-0005](docs/adr/0005-microservices-observabilty-spring-boot.md).
+#### Detalle y puertos: [infra/compose/README.md](infra/compose/README.md). Observabilidad: [platform/observability/README.md](platform/observability/README.md) · [ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md).
 
 #### Backend: microservicios y gateway
 
@@ -863,6 +863,7 @@ proyecto/
 │   └── use-cases/            # Casos de uso
 ├── scripts/                  # Atajos PowerShell locales (`dev/`); ver README.md
 ├── .cursor/
+│   ├── commands/             # Commands Cursor
 │   ├── rules/                # Reglas Cursor (API, Spring, seguridad…)
 │   └── skills/               # Skills de encargo, refinamiento HU, BD…
 ├── .github/                  # Plantillas de pull request
@@ -871,7 +872,7 @@ proyecto/
 
 ### **3.4. Infraestructura y despliegue**
 
-**Desarrollo:** Docker Compose (o equivalente) con **un** PostgreSQL con extensión **PostGIS** (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO, Kafka, Keycloak, **Mailpit** (SMTP de prueba para notificaciones en local), **Prometheus** (`prom/prometheus:v3.2.1`) y **Grafana** (`grafana/grafana:11.5.2`) para métricas y dashboards ([ADR-0005](docs/adr/0005-microservices-observabilty-spring-boot.md)); los microservicios Spring Boot suelen ejecutarse en el **host** (puertos 8080–8084) para que Prometheus haga scrape vía `host.docker.internal`, o como contenedores si se adaptan los targets.
+**Desarrollo:** Docker Compose (o equivalente) con **un** PostgreSQL con extensión **PostGIS** (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO, Kafka, Keycloak, **Mailpit** (SMTP de prueba para notificaciones en local), **Prometheus** (`prom/prometheus:v3.2.1`) y **Grafana** (`grafana/grafana:11.5.2`) para métricas y dashboards ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)); los microservicios Spring Boot suelen ejecutarse en el **host** (puertos 8080–8084) para que Prometheus haga scrape vía `host.docker.internal`, o como contenedores si se adaptan los targets.
 
 Detalle de servicios, puertos y arranque en Compose: [infra/compose/README.md](infra/compose/README.md).
 
@@ -936,16 +937,29 @@ flowchart LR
 
 ### **3.6. Tests**
 
-Estrategia prevista: pruebas unitarias de dominio; **integración** con **Testcontainers** (PostgreSQL con PostGIS, MongoDB, Kafka) donde aporte valor; **contrato de API** en [docs/api/openapi.yaml](docs/api/openapi.yaml) como referencia para pruebas de contrato y revisiones; tests de capa web y de aceptación sobre flujos críticos (catálogo, notificaciones, IA).
+**Test unitarios** — lógica aislada, sin dependencias externas.
+- **Frontend (Vitest):** composables y componentes con lógica relevante.
+- **Backend (JUnit):** servicios de dominio y reglas de negocio.
 
-**Backend Java (`services/`):** convención `src/test/java` vs `src/testIT/java`, Surefire/Failsafe, IT por capa y E2E de sistema — [docs/engineering/testing-java.md](docs/engineering/testing-java.md) (§2.1; módulo [system-e2e-tests](services/system-e2e-tests/README.md), épica Acceso e identidad HU-001 esc. 2–4).
+**Test de integración** — capas reales contra dependencias gestionadas.
+- **Frontend:** componentes y vistas con stores/servicios mockeados o reales.
+- **Backend:** repositorios y endpoints por capa (Testcontainers: PostGIS/Mongo/Kafka).
 
+**Test E2E en tres niveles:**
+- **Contenedores de prueba (CI):** stack efímero autocontenido en Docker, ejecutado en cada PR.
+- **Docker Compose (entorno levantado):**
+  - **UI front + back (Playwright):** flujo de usuario completo por el navegador.
+  - **REST del back (`system-e2e-tests`):** contrato HTTP/JWT por el gateway, sin navegador.
 
-*No listados aquí:* **`system-e2e-tests`** (pruebas E2E vía gateway, §3.6) y **Docker Compose** (infra local, §3.4).
+**Documentación:** [testing-frontend.md](docs/engineering/testing-frontend.md) · [testing-java.md](docs/engineering/testing-java.md) · [testing-e2e.md](docs/engineering/testing-e2e.md) · módulos [system-e2e-tests](services/system-e2e-tests/README.md) · [e2e/](e2e/README.md).
+
+*Atajos locales (PowerShell):* `scripts/dev/test-backend.ps1`, `test-frontend.ps1` y `test-e2e.ps1` — [scripts/README.md](scripts/README.md). Infra local con **Docker Compose**: §3.4.
 
 ---
 
 ## 4. Modelo de datos
+
+**NOTA:** El idioma en el que se ha realizado el modelo de datos es intencionadamente **el idioma del dominio de negocio** que en este caso es el español. La justificación es que en proyectos que no son internacionales, tiene sentido modelar en un idioma y la jerga del cliente. Esta decisión presenta un reto de coherencia y definición del idioma aplicable a cada capa del sistema.
 
 **Documentación relacionada:** [Notas de negocio y reglas](docs/data-model/data-model.md) · [Modelo técnico MongoDB (colecciones, validación, índices)](docs/data-model/mongo.md) · [Eventos Kafka](docs/events/kafka-events.md)
 

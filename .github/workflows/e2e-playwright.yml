@@ -1,0 +1,58 @@
+name: E2E Playwright (alta de ejemplar)
+
+# Ejecuta el E2E self-contained (Docker) del flujo de alta de ejemplar en cada PR.
+# Marca esta verificacion como "required" en la proteccion de rama para bloquear
+# el merge si falla.
+
+on:
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+# Cancela ejecuciones previas de la misma rama/PR si se empuja codigo nuevo.
+concurrency:
+  group: e2e-playwright-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Flujo alta de ejemplar
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 21 (Temurin) + cache Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      # Opcion A: compilar los jars de la PR en el runner; los Dockerfiles solo los empaquetan.
+      - name: Compilar jars de los servicios
+        run: mvn -f services/pom.xml -pl catalog-service,media-service,api-gateway -am package -DskipTests -B
+
+      - name: Levantar stack E2E y ejecutar Playwright
+        working-directory: infra/compose
+        run: >
+          docker compose -f docker-compose.e2e.yml up --build
+          --abort-on-container-exit --exit-code-from playwright
+
+      - name: Publicar informe de Playwright
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            e2e/playwright-report
+            e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Limpiar stack (incluye volumenes efimeros)
+        if: ${{ always() }}
+        working-directory: infra/compose
+        run: docker compose -f docker-compose.e2e.yml down -v

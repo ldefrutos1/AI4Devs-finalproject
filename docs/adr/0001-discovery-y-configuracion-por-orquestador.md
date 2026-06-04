@@ -16,7 +16,7 @@ En arquitecturas Spring Cloud suelen aparecer **Netflix Eureka** (u otro registr
 
 2. **Spring Cloud Config Server**  
    - **Centraliza** propiedades (perfiles, entornos) desde Git, Vault u otros backends.  
-   - Los servicios **obtienen** configuración al arranque (y opcionalmente la **refrescan**) de forma homogénea.
+   - Los servicios **obtienen** configuración al arranque (y opcionalmente la **actualizan** sin reinicio) de forma homogénea.
 
 ## Decisión
 

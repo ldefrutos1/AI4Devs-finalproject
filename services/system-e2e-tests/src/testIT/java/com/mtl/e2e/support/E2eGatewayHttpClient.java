@@ -92,4 +92,42 @@ public final class E2eGatewayHttpClient {
     }
     return problem;
   }
+
+  /** POST con cuerpo JSON (correlación {@code e2e-<uuid>} automática). */
+  public static HttpResponse<String> post(String pathAndQuery, String jsonBody, String bearerToken)
+      throws Exception {
+    URI uri = URI.create(E2eGatewayConfig.baseUri() + pathAndQuery);
+    HttpRequest.Builder builder =
+        HttpRequest.newBuilder(uri)
+            .timeout(Duration.ofSeconds(30))
+            .header("Accept", "application/json")
+            .header("Content-Type", "application/json")
+            .header(E2eCorrelationAssertions.HEADER_NAME, "e2e-" + UUID.randomUUID())
+            .POST(HttpRequest.BodyPublishers.ofString(jsonBody));
+    if (bearerToken != null && !bearerToken.isBlank()) {
+      builder.header("Authorization", "Bearer " + bearerToken.trim());
+    }
+    return CLIENT.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+  }
+
+  /** DELETE (correlación {@code e2e-<uuid>} automática). */
+  public static HttpResponse<String> delete(String pathAndQuery, String bearerToken)
+      throws Exception {
+    URI uri = URI.create(E2eGatewayConfig.baseUri() + pathAndQuery);
+    HttpRequest.Builder builder =
+        HttpRequest.newBuilder(uri)
+            .timeout(Duration.ofSeconds(30))
+            .header("Accept", "application/json")
+            .header(E2eCorrelationAssertions.HEADER_NAME, "e2e-" + UUID.randomUUID())
+            .DELETE();
+    if (bearerToken != null && !bearerToken.isBlank()) {
+      builder.header("Authorization", "Bearer " + bearerToken.trim());
+    }
+    return CLIENT.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+  }
+
+  /** Parsea un cuerpo JSON con el mapper compartido del módulo. */
+  public static JsonNode parse(String body) {
+    return E2eTestJson.MAPPER.readTree(body);
+  }
 }
