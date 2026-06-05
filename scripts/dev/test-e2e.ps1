@@ -59,7 +59,7 @@ if ($Local) {
 
         $env:BASE_URL = $BaseUrl
         $npmScript = if ($Ui) { 'e2e:ui' } else { 'e2e' }
-        Write-MtlInfo "npm run $npmScript…"
+        Write-MtlInfo "npm run ${npmScript}..."
         npm run $npmScript
         if ($LASTEXITCODE -ne 0) { throw "Playwright (npm run $npmScript) terminó con código $LASTEXITCODE" }
     }

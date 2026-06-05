@@ -25,6 +25,7 @@ function mountGallery(photos: TreePhotoGalleryItem[] = [photo(1), photo(2), phot
   const isDeletingPhoto = ref(false)
   const isUploadingPhoto = ref(false)
   const canAddGalleryPhoto = computed(() => galleryPhotos.value.length < 5)
+  const photoFileInputRef = ref<HTMLInputElement | null>(null)
   const addGalleryPhoto = vi.fn().mockResolvedValue(true)
   const removeGalleryPhoto = vi.fn().mockResolvedValue(true)
 
@@ -38,6 +39,7 @@ function mountGallery(photos: TreePhotoGalleryItem[] = [photo(1), photo(2), phot
         isDeletingPhoto,
         isUploadingPhoto,
         canAddGalleryPhoto,
+        photoFileInputRef,
         addGalleryPhoto,
         removeGalleryPhoto,
       })

@@ -5,7 +5,7 @@ import type { TreePhotoGalleryItem } from '@/types/media'
 
 export const EDIT_TREE_GALLERY_PHOTO_ACCEPT_MIME = 'image/jpeg,image/png,image/webp'
 
-export interface UseEditTreeGalleryOptions {
+export interface UseEditTreeGalleryBindings {
   galleryPhotos: Ref<TreePhotoGalleryItem[]>
   species: Ref<MasterListItem[]>
   speciesId: Ref<string>
@@ -14,6 +14,10 @@ export interface UseEditTreeGalleryOptions {
   canAddGalleryPhoto: ComputedRef<boolean>
   addGalleryPhoto: (file: File) => Promise<boolean>
   removeGalleryPhoto: (photoId: number) => Promise<boolean>
+}
+
+export interface UseEditTreeGalleryOptions extends UseEditTreeGalleryBindings {
+  photoFileInputRef: Ref<HTMLInputElement | null>
 }
 
 export function useEditTreeGallery(options: UseEditTreeGalleryOptions) {
@@ -133,7 +137,6 @@ export function useEditTreeGallery(options: UseEditTreeGalleryOptions) {
     deletePhotoConfirmOpen,
     selectedPhotoIndex,
     isFullscreenOpen,
-    photoFileInputRef,
     hasGalleryPhotos,
     hasMultipleGalleryPhotos,
     selectedPhoto,

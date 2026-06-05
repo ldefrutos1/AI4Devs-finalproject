@@ -1,24 +1,25 @@
 <script setup lang="ts">
+import { useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import MtlConfirmDialog from '@/components/MtlConfirmDialog.vue'
 import TreePhotoFullscreenViewer from '@/components/TreePhotoFullscreenViewer.vue'
 import {
   EDIT_TREE_GALLERY_PHOTO_ACCEPT_MIME,
   useEditTreeGallery,
-  type UseEditTreeGalleryOptions,
+  type UseEditTreeGalleryBindings,
 } from '@/composables/useEditTreeGallery'
 
 const props = defineProps<{
-  gallery: UseEditTreeGalleryOptions
+  gallery: UseEditTreeGalleryBindings
   galleryPhotoError: string
 }>()
 
 const { t } = useI18n()
+const photoFileInputRef = useTemplateRef<HTMLInputElement>('photoFileInput')
 const {
   deletePhotoConfirmOpen,
   selectedPhotoIndex,
   isFullscreenOpen,
-  photoFileInputRef,
   hasGalleryPhotos,
   hasMultipleGalleryPhotos,
   selectedPhoto,
@@ -32,7 +33,7 @@ const {
   onConfirmDeletePhoto,
   openPhotoFilePicker,
   onPhotoFileSelected,
-} = useEditTreeGallery(props.gallery)
+} = useEditTreeGallery({ ...props.gallery, photoFileInputRef })
 
 const { galleryPhotos, isDeletingPhoto, isUploadingPhoto, canAddGalleryPhoto } = props.gallery
 </script>
@@ -135,7 +136,7 @@ const { galleryPhotos, isDeletingPhoto, isUploadingPhoto, canAddGalleryPhoto } =
           </button>
         </div>
         <input
-          ref="photoFileInputRef"
+          ref="photoFileInput"
           class="tree-gallery-file-input"
           type="file"
           :accept="EDIT_TREE_GALLERY_PHOTO_ACCEPT_MIME"
