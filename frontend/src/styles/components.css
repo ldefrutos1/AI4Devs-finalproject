@@ -1,0 +1,428 @@
+﻿/* Modal de confirmaciÃ³n reutilizable (MtlConfirmDialog): mismo lenguaje visual que el visor de fotos, panel compacto */
+dialog.mtl-confirm-dialog[open] {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  z-index: 1010;
+  border: none;
+  margin: 0;
+  padding: max(var(--space-4), env(safe-area-inset-top, 0px))
+    max(var(--space-4), env(safe-area-inset-right, 0px))
+    max(var(--space-4), env(safe-area-inset-bottom, 0px))
+    max(var(--space-4), env(safe-area-inset-left, 0px));
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+dialog.mtl-confirm-dialog::backdrop {
+  background: color-mix(in srgb, var(--secondary) 42%, transparent);
+}
+
+.mtl-confirm-dialog-panel {
+  width: min(26rem, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.22);
+}
+
+.mtl-confirm-dialog-title {
+  margin: 0 0 var(--space-3);
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.mtl-confirm-dialog-message {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.mtl-confirm-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.mtl-confirm-dialog-confirm {
+  margin-left: auto;
+}
+
+/* Modal de formulario (alta/ediciÃ³n taxonomÃ­a, etc.): panel + campos tree-form */
+dialog.mtl-form-dialog[open] {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  border: none;
+  margin: 0;
+  padding: max(var(--space-4), env(safe-area-inset-top, 0px))
+    max(var(--space-4), env(safe-area-inset-right, 0px))
+    max(var(--space-4), env(safe-area-inset-bottom, 0px))
+    max(var(--space-4), env(safe-area-inset-left, 0px));
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+dialog.mtl-form-dialog--species[open] {
+  z-index: 1020;
+}
+
+dialog.mtl-form-dialog--genus[open] {
+  z-index: 1030;
+}
+
+dialog.mtl-form-dialog--family[open] {
+  z-index: 1040;
+}
+
+dialog.mtl-form-dialog::backdrop {
+  background: color-mix(in srgb, var(--secondary) 42%, transparent);
+}
+
+.mtl-form-dialog-panel {
+  width: min(32rem, 100%);
+  max-height: min(90vh, 40rem);
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.22);
+}
+
+.mtl-form-dialog-title {
+  margin: 0 0 var(--space-4);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--secondary);
+  line-height: 1.3;
+}
+
+.mtl-form-dialog-panel .tree-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  margin-top: 0;
+}
+
+.mtl-form-dialog-panel .form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--secondary);
+}
+
+.mtl-form-dialog-panel .form-control {
+  padding: 0.42rem 0.62rem;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  min-height: 2.125rem;
+}
+
+.mtl-form-dialog-panel select.form-control {
+  padding-right: 2.1rem;
+}
+
+.mtl-form-dialog-panel .form-control:focus-visible,
+.mtl-form-dialog-panel select.form-control:focus-visible {
+  border-color: var(--accent);
+  outline: 3px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  outline-offset: 0;
+}
+
+.mtl-form-dialog-panel .field {
+  gap: var(--space-1);
+}
+
+.mtl-form-dialog-panel .admin-masters-combo-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: stretch;
+}
+
+.mtl-form-dialog-panel .admin-masters-combo-row .form-control {
+  flex: 1;
+  min-width: 0;
+}
+
+.mtl-form-dialog-panel .admin-masters-combo-row .btn {
+  flex-shrink: 0;
+}
+
+.mtl-form-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+  width: 100%;
+}
+
+.mtl-form-dialog-actions .tree-form-submit {
+  margin-left: auto;
+}
+
+/* Tablas de administraciÃ³n (maestros taxonÃ³micos, suscripciones, etc.) */
+.admin-masters-page .admin-masters-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.admin-masters-page .admin-masters-section-title {
+  margin: 0;
+}
+
+.admin-masters-page .admin-masters-table-panel {
+  padding: var(--space-3) var(--space-4);
+}
+
+.admin-masters-page .admin-masters-table-panel .mtl-admin-table-wrap {
+  margin: 0;
+}
+
+.mtl-admin-list-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.mtl-admin-list-toolbar .catalog-results-count {
+  margin: 0;
+}
+
+.mtl-admin-list-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.mtl-admin-table-wrap {
+  overflow-x: auto;
+}
+
+.mtl-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.mtl-admin-table th,
+.mtl-admin-table td {
+  border: 1px solid var(--border);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  vertical-align: top;
+}
+
+.mtl-admin-table th {
+  background: var(--bg-soft);
+  font-weight: 600;
+}
+
+.mtl-admin-table td.mtl-admin-table__actions {
+  white-space: nowrap;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.mtl-admin-table__actions .btn {
+  font-weight: 500;
+}
+
+.tree-photo-viewer-content {
+  width: min(1280px, 98vw);
+  height: 98vh;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.22);
+}
+
+.tree-photo-viewer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.tree-photo-viewer-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--text);
+}
+
+.tree-photo-viewer-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--secondary) 28%, var(--surface) 72%);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tree-photo-viewer-zoomable {
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.tree-photo-viewer-zoomable:active {
+  cursor: grabbing;
+}
+
+.tree-photo-viewer-frame {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tree-photo-viewer-image {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.tree-photo-viewer-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.tree-photo-viewer-zoom-indicator {
+  font-variant-numeric: tabular-nums;
+}
+
+.tree-photo-viewer-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.tree-photo-viewer-help {
+  margin: 0;
+  text-align: center;
+  font-size: 0.82rem;
+}
+
+.tree-detail-map-unavailable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--tree-detail-media-h);
+  margin: 0;
+  text-align: center;
+}
+
+.trees-pagination {
+  margin-top: var(--space-6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 28rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.trees-pagination-btn {
+  flex: 0 1 auto;
+  min-width: 6.75rem;
+  padding: 0.52rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  border-radius: var(--radius-sm);
+  border: 1px solid color-mix(in srgb, var(--border) 88%, var(--secondary) 12%);
+  background: var(--surface);
+  color: var(--secondary);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 120ms ease;
+}
+
+.trees-pagination-btn:not(:disabled):hover {
+  border-color: var(--border-strong);
+  background: var(--bg-soft);
+  color: var(--text);
+  box-shadow: 0 2px 6px rgba(16, 24, 40, 0.06);
+}
+
+.trees-pagination-btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.trees-pagination .btn.trees-pagination-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.trees-pagination-status {
+  flex: 1 1 auto;
+  min-width: 9.5rem;
+  padding: 0 var(--space-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.4;
+}

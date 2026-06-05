@@ -28,17 +28,26 @@ describe('mapCollaboratorCatalogError', () => {
   })
 
   it('mapea 403 y 404 con fallback', () => {
-    expect(mapCollaboratorCatalogError(new HttpError(403, { title: 'Forbidden', status: 403 }), messages)).toBe(
-      'FORBIDDEN',
-    )
-    expect(mapCollaboratorCatalogError(new HttpError(404, { title: 'Not Found', status: 404 }), messages)).toBe(
-      'NOT_FOUND',
-    )
+    expect(
+      mapCollaboratorCatalogError(
+        new HttpError(403, { title: 'Forbidden', status: 403 }),
+        messages,
+      ),
+    ).toBe('FORBIDDEN')
+    expect(
+      mapCollaboratorCatalogError(
+        new HttpError(404, { title: 'Not Found', status: 404 }),
+        messages,
+      ),
+    ).toBe('NOT_FOUND')
   })
 
   it('detecta catálogo no disponible en 502', () => {
-    expect(mapCollaboratorCatalogError(new HttpError(502, { title: 'Bad Gateway', status: 502 }), messages)).toBe(
-      'GATEWAY',
-    )
+    expect(
+      mapCollaboratorCatalogError(
+        new HttpError(502, { title: 'Bad Gateway', status: 502 }),
+        messages,
+      ),
+    ).toBe('GATEWAY')
   })
 })

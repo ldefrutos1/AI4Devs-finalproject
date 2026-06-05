@@ -12,12 +12,7 @@ export interface CreateTreeFormModel {
   publicMapVisibility: PublicMapVisibility
 }
 
-export type CreateTreeField =
-  | 'speciesId'
-  | 'provinceId'
-  | 'latitude'
-  | 'longitude'
-  | 'description'
+export type CreateTreeField = 'speciesId' | 'provinceId' | 'latitude' | 'longitude' | 'description'
 
 export type CreateTreeValidationCode =
   | 'speciesRequired'
@@ -31,7 +26,9 @@ export type CreateTreeValidationCode =
 export type ValidationResult = Partial<Record<CreateTreeField, CreateTreeValidationCode>>
 
 /** True when lat/lng are present, numeric and within geographic range (same rules as validateCreateTreeForm). */
-export function areLatLngInValidRange(form: Pick<CreateTreeFormModel, 'latitude' | 'longitude'>): boolean {
+export function areLatLngInValidRange(
+  form: Pick<CreateTreeFormModel, 'latitude' | 'longitude'>,
+): boolean {
   const latitude = Number(form.latitude)
   const longitude = Number(form.longitude)
   if (!form.latitude || !form.longitude) {

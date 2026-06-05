@@ -39,7 +39,10 @@ function parseOptionalFilterId(value: string): number | undefined {
   return parsed
 }
 
-export function mapAdminTaxonomyError(error: unknown, t: (key: string, params?: Record<string, unknown>) => string): string {
+export function mapAdminTaxonomyError(
+  error: unknown,
+  t: (key: string, params?: Record<string, unknown>) => string,
+): string {
   if (error instanceof NetworkError) {
     return t('adminMasters.messages.network')
   }

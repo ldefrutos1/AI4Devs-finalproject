@@ -6,10 +6,7 @@ import {
   findSpeciesByExactLabel,
 } from '@/composables/speciesAutocomplete'
 
-export function useSpeciesAutocomplete(
-  species: Ref<MasterListItem[]>,
-  speciesId: Ref<string>,
-) {
+export function useSpeciesAutocomplete(species: Ref<MasterListItem[]>, speciesId: Ref<string>) {
   const speciesAutocompleteText = ref('')
   const showSpeciesSuggestions = ref(false)
   const speciesHighlightIndex = ref(-1)

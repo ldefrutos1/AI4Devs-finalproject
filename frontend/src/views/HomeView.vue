@@ -10,7 +10,9 @@ const auth = useAuth()
 const { t } = useI18n()
 const isAuthenticated = computed(() => auth.isAuthenticated.value)
 const isAdmin = computed(() => isAuthenticated.value && auth.hasRole('ADMIN'))
-const homeTitle = computed(() => (isAdmin.value ? t('home.adminTitle') : t('home.collaboratorTitle')))
+const homeTitle = computed(() =>
+  isAdmin.value ? t('home.adminTitle') : t('home.collaboratorTitle'),
+)
 const homeDescription = computed(() =>
   isAdmin.value ? t('home.adminDescription') : t('home.collaboratorDescription'),
 )
@@ -176,7 +178,13 @@ const pageDescription = computed(() => {
               <span class="home-tile__desc">{{ t('home.publicTiles.login.desc') }}</span>
             </span>
             <span class="home-tile__chevron" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
                 <path
                   d="M9 6l6 6-6 6"
                   stroke="currentColor"

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import type { CreateTreeFormModel } from '@/composables/createTreeFormValidation'
-import { areLatLngInValidRange, validateCreateTreeForm } from '@/composables/createTreeFormValidation'
+import {
+  areLatLngInValidRange,
+  validateCreateTreeForm,
+} from '@/composables/createTreeFormValidation'
 
 function buildValidForm(overrides: Partial<CreateTreeFormModel> = {}): CreateTreeFormModel {
   return {

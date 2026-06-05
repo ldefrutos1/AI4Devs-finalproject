@@ -19,7 +19,16 @@ vi.mock('@/services/http/apiClient', () => ({
 
 describe('adminTaxonomy', () => {
   it('fetchAdminFamilies pide listado unpaged', async () => {
-    const page = { content: [], totalElements: 0, totalPages: 0, page: 0, size: 100, unpaged: true, first: true, last: true }
+    const page = {
+      content: [],
+      totalElements: 0,
+      totalPages: 0,
+      page: 0,
+      size: 100,
+      unpaged: true,
+      first: true,
+      last: true,
+    }
     apiFetchMock.mockResolvedValueOnce(page)
 
     const result = await fetchAdminFamilies()
@@ -93,7 +102,11 @@ describe('adminTaxonomy', () => {
 
   it('createAdminSpecies envía POST con cuerpo JSON', async () => {
     const body = { genusId: 3, scientificName: 'Pinus pinea', commonName: 'Pino piñonero' }
-    apiFetchMock.mockResolvedValueOnce({ speciesId: 9, ...body, label: 'Pino piñonero (Pinus pinea)' })
+    apiFetchMock.mockResolvedValueOnce({
+      speciesId: 9,
+      ...body,
+      label: 'Pino piñonero (Pinus pinea)',
+    })
 
     await createAdminSpecies(body)
 
@@ -106,7 +119,12 @@ describe('adminTaxonomy', () => {
 
   it('updateAdminSpecies envía PUT', async () => {
     const body = { genusId: 3, scientificName: 'Pinus pinea' }
-    apiFetchMock.mockResolvedValueOnce({ speciesId: 9, ...body, commonName: null, label: 'Pinus pinea' })
+    apiFetchMock.mockResolvedValueOnce({
+      speciesId: 9,
+      ...body,
+      commonName: null,
+      label: 'Pinus pinea',
+    })
 
     await updateAdminSpecies(9, body)
 
@@ -129,7 +147,12 @@ describe('adminTaxonomy', () => {
   })
 
   it('createAdminFamily y createAdminGenus usan POST', async () => {
-    apiFetchMock.mockResolvedValueOnce({ familyId: 1, scientificName: 'Fagaceae', commonName: null, label: 'Fagaceae' })
+    apiFetchMock.mockResolvedValueOnce({
+      familyId: 1,
+      scientificName: 'Fagaceae',
+      commonName: null,
+      label: 'Fagaceae',
+    })
     await createAdminFamily({ scientificName: 'Fagaceae' })
     expect(apiFetchMock).toHaveBeenLastCalledWith('/api/catalog/families', {
       method: 'POST',

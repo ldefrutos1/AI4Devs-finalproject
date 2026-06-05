@@ -130,8 +130,7 @@ export function useEditTreeForm(treeId: ComputedRef<number | null>) {
   function photoValidationMessages() {
     return {
       maxPhotos: (max: number) => t('treeForm.photos.validation.maxPhotos', { max }),
-      invalidMime: (allowed: string) =>
-        t('treeForm.photos.validation.invalidMime', { allowed }),
+      invalidMime: (allowed: string) => t('treeForm.photos.validation.invalidMime', { allowed }),
       maxFileSize: (maxMb: number) => t('treeForm.photos.validation.maxFileSize', { maxMb }),
     }
   }
@@ -279,7 +278,10 @@ export function useEditTreeForm(treeId: ComputedRef<number | null>) {
       photoValidationMessages(),
     )
     if (validationCode) {
-      galleryPhotoError.value = treePhotoValidationMessage(validationCode, photoValidationMessages())
+      galleryPhotoError.value = treePhotoValidationMessage(
+        validationCode,
+        photoValidationMessages(),
+      )
       return false
     }
 

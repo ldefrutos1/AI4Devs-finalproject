@@ -113,6 +113,8 @@ describe('MtlFormDialog', () => {
 
     const input = wrapper.get('#test-field')
     expect(input.attributes('aria-invalid')).toBe('true')
-    expect(input.attributes('aria-describedby')).toBe(wrapper.get('[role="alert"]').attributes('id'))
+    expect(input.attributes('aria-describedby')).toBe(
+      wrapper.get('[role="alert"]').attributes('id'),
+    )
   })
 })

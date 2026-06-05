@@ -63,7 +63,6 @@ watch(
     closeSidebar()
   },
 )
-
 </script>
 
 <template>

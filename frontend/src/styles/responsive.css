@@ -1,0 +1,486 @@
+﻿.muted {
+  color: var(--muted);
+}
+
+.error {
+  color: var(--danger);
+  margin: var(--space-3) 0 0;
+}
+
+.field-error {
+  color: var(--danger);
+  font-size: 0.85rem;
+  margin-top: var(--space-1);
+}
+
+.field-help {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.success {
+  color: var(--success);
+  margin-top: var(--space-3);
+}
+
+.status-note {
+  margin-top: var(--space-3);
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.tree-form .actions {
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+}
+
+.tree-form .actions .tree-form-submit {
+  margin-left: auto;
+}
+
+/*
+ * Botones â€” jerarquÃ­a visual:
+ * - btn-secondary: navegaciÃ³n, cancelar, paginaciÃ³n
+ * - btn-primary-soft: CTA de toolbar (crear, buscar)
+ * - btn-outline-primary / btn-outline-danger: acciones en filas o inline
+ * - btn-primary / btn-danger: confirmaciÃ³n en modales y envÃ­o de formulario
+ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.72rem 1.05rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 120ms ease;
+}
+
+.btn-sm {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.88rem;
+}
+
+.btn:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus-ring) 40%, transparent);
+  outline-offset: 1px;
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.btn-primary-soft {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 32%, var(--border));
+  box-shadow: none;
+}
+
+.btn-primary-soft:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--primary-soft) 72%, var(--primary) 28%);
+  border-color: color-mix(in srgb, var(--primary) 48%, var(--border));
+  color: var(--primary-hover);
+}
+
+.btn-outline-primary {
+  background: var(--surface);
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 32%, var(--border));
+  box-shadow: none;
+}
+
+.btn-outline-primary:hover:not(:disabled) {
+  background: var(--primary-soft);
+  border-color: color-mix(in srgb, var(--primary) 48%, var(--border));
+  color: var(--primary-hover);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--secondary);
+  border-color: var(--border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background: var(--bg-soft);
+}
+
+.btn-outline-danger {
+  background: var(--surface);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
+  box-shadow: none;
+}
+
+.btn-outline-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+  border-color: color-mix(in srgb, var(--danger) 52%, var(--border));
+  color: color-mix(in srgb, var(--danger) 88%, #000 12%);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  border-color: color-mix(in srgb, var(--danger) 82%, #000 18%);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 88%, #000 12%);
+  border-color: color-mix(in srgb, var(--danger) 72%, #000 28%);
+}
+
+.tree-form {
+  margin-top: var(--space-4);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.field-full {
+  grid-column: 1 / -1;
+}
+
+.tree-geo-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.form-control {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.67rem 0.78rem;
+  font: inherit;
+  color: var(--text);
+  background: #fff;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    background-color 140ms ease;
+}
+
+.form-control::placeholder {
+  color: #98a2b3;
+}
+
+select.form-control {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%;
+  background-size:
+    6px 6px,
+    6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 2.1rem;
+}
+
+.form-control:focus-visible {
+  border-color: var(--primary);
+  outline: 3px solid color-mix(in srgb, var(--focus-ring) 35%, transparent);
+  outline-offset: 0;
+}
+
+.form-control[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+
+.form-textarea {
+  resize: vertical;
+}
+
+.map-preview-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.map-preview {
+  width: 100%;
+  min-height: 250px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.map-attribution {
+  margin: 0;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+@media (max-width: 720px) {
+  .tree-form-map-slot {
+    display: none;
+  }
+
+  .btn,
+  .btn-sm {
+    min-height: 2.75rem;
+  }
+
+  .tree-form-page .form-control,
+  .tree-form .form-control,
+  .catalog-toolbar .form-control,
+  .catalog-toolbar select.form-control {
+    min-height: 2.75rem;
+  }
+
+  .app-menu-toggle {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .mtl-admin-table-wrap:has(.mtl-admin-table--stack) {
+    overflow-x: visible;
+  }
+
+  .mtl-admin-table--stack thead {
+    display: none;
+  }
+
+  .mtl-admin-table--stack tbody tr {
+    display: block;
+    margin-bottom: var(--space-3);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .mtl-admin-table--stack tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .mtl-admin-table--stack td {
+    display: block;
+    border: none;
+    padding: var(--space-1) 0;
+  }
+
+  .mtl-admin-table--stack td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.15rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .mtl-admin-table--stack td.mtl-admin-table__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--border);
+    white-space: normal;
+  }
+
+  .mtl-admin-table--stack td.mtl-admin-table__actions::before {
+    margin-bottom: var(--space-1);
+  }
+
+  .mtl-admin-table--stack .mtl-admin-table__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .card {
+    padding: var(--space-5);
+  }
+
+  .tree-form {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .tree-geo-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .trees-list-filters {
+    margin-left: 0;
+    max-width: none;
+    width: 100%;
+  }
+
+  .trees-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trees-filter-actions {
+    justify-content: stretch;
+  }
+
+  .trees-filter-actions .trees-filter-btn-submit {
+    margin-left: 0;
+  }
+
+  .trees-filter-btn {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .trees-pagination {
+    max-width: none;
+    padding: 0;
+  }
+
+  .trees-pagination-btn {
+    flex: 1 1 calc(50% - var(--space-2));
+    min-width: 0;
+  }
+
+  .trees-pagination-status {
+    width: 100%;
+    order: -1;
+    padding-bottom: 0;
+    border-bottom: none;
+    margin-bottom: var(--space-2);
+  }
+
+  .tree-detail-visual-grid {
+    --tree-detail-media-h: 16.25rem; /* 260px en estrecho: foto y mapa alineados */
+    grid-template-columns: 1fr;
+  }
+
+  .tree-detail-facts__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tree-detail-page__footer.actions > .btn,
+  .tree-detail-page__footer.actions > a.btn {
+    width: 100%;
+  }
+
+  .tree-form .page-actions-footer.actions > .btn,
+  .tree-form .page-actions-footer.actions > a.btn {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tree-form .page-actions-footer.actions .page-actions-footer__end {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .tree-form .page-actions-footer.actions .page-actions-footer__end .btn {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tree-form .page-actions-footer.actions .tree-form-submit {
+    margin-left: 0;
+  }
+
+  .tree-form-species-status-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .tree-form-location-row,
+  .tree-edit-location-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .home-dashboard__grid,
+  .home-dashboard__grid--public {
+    grid-template-columns: 1fr;
+  }
+
+  .home-dashboard__grid--public .home-tile--native {
+    grid-column: auto;
+  }
+
+  .catalog-toolbar__fields,
+  .catalog-toolbar__fields--privileged,
+  .catalog-toolbar__fields--pair {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-toolbar__submit {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .catalog-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-card {
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+  }
+
+  .tree-form .actions {
+    justify-content: stretch;
+  }
+
+  .tree-form .actions .tree-form-submit {
+    margin-left: 0;
+  }
+
+  .tree-form .actions > .btn,
+  .tree-form .actions > a.btn {
+    flex: 1;
+    min-width: 0;
+  }
+}

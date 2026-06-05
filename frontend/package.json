@@ -6,6 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
+    "typecheck": "vue-tsc -b",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
     "preview": "vite preview",
     "test": "vitest run"
   },
@@ -20,15 +25,23 @@
     "vue-zoomable": "^1.2.8"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/leaflet": "^1.9.21",
     "@types/node": "^24.12.2",
     "@vitejs/plugin-vue": "^6.0.6",
     "@vue/test-utils": "^2.4.9",
     "@vue/tsconfig": "^0.9.1",
+    "eslint": "^10.4.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^10.9.2",
+    "globals": "^17.6.0",
     "jsdom": "^29.0.2",
+    "prettier": "^3.8.3",
     "typescript": "~6.0.2",
+    "typescript-eslint": "^8.60.1",
     "vite": "^8.0.10",
     "vitest": "^4.1.5",
+    "vue-eslint-parser": "^10.4.1",
     "vue-tsc": "^3.2.7"
   }
 }

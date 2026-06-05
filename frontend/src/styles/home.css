@@ -1,0 +1,132 @@
+﻿.home-dashboard__body {
+  display: block;
+}
+
+.home-dashboard__section {
+  margin: 0;
+}
+
+.home-dashboard__section--follow {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.home-dashboard__section-title {
+  margin: 0 0 var(--space-3);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.home-dashboard__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.home-dashboard__grid--public {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.home-dashboard__grid--public .home-tile--native {
+  grid-column: 1 / -1;
+}
+
+.home-tile {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  min-height: 5.5rem;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: none;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.home-tile:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-soft);
+}
+
+.home-tile:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus-ring) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.home-tile--primary {
+  background: var(--surface);
+  border-color: color-mix(in srgb, var(--sidebar-bg) 25%, var(--border));
+  box-shadow: var(--shadow-soft);
+}
+
+.home-tile--primary .home-tile__icon {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.home-tile--default .home-tile__icon,
+.home-tile:not(.home-tile--primary) .home-tile__icon {
+  color: var(--muted);
+}
+
+.home-tile--native {
+  font: inherit;
+  text-align: inherit;
+  width: 100%;
+  cursor: pointer;
+}
+
+.home-tile__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--workspace-bg);
+  color: var(--muted);
+}
+
+.home-tile__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.home-tile__title {
+  font-weight: 700;
+  font-size: 1.02rem;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+.home-tile__desc {
+  font-size: 0.875rem;
+  line-height: 1.42;
+  color: var(--muted);
+}
+
+.home-tile__chevron {
+  flex-shrink: 0;
+  color: var(--border-strong);
+}
+
+.home-tile:hover .home-tile__chevron {
+  color: var(--primary);
+}
+
+.home-dashboard-icon {
+  display: block;
+}

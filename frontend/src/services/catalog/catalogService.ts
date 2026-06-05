@@ -10,13 +10,10 @@ import type {
 } from '@/types/catalog'
 
 export async function fetchSpecies(signal?: AbortSignal): Promise<MasterListItem[]> {
-  const response = await apiFetch<MasterDataPageResponse<MasterListItem>>(
-    '/api/catalog/species',
-    {
-      query: { unpaged: true },
-      signal,
-    },
-  )
+  const response = await apiFetch<MasterDataPageResponse<MasterListItem>>('/api/catalog/species', {
+    query: { unpaged: true },
+    signal,
+  })
   return response.content
 }
 

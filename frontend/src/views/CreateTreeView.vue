@@ -3,12 +3,12 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import PageBackLink from '@/components/layout/PageBackLink.vue'
+import SpeciesAutocompleteInput from '@/components/SpeciesAutocompleteInput.vue'
 import TreePhotoUploadPicker from '@/components/TreePhotoUploadPicker.vue'
 import TreeLocationMapPreview from '@/components/TreeLocationMapPreview.vue'
 import { areLatLngInValidRange } from '@/composables/createTreeFormValidation'
 import { useTreeLocationAutofill } from '@/composables/useTreeLocationAutofill'
 import { useCreateTreeForm } from '@/composables/useCreateTreeForm'
-import type { MasterListItem } from '@/types/catalog'
 
 const { t } = useI18n()
 const {
@@ -29,6 +29,8 @@ const {
 } = useCreateTreeForm()
 
 const showMapMarker = computed(() => areLatLngInValidRange(form))
+const speciesAutocompleteRef = ref<InstanceType<typeof SpeciesAutocompleteInput> | null>(null)
+
 interface CoordinatesPayload {
   latitude: string
   longitude: string
@@ -38,115 +40,6 @@ const { applyCoordinatesAndAutofillAddress } = useTreeLocationAutofill({
   form,
   provinces,
 })
-const SPECIES_SUGGESTIONS_BLUR_DELAY_MS = 120
-
-function normalizeAutocompleteValue(value: string): string {
-  return value
-    .trim()
-    .normalize('NFD')
-    .replaceAll(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-}
-
-const speciesAutocompleteText = ref('')
-const showSpeciesSuggestions = ref(false)
-const speciesHighlightIndex = ref(-1)
-
-const normalizedSpecies = computed(() =>
-  species.value.map((item) => ({
-    item,
-    normalizedLabel: normalizeAutocompleteValue(item.label),
-  })),
-)
-
-const filteredSpecies = computed(() => {
-  const normalizedInput = normalizeAutocompleteValue(speciesAutocompleteText.value)
-  if (!normalizedInput) {
-    return species.value
-  }
-  return normalizedSpecies.value
-    .filter((entry) => entry.normalizedLabel.includes(normalizedInput))
-    .map((entry) => entry.item)
-})
-
-function resetSpeciesSuggestions(): void {
-  showSpeciesSuggestions.value = false
-  speciesHighlightIndex.value = -1
-}
-
-function applySpeciesSelection(item: MasterListItem | null): void {
-  form.speciesId = item ? String(item.id) : ''
-}
-
-function findSpeciesByExactLabel(inputValue: string): MasterListItem | null {
-  const normalizedInput = normalizeAutocompleteValue(inputValue)
-  if (!normalizedInput) {
-    return null
-  }
-  const found = normalizedSpecies.value.find((entry) => entry.normalizedLabel === normalizedInput)
-  return found?.item ?? null
-}
-
-function onSpeciesInput(event: Event): void {
-  const input = event.target as HTMLInputElement
-  speciesAutocompleteText.value = input.value
-  applySpeciesSelection(findSpeciesByExactLabel(input.value))
-  showSpeciesSuggestions.value = true
-  speciesHighlightIndex.value = -1
-}
-
-function onSpeciesFocus(): void {
-  showSpeciesSuggestions.value = true
-}
-
-function onSpeciesBlur(): void {
-  // Permite que el click sobre una sugerencia se procese antes de ocultar la lista.
-  setTimeout(() => {
-    resetSpeciesSuggestions()
-  }, SPECIES_SUGGESTIONS_BLUR_DELAY_MS)
-}
-
-function selectSpecies(item: { id: number; label: string }): void {
-  speciesAutocompleteText.value = item.label
-  applySpeciesSelection(item)
-  resetSpeciesSuggestions()
-}
-
-function highlightNextSpecies(): void {
-  if (filteredSpecies.value.length === 0) {
-    return
-  }
-  showSpeciesSuggestions.value = true
-  speciesHighlightIndex.value =
-    speciesHighlightIndex.value >= filteredSpecies.value.length - 1
-      ? 0
-      : speciesHighlightIndex.value + 1
-}
-
-function highlightPreviousSpecies(): void {
-  if (filteredSpecies.value.length === 0) {
-    return
-  }
-  showSpeciesSuggestions.value = true
-  speciesHighlightIndex.value =
-    speciesHighlightIndex.value <= 0
-      ? filteredSpecies.value.length - 1
-      : speciesHighlightIndex.value - 1
-}
-
-function confirmHighlightedSpecies(): void {
-  if (speciesHighlightIndex.value < 0) {
-    return
-  }
-  const highlighted = filteredSpecies.value[speciesHighlightIndex.value]
-  if (highlighted) {
-    selectSpecies(highlighted)
-  }
-}
-
-function dismissSpeciesSuggestions(): void {
-  resetSpeciesSuggestions()
-}
 
 function onMapPickCoordinates(payload: CoordinatesPayload): void {
   void applyCoordinatesAndAutofillAddress(payload)
@@ -156,10 +49,13 @@ function onFirstPhotoGps(payload: CoordinatesPayload): void {
   void applyCoordinatesAndAutofillAddress(payload)
 }
 
+async function onSubmit(): Promise<void> {
+  speciesAutocompleteRef.value?.commitSpeciesFromText()
+  await submit()
+}
+
 onMounted(async () => {
   await loadMasters()
-  const selected = species.value.find((item) => String(item.id) === form.speciesId)
-  speciesAutocompleteText.value = selected?.label ?? ''
 })
 </script>
 
@@ -178,48 +74,24 @@ onMounted(async () => {
       v-if="!isLoadingMasters && hasMasters"
       class="tree-form"
       data-testid="tree-form"
-      @submit.prevent="submit"
+      @submit.prevent="onSubmit"
     >
       <div class="field-full tree-form-species-status-row">
         <div class="field species-field">
           <label class="form-label" for="speciesId">{{ t('treeForm.fields.species.label') }}</label>
-          <div class="species-autocomplete">
-            <input
-              id="speciesId"
-              data-testid="tree-form-species"
-              :value="speciesAutocompleteText"
-              class="form-control"
-              type="text"
-              required
-              :placeholder="t('treeForm.fields.species.placeholder')"
-              :aria-invalid="Boolean(fieldErrors.speciesId)"
-              autocomplete="off"
-              @input="onSpeciesInput"
-              @keydown.down.prevent="highlightNextSpecies"
-              @keydown.up.prevent="highlightPreviousSpecies"
-              @keydown.page-down.prevent="highlightNextSpecies"
-              @keydown.page-up.prevent="highlightPreviousSpecies"
-              @keydown.enter.prevent="confirmHighlightedSpecies"
-              @keydown.esc.prevent="dismissSpeciesSuggestions"
-              @focus="onSpeciesFocus"
-              @blur="onSpeciesBlur"
-            />
-            <ul
-              v-if="showSpeciesSuggestions && filteredSpecies.length > 0"
-              class="species-autocomplete-list"
-            >
-              <li
-                v-for="(item, index) in filteredSpecies"
-                :key="item.id"
-                class="species-autocomplete-item"
-                :class="{ 'species-autocomplete-item-active': speciesHighlightIndex === index }"
-                @mousedown.prevent="selectSpecies(item)"
-              >
-                {{ item.label }}
-              </li>
-            </ul>
-          </div>
-          <small v-if="fieldErrors.speciesId" class="field-error">{{ fieldErrors.speciesId }}</small>
+          <SpeciesAutocompleteInput
+            ref="speciesAutocompleteRef"
+            input-id="speciesId"
+            input-test-id="tree-form-species"
+            v-model="form.speciesId"
+            :species="species"
+            required
+            :aria-invalid="Boolean(fieldErrors.speciesId)"
+            :placeholder="t('treeForm.fields.species.placeholder')"
+          />
+          <small v-if="fieldErrors.speciesId" class="field-error">{{
+            fieldErrors.speciesId
+          }}</small>
         </div>
 
         <div class="field">
@@ -260,7 +132,9 @@ onMounted(async () => {
 
       <div class="field-full tree-form-location-row">
         <div class="field">
-          <label class="form-label" for="provinceId">{{ t('treeForm.fields.province.label') }}</label>
+          <label class="form-label" for="provinceId">{{
+            t('treeForm.fields.province.label')
+          }}</label>
           <select
             id="provinceId"
             data-testid="tree-form-province"
@@ -274,11 +148,15 @@ onMounted(async () => {
               {{ item.label }}
             </option>
           </select>
-          <small v-if="fieldErrors.provinceId" class="field-error">{{ fieldErrors.provinceId }}</small>
+          <small v-if="fieldErrors.provinceId" class="field-error">{{
+            fieldErrors.provinceId
+          }}</small>
         </div>
 
         <div class="field">
-          <label class="form-label" for="municipality">{{ t('treeForm.fields.municipality.label') }}</label>
+          <label class="form-label" for="municipality">{{
+            t('treeForm.fields.municipality.label')
+          }}</label>
           <input
             id="municipality"
             data-testid="tree-form-municipality"
@@ -292,7 +170,9 @@ onMounted(async () => {
       </div>
 
       <div class="field field-full tree-form-field-block">
-        <label class="form-label" for="description">{{ t('treeForm.fields.description.label') }}</label>
+        <label class="form-label" for="description">{{
+          t('treeForm.fields.description.label')
+        }}</label>
         <textarea
           id="description"
           v-model="form.description"
@@ -302,7 +182,9 @@ onMounted(async () => {
           :aria-invalid="Boolean(fieldErrors.description)"
           maxlength="5000"
         />
-        <small v-if="fieldErrors.description" class="field-error">{{ fieldErrors.description }}</small>
+        <small v-if="fieldErrors.description" class="field-error">{{
+          fieldErrors.description
+        }}</small>
       </div>
 
       <div class="field-full tree-geo-row">
@@ -325,7 +207,9 @@ onMounted(async () => {
         </div>
 
         <div class="field">
-          <label class="form-label" for="longitude">{{ t('treeForm.fields.longitude.label') }}</label>
+          <label class="form-label" for="longitude">{{
+            t('treeForm.fields.longitude.label')
+          }}</label>
           <input
             id="longitude"
             data-testid="tree-form-longitude"
@@ -339,7 +223,9 @@ onMounted(async () => {
             :placeholder="t('treeForm.fields.longitude.placeholder')"
             :aria-invalid="Boolean(fieldErrors.longitude)"
           />
-          <small v-if="fieldErrors.longitude" class="field-error">{{ fieldErrors.longitude }}</small>
+          <small v-if="fieldErrors.longitude" class="field-error">{{
+            fieldErrors.longitude
+          }}</small>
         </div>
 
         <div class="field">
@@ -373,45 +259,3 @@ onMounted(async () => {
     </form>
   </div>
 </template>
-
-<style scoped>
-.species-autocomplete {
-  position: relative;
-  width: 100%;
-}
-
-.species-autocomplete > .form-control {
-  display: block;
-  width: 100%;
-}
-
-.species-autocomplete-list {
-  position: absolute;
-  z-index: 10;
-  width: 100%;
-  margin: 0;
-  margin-top: 0.25rem;
-  padding: 0.25rem 0;
-  list-style: none;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  max-height: 14rem;
-  overflow-y: auto;
-  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
-}
-
-.species-autocomplete-item {
-  padding: 0.45rem 0.7rem;
-  cursor: pointer;
-}
-
-.species-autocomplete-item:hover {
-  background: var(--bg-soft);
-}
-
-.species-autocomplete-item-active {
-  background: var(--bg-soft);
-}
-
-</style>

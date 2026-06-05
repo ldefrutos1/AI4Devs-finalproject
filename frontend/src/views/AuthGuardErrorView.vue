@@ -8,9 +8,7 @@ const route = useRoute()
 const auth = useAuth()
 const { t } = useI18n()
 const retryError = ref('')
-const errorReason = computed(() =>
-  route.query.reason === 'forbidden' ? 'forbidden' : 'session',
-)
+const errorReason = computed(() => (route.query.reason === 'forbidden' ? 'forbidden' : 'session'))
 const canRetryLogin = computed(() => errorReason.value === 'session')
 const descriptionKey = computed(() =>
   errorReason.value === 'forbidden'

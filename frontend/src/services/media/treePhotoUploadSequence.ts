@@ -19,7 +19,9 @@ export class ObjectStorageUploadError extends Error {
 const DIMENSION_READ_TIMEOUT_MS = 8_000
 const OBJECT_STORAGE_PUT_TIMEOUT_MS = 120_000
 
-async function readImageDimensionsOptional(file: File): Promise<{ width?: number; height?: number }> {
+async function readImageDimensionsOptional(
+  file: File,
+): Promise<{ width?: number; height?: number }> {
   const objectUrl = URL.createObjectURL(file)
   let settled = false
   return await new Promise((resolve) => {
@@ -74,10 +76,7 @@ export async function putFileToObjectStorageUrl(uploadUrl: string, file: File): 
     throw new NetworkError()
   }
   if (!response.ok) {
-    throw new ObjectStorageUploadError(
-      response.status,
-      `STORAGE_UPLOAD_HTTP_${response.status}`,
-    )
+    throw new ObjectStorageUploadError(response.status, `STORAGE_UPLOAD_HTTP_${response.status}`)
   }
 }
 

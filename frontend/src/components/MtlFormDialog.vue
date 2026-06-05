@@ -39,8 +39,8 @@ const errorId = useId()
 
 const stackClass = computed(() => `mtl-form-dialog--${props.stack}`)
 
-const fieldA11y = computed((): MtlFormFieldA11y =>
-  buildMtlFormFieldA11y(props.formError ?? '', errorId),
+const fieldA11y = computed(
+  (): MtlFormFieldA11y => buildMtlFormFieldA11y(props.formError ?? '', errorId),
 )
 
 provide(MTL_FORM_FIELD_A11Y_KEY, fieldA11y)
