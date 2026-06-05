@@ -197,7 +197,9 @@ onMounted(async () => {
 <template>
   <div class="tree-detail-page">
     <header class="page-header tree-detail-page__header">
-      <PageBackLink :to="{ name: 'ejemplares-list' }">{{ t('treesDetail.backToList') }}</PageBackLink>
+      <PageBackLink :to="{ name: 'ejemplares-list' }">{{
+        t('treesDetail.backToList')
+      }}</PageBackLink>
       <h1 class="page-header__title">{{ pageTitle }}</h1>
       <p class="page-header__description">{{ pageDescription }}</p>
       <div v-if="tree" class="tree-detail-page__badges">
@@ -205,7 +207,9 @@ onMounted(async () => {
         <span class="mtl-badge mtl-badge--muted">{{
           mapVisibilityLabel(tree.publicMapVisibility)
         }}</span>
-        <span class="mtl-badge mtl-badge--muted">{{ t('treesDetail.treeId', { id: tree.treeId }) }}</span>
+        <span class="mtl-badge mtl-badge--muted">{{
+          t('treesDetail.treeId', { id: tree.treeId })
+        }}</span>
       </div>
     </header>
 

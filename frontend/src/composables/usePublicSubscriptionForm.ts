@@ -16,7 +16,9 @@ function mapHttpErrorToMessage(error: HttpError, t: SubscriptionMessagesT): stri
       return t('subscriptionNew.errors.conflictCancelled')
     }
     const detail409 = error.problem?.detail?.trim()
-    return detail409 && detail409.length > 0 ? detail409 : t('subscriptionNew.errors.conflictGeneric')
+    return detail409 && detail409.length > 0
+      ? detail409
+      : t('subscriptionNew.errors.conflictGeneric')
   }
   if (error.status === 400) {
     const detail400 = error.problem?.detail?.trim()

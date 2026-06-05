@@ -1,10 +1,7 @@
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
-import {
-  parseTreeCreateFlash,
-  TREE_CREATE_FLASH_QUERY,
-} from '@/composables/treeCreateRedirect'
+import { parseTreeCreateFlash, TREE_CREATE_FLASH_QUERY } from '@/composables/treeCreateRedirect'
 
 /** Lee el flash de alta (`fromCreate`), rellena mensajes y limpia la query de la URL. */
 export function useTreeCreateFlashFromRoute() {

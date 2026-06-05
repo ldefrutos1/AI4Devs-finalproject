@@ -51,7 +51,10 @@ describe('adminSubscriptions', () => {
       last: true,
     })
 
-    await fetchAdminSubscriptions({ page: 1, size: 10, estadoSuscripcion: 'CANCELADA' }, new AbortController().signal)
+    await fetchAdminSubscriptions(
+      { page: 1, size: 10, estadoSuscripcion: 'CANCELADA' },
+      new AbortController().signal,
+    )
 
     expect(apiFetchMock).toHaveBeenCalledWith('/api/notifications/subscriptions', {
       query: {

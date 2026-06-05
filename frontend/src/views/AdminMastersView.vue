@@ -137,9 +137,15 @@ onMounted(async () => {
                 <label class="form-label" for="admin-masters-filter-genus">{{
                   t('adminMasters.filters.genus.label')
                 }}</label>
-                <select id="admin-masters-filter-genus" v-model="filterGenusId" class="form-control">
+                <select
+                  id="admin-masters-filter-genus"
+                  v-model="filterGenusId"
+                  class="form-control"
+                >
                   <option value="">{{ t('adminMasters.filters.genus.all') }}</option>
-                  <option v-for="g in generaList" :key="g.id" :value="String(g.id)">{{ g.label }}</option>
+                  <option v-for="g in generaList" :key="g.id" :value="String(g.id)">
+                    {{ g.label }}
+                  </option>
                 </select>
               </div>
             </div>
@@ -165,7 +171,9 @@ onMounted(async () => {
         </form>
       </section>
 
-      <h2 class="tree-detail-panel__title admin-masters-section-title">{{ t('adminMasters.listTitle') }}</h2>
+      <h2 class="tree-detail-panel__title admin-masters-section-title">
+        {{ t('adminMasters.listTitle') }}
+      </h2>
 
       <p v-if="isSpeciesListLoading" class="status-note">{{ t('adminMasters.loadingSpecies') }}</p>
 
@@ -175,21 +183,22 @@ onMounted(async () => {
             {{ t('adminMasters.resultsCount', { count: speciesTotalElements }) }}
           </p>
           <div class="mtl-admin-list-toolbar__actions">
-            <button
-              type="button"
-              class="btn btn-primary-soft btn-sm"
-              @click="openCreateSpecies"
-            >
+            <button type="button" class="btn btn-primary-soft btn-sm" @click="openCreateSpecies">
               {{ t('adminMasters.actions.create') }}
             </button>
           </div>
         </div>
 
-        <p v-if="!hasSpeciesRows && !errorMessage" class="status-note">{{ t('adminMasters.emptyList') }}</p>
+        <p v-if="!hasSpeciesRows && !errorMessage" class="status-note">
+          {{ t('adminMasters.emptyList') }}
+        </p>
 
         <div v-else-if="hasSpeciesRows" class="catalog-toolbar__panel admin-masters-table-panel">
           <div class="mtl-admin-table-wrap">
-            <table class="mtl-admin-table mtl-admin-table--stack" :aria-label="t('adminMasters.listTitle')">
+            <table
+              class="mtl-admin-table mtl-admin-table--stack"
+              :aria-label="t('adminMasters.listTitle')"
+            >
               <thead>
                 <tr>
                   <th scope="col">{{ t('adminMasters.columns.species') }}</th>
@@ -201,7 +210,10 @@ onMounted(async () => {
                 <tr v-for="item in speciesList" :key="item.id">
                   <td :data-label="t('adminMasters.columns.species')">{{ item.label }}</td>
                   <td :data-label="t('adminMasters.columns.genus')">{{ item.genusLabel }}</td>
-                  <td class="mtl-admin-table__actions" :data-label="t('adminMasters.columns.actions')">
+                  <td
+                    class="mtl-admin-table__actions"
+                    :data-label="t('adminMasters.columns.actions')"
+                  >
                     <button
                       type="button"
                       class="btn btn-outline-primary btn-sm"
@@ -272,7 +284,9 @@ onMounted(async () => {
     >
       <template #default="{ fieldA11y }">
         <div class="field">
-          <label class="form-label" for="admin-species-genus">{{ t('adminMasters.form.genus') }}</label>
+          <label class="form-label" for="admin-species-genus">{{
+            t('adminMasters.form.genus')
+          }}</label>
           <div class="admin-masters-combo-row">
             <select
               id="admin-species-genus"
@@ -297,7 +311,9 @@ onMounted(async () => {
         </div>
 
         <div class="field">
-          <label class="form-label" for="admin-species-scientific">{{ t('adminMasters.form.scientificName') }}</label>
+          <label class="form-label" for="admin-species-scientific">{{
+            t('adminMasters.form.scientificName')
+          }}</label>
           <input
             id="admin-species-scientific"
             v-model="formScientificName"
@@ -310,7 +326,9 @@ onMounted(async () => {
         </div>
 
         <div class="field">
-          <label class="form-label" for="admin-species-common">{{ t('adminMasters.form.commonName') }}</label>
+          <label class="form-label" for="admin-species-common">{{
+            t('adminMasters.form.commonName')
+          }}</label>
           <input
             id="admin-species-common"
             v-model="formCommonName"
@@ -336,7 +354,9 @@ onMounted(async () => {
     >
       <template #default="{ fieldA11y }">
         <div class="field">
-          <label class="form-label" for="admin-genus-family">{{ t('adminMasters.form.family') }}</label>
+          <label class="form-label" for="admin-genus-family">{{
+            t('adminMasters.form.family')
+          }}</label>
           <div class="admin-masters-combo-row">
             <select
               id="admin-genus-family"
@@ -361,7 +381,9 @@ onMounted(async () => {
         </div>
 
         <div class="field">
-          <label class="form-label" for="admin-genus-scientific">{{ t('adminMasters.form.scientificName') }}</label>
+          <label class="form-label" for="admin-genus-scientific">{{
+            t('adminMasters.form.scientificName')
+          }}</label>
           <input
             id="admin-genus-scientific"
             v-model="genusModalScientific"
@@ -374,7 +396,9 @@ onMounted(async () => {
         </div>
 
         <div class="field">
-          <label class="form-label" for="admin-genus-common">{{ t('adminMasters.form.commonName') }}</label>
+          <label class="form-label" for="admin-genus-common">{{
+            t('adminMasters.form.commonName')
+          }}</label>
           <input
             id="admin-genus-common"
             v-model="genusModalCommon"
@@ -400,7 +424,9 @@ onMounted(async () => {
     >
       <template #default="{ fieldA11y }">
         <div class="field">
-          <label class="form-label" for="admin-family-scientific">{{ t('adminMasters.form.scientificName') }}</label>
+          <label class="form-label" for="admin-family-scientific">{{
+            t('adminMasters.form.scientificName')
+          }}</label>
           <input
             id="admin-family-scientific"
             v-model="familyModalScientific"
@@ -413,7 +439,9 @@ onMounted(async () => {
         </div>
 
         <div class="field">
-          <label class="form-label" for="admin-family-common">{{ t('adminMasters.form.commonName') }}</label>
+          <label class="form-label" for="admin-family-common">{{
+            t('adminMasters.form.commonName')
+          }}</label>
           <input
             id="admin-family-common"
             v-model="familyModalCommon"

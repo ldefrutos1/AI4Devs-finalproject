@@ -1,0 +1,482 @@
+﻿/* Cabecera de pÃ¡gina (estilo consola) */
+.page-header {
+  margin-bottom: var(--space-6);
+}
+
+.page-header__title {
+  margin: 0;
+  font-size: clamp(1.5rem, 1.25rem + 0.75vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.page-header__description {
+  max-width: 100%;
+  margin: var(--space-2) 0 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.home-page {
+  width: 100%;
+  max-width: min(56rem, 100%);
+  margin-inline: auto;
+}
+
+/* Login, callback OIDC y error de sesiÃ³n */
+.auth-flow-page {
+  width: 100%;
+  max-width: min(40rem, 100%);
+  margin-inline: auto;
+}
+
+.auth-flow-page__header {
+  margin-bottom: var(--space-4);
+}
+
+.auth-flow-page__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.auth-flow-page__actions .tree-form-submit {
+  margin-left: auto;
+}
+
+/* CatÃ¡logo pÃºblico (listado de ejemplares) */
+.catalog-page {
+  width: 100%;
+  max-width: min(72rem, 100%);
+  margin-inline: auto;
+}
+
+/* Detalle pÃºblico de ejemplar */
+.tree-detail-page {
+  width: 100%;
+  max-width: min(72rem, 100%);
+  margin-inline: auto;
+}
+
+.tree-detail-page__header {
+  margin-bottom: var(--space-5);
+}
+
+.page-header__nav {
+  margin-bottom: var(--space-3);
+}
+
+.page-back-link,
+.tree-detail-page__back {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.page-back-link:hover,
+.tree-detail-page__back:hover {
+  text-decoration: underline;
+}
+
+.page-back-link:focus-visible,
+.tree-detail-page__back:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.tree-detail-page__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.tree-detail-facts {
+  margin-top: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.tree-detail-facts__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-5);
+  margin: var(--space-4) 0 0;
+}
+
+.tree-detail-facts__item {
+  margin: 0;
+  min-width: 0;
+}
+
+.tree-detail-facts__item--full {
+  grid-column: 1 / -1;
+}
+
+.tree-detail-facts__item dt {
+  margin: 0 0 var(--space-1);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--secondary);
+}
+
+.tree-detail-facts__item dd {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.tree-detail-facts__description {
+  white-space: pre-wrap;
+}
+
+.tree-detail-page__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.page-actions-footer {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.page-actions-footer__end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-left: auto;
+}
+
+.page-actions-footer__end .tree-form-submit {
+  margin-left: 0;
+}
+
+/* Alta y ediciÃ³n de ejemplar */
+.tree-form-page {
+  width: 100%;
+  max-width: min(72rem, 100%);
+  margin-inline: auto;
+}
+
+.tree-form-page__header {
+  margin-bottom: var(--space-5);
+}
+
+.tree-form-page .tree-form {
+  margin-top: 0;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+/* Cada bloque de campos ocupa todo el ancho; foto/mapa ya van en field-full */
+.tree-form-page .tree-form > .field,
+.subscription-page .subscription-form-panel {
+  max-width: none;
+}
+
+.tree-form-page .tree-form > .tree-form-species-status-row,
+.tree-form-page .tree-form > .state-visibility-inline,
+.tree-form-page .tree-form > .tree-form-location-row,
+.tree-form-page .tree-form > .tree-edit-location-row,
+.tree-form-page .tree-form > .tree-geo-row,
+.tree-form-page .tree-form > .tree-form-field-block,
+.tree-form-page
+  .tree-form
+  > .field-full:not(.tree-detail-visual-grid):not(.actions):not(.page-actions-footer) {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: none;
+}
+
+.tree-form-page .tree-detail-visual-grid {
+  --tree-detail-media-h: 14rem;
+}
+
+.tree-form-species-status-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.tree-form-species-status-row .species-field {
+  grid-column: auto;
+  min-width: 0;
+}
+
+.tree-form-species-status-row > .field {
+  min-width: 0;
+}
+
+.tree-form-species-status-row .species-autocomplete {
+  position: relative;
+  width: 100%;
+}
+
+.tree-form-location-row,
+.tree-edit-location-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.tree-form-location-row > .field,
+.tree-edit-location-row > .field {
+  min-width: 0;
+}
+
+.tree-form-page .field {
+  gap: var(--space-1);
+}
+
+.tree-form-page .form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--secondary);
+}
+
+.tree-form-page .form-control {
+  padding: 0.42rem 0.62rem;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.tree-form-page select.form-control {
+  min-height: 2.125rem;
+}
+
+.tree-form-page .form-textarea {
+  min-height: 4.5rem;
+}
+
+.tree-form-page .form-control:focus-visible,
+.tree-form-page select.form-control:focus-visible {
+  border-color: var(--accent);
+  outline: 3px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  outline-offset: 0;
+}
+
+.tree-form-page__flash {
+  margin: 0 0 var(--space-4);
+}
+
+/* Pie de formulario alineado con inputs compactos (0,9rem) y btn-sm de listados */
+.tree-form-page .page-actions-footer.actions .btn {
+  padding: 0.5rem 0.85rem;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  min-height: 2.125rem;
+  font-weight: 600;
+}
+
+.tree-form-page .page-actions-footer.actions .btn-primary,
+.tree-form-page .page-actions-footer.actions .btn-primary-soft {
+  box-shadow: none;
+}
+
+.tree-form .page-actions-footer.actions {
+  margin-top: var(--space-2);
+}
+
+.catalog-toolbar__panel {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.catalog-toolbar__fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-4);
+}
+
+.catalog-toolbar__fields--privileged {
+  margin-top: var(--space-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.catalog-toolbar__fields--pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-subscriptions-page .admin-subscriptions-table-panel {
+  padding: var(--space-3) var(--space-4);
+}
+
+.admin-subscriptions-page .admin-subscriptions-table-panel .mtl-admin-table-wrap {
+  margin: 0;
+}
+
+.catalog-toolbar select.form-control {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 2.25rem;
+  cursor: pointer;
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) 50%,
+    calc(100% - 12px) 50%;
+  background-size:
+    6px 6px,
+    6px 6px;
+  background-repeat: no-repeat;
+}
+
+.catalog-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.catalog-toolbar__submit {
+  margin-left: auto;
+}
+
+.catalog-results-count {
+  margin: var(--space-5) 0 0;
+  font-size: 0.9rem;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.catalog-card {
+  display: grid;
+  grid-template-columns: 7.25rem minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.catalog-card:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-soft);
+}
+
+.catalog-card__thumb-link {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+.catalog-card__thumb {
+  display: block;
+  width: 100%;
+  height: 6.25rem;
+  object-fit: cover;
+}
+
+.catalog-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.catalog-card__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+
+.catalog-card__title-link {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.catalog-card__title-link:hover {
+  color: var(--accent);
+}
+
+.catalog-card__location {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.catalog-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.mtl-badge {
+  display: inline-block;
+  padding: 0.12rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--secondary);
+  background: var(--workspace-bg);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.mtl-badge--muted {
+  color: var(--muted);
+}
+
+.catalog-card__detail-link {
+  margin-top: auto;
+  padding-top: var(--space-1);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.catalog-card__detail-link:hover {
+  text-decoration: underline;
+}
+
+.catalog-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.catalog-pagination__status {
+  font-size: 0.9rem;
+  color: var(--muted);
+}

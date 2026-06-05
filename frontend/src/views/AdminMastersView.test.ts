@@ -85,7 +85,9 @@ describe('AdminMastersView', () => {
     fetchSpeciesMock.mockResolvedValue([{ id: 1, label: 'Encina (Quercus ilex)' }])
     fetchAdminSpeciesListMock.mockResolvedValue({
       ...emptyPage,
-      content: [{ id: 1, label: 'Encina (Quercus ilex)', genusId: 10, genusLabel: 'Robles (Quercus)' }],
+      content: [
+        { id: 1, label: 'Encina (Quercus ilex)', genusId: 10, genusLabel: 'Robles (Quercus)' },
+      ],
     })
     fetchAdminGeneraMock.mockResolvedValue({
       ...emptyPage,
@@ -175,14 +177,17 @@ describe('AdminMastersView', () => {
   })
 
   it('muestra error 409 al confirmar borrado con fichas referenciadas', async () => {
-    deleteAdminSpeciesMock.mockRejectedValueOnce(new HttpError(409, { title: 'Conflicto', status: 409 }))
+    deleteAdminSpeciesMock.mockRejectedValueOnce(
+      new HttpError(409, { title: 'Conflicto', status: 409 }),
+    )
 
     const wrapper = mount(AdminMastersView, {
       global: {
         plugins: [createTestI18n()],
         stubs: {
           MtlConfirmDialog: {
-            template: '<div><button data-testid="confirm-delete" @click="$emit(\'confirm\')">Confirmar</button></div>',
+            template:
+              '<div><button data-testid="confirm-delete" @click="$emit(\'confirm\')">Confirmar</button></div>',
             props: ['open', 'title', 'message', 'cancelLabel', 'confirmLabel', 'confirmDanger'],
           },
         },
@@ -321,7 +326,9 @@ describe('AdminMastersView', () => {
   })
 
   it('muestra botón Crear aunque falle la carga del listado', async () => {
-    fetchAdminSpeciesListMock.mockRejectedValueOnce(new HttpError(503, { title: 'Unavailable', status: 503 }))
+    fetchAdminSpeciesListMock.mockRejectedValueOnce(
+      new HttpError(503, { title: 'Unavailable', status: 503 }),
+    )
 
     const wrapper = mount(AdminMastersView, {
       global: {
@@ -341,7 +348,9 @@ describe('AdminMastersView', () => {
   it('muestra paginación cuando hay más de una página', async () => {
     fetchAdminSpeciesListMock.mockResolvedValue({
       ...emptyPage,
-      content: [{ id: 1, label: 'Encina (Quercus ilex)', genusId: 10, genusLabel: 'Robles (Quercus)' }],
+      content: [
+        { id: 1, label: 'Encina (Quercus ilex)', genusId: 10, genusLabel: 'Robles (Quercus)' },
+      ],
       totalElements: 25,
       totalPages: 2,
       last: false,

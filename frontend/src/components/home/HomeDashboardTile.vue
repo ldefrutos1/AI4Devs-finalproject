@@ -10,11 +10,7 @@ defineProps<{
 </script>
 
 <template>
-  <RouterLink
-    class="home-tile"
-    :class="{ 'home-tile--primary': variant === 'primary' }"
-    :to="to"
-  >
+  <RouterLink class="home-tile" :class="{ 'home-tile--primary': variant === 'primary' }" :to="to">
     <span class="home-tile__icon" aria-hidden="true">
       <slot name="icon" />
     </span>
@@ -23,7 +19,13 @@ defineProps<{
       <span class="home-tile__desc">{{ description }}</span>
     </span>
     <span class="home-tile__chevron" aria-hidden="true">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <path
           d="M9 6l6 6-6 6"
           stroke="currentColor"

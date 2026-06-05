@@ -134,19 +134,12 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="map-preview-stack">
-    <div
-      ref="mapContainer"
-      class="map-preview"
-      role="application"
-      :aria-label="mapAriaLabel"
-    />
+    <div ref="mapContainer" class="map-preview" role="application" :aria-label="mapAriaLabel" />
     <p class="map-attribution muted">
       {{ t('treeForm.map.attributionPrefix') }}
-      <a
-        href="https://www.openstreetmap.org/copyright"
-        target="_blank"
-        rel="noopener noreferrer"
-      >{{ openStreetMapLabel }}</a>
+      <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">{{
+        openStreetMapLabel
+      }}</a>
       {{ t('treeForm.map.attributionSuffix') }}
     </p>
   </div>

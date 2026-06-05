@@ -39,7 +39,9 @@ describe('treePhotoUploadSequence', () => {
       })
       .mockResolvedValueOnce({ photoId: 10 })
 
-    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 200 }))
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(null, { status: 200 }))
 
     const file = new File(['bytes'], 'a.jpg', { type: 'image/jpeg' })
     await uploadPhotosForTree(42, [file], { startOrden: 1 })

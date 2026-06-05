@@ -87,7 +87,8 @@ export const es = {
   },
   authGuardError: {
     title: 'No se pudo validar la sesión',
-    descriptionSession: 'No hemos podido contactar con el proveedor de identidad o renovar tu sesión.',
+    descriptionSession:
+      'No hemos podido contactar con el proveedor de identidad o renovar tu sesión.',
     descriptionForbidden: 'Tu usuario no tiene permisos para acceder a esta pantalla.',
     retryCta: 'Reintentar autenticación',
     backHomeCta: 'Inicio',
@@ -115,7 +116,8 @@ export const es = {
         'Esta suscripción está cancelada. Solo un administrador puede reactivarla desde la gestión de suscripciones.',
       conflictGeneric: 'No se pudo completar el alta por un conflicto con el correo indicado.',
       badRequest: 'Los datos enviados no son válidos. Revisa el correo.',
-      network: 'No se pudo conectar con el servicio. Comprueba tu conexión o que el API Gateway esté en marcha.',
+      network:
+        'No se pudo conectar con el servicio. Comprueba tu conexión o que el API Gateway esté en marcha.',
       serviceError: 'Error en el servicio (código {status}).',
       unexpected: 'No se pudo completar la suscripción por un error inesperado.',
     },
@@ -173,7 +175,8 @@ export const es = {
     },
     messages: {
       patchSuccess: 'Estado actualizado correctamente.',
-      network: 'No se pudo conectar con el servicio. Comprueba el API Gateway y notification-service.',
+      network:
+        'No se pudo conectar con el servicio. Comprueba el API Gateway y notification-service.',
       badRequest: 'La petición no es válida.',
       unauthorized: 'Tu sesión no es válida o ha caducado. Vuelve a iniciar sesión.',
       forbidden: 'No tienes permisos para esta operación (se requiere rol administrador).',
@@ -270,7 +273,8 @@ export const es = {
   pendingViews: {
     default: {
       title: 'Pantalla pendiente',
-      description: 'Esta sección está preparada como placeholder y se completará en su historia funcional.',
+      description:
+        'Esta sección está preparada como placeholder y se completará en su historia funcional.',
       backHome: 'Inicio',
     },
     treesList: {
@@ -353,7 +357,8 @@ export const es = {
   },
   myTrees: {
     title: 'Mis árboles',
-    description: 'Gestiona tus fichas registradas y accede a la edición con los filtros habituales.',
+    description:
+      'Gestiona tus fichas registradas y accede a la edición con los filtros habituales.',
     loading: 'Cargando tus fichas...',
     empty: 'No hay resultados para los filtros seleccionados.',
     edit: 'Editar',
@@ -470,8 +475,7 @@ export const es = {
       noPhotosHint: 'Sin fotografías',
       deleteConfirm: {
         title: 'Eliminar fotografía',
-        message:
-          '¿Confirmas la eliminación de esta fotografía? Esta acción no se puede deshacer.',
+        message: '¿Confirmas la eliminación de esta fotografía? Esta acción no se puede deshacer.',
         confirm: 'Eliminar',
         cancel: 'Cancelar',
       },
@@ -513,7 +517,8 @@ export const es = {
       },
       description: {
         label: 'Descripción',
-        placeholder: 'Opcional. Describe el árbol y el contexto de la observación (máximo 5000 caracteres)',
+        placeholder:
+          'Opcional. Describe el árbol y el contexto de la observación (máximo 5000 caracteres)',
       },
       latitude: {
         label: 'Latitud *',
@@ -576,7 +581,8 @@ export const es = {
     messages: {
       mastersEmpty: 'No hay datos maestros disponibles para completar el formulario.',
       created: 'Ficha creada correctamente con id {treeId}.',
-      createdWithPhotos: 'Ficha creada con id {treeId}. Las fotografías se han asociado correctamente.',
+      createdWithPhotos:
+        'Ficha creada con id {treeId}. Las fotografías se han asociado correctamente.',
       photoStorageUploadFailed:
         'La ficha se creó, pero la subida al almacén de objetos falló (código {status}). Comprueba MinIO/CORS o inténtalo de nuevo.',
       forbidden: 'No tiene permiso para realizar esta operación.',

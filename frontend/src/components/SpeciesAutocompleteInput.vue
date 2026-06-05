@@ -12,11 +12,13 @@ const props = withDefaults(
     inputClass?: string
     required?: boolean
     ariaInvalid?: boolean
+    inputTestId?: string
   }>(),
   {
     inputClass: 'form-control',
     required: false,
     ariaInvalid: false,
+    inputTestId: undefined,
   },
 )
 
@@ -72,6 +74,7 @@ onMounted(() => {
   <div class="species-autocomplete">
     <input
       :id="inputId"
+      :data-testid="inputTestId"
       :value="speciesAutocompleteText"
       :class="inputClass"
       type="text"

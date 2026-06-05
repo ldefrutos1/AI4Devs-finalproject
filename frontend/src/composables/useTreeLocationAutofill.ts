@@ -31,7 +31,11 @@ export function useTreeLocationAutofill(options: UseTreeLocationAutofillOptions)
 
     const generation = ++reverseGeocodeGeneration.value
     try {
-      const reverseResult = await reverseGeocoder(payload.latitude, payload.longitude, provinces.value)
+      const reverseResult = await reverseGeocoder(
+        payload.latitude,
+        payload.longitude,
+        provinces.value,
+      )
       if (!reverseResult || generation !== reverseGeocodeGeneration.value) {
         return
       }

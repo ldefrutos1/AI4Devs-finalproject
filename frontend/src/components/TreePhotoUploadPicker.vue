@@ -64,9 +64,7 @@ const selectedCount = computed(() => selectedPhotos.value.length)
 watch(
   () => props.modelValue,
   (newModelValue) => {
-    const nextMap = new Map(
-      selectedPhotos.value.map((item) => [buildPhotoId(item.file), item]),
-    )
+    const nextMap = new Map(selectedPhotos.value.map((item) => [buildPhotoId(item.file), item]))
     const nextItems: SelectedPhotoItem[] = []
     for (const file of newModelValue) {
       const existing = nextMap.get(buildPhotoId(file))
@@ -218,11 +216,7 @@ function onFilesSelected(event: Event): void {
 
     <ul v-else class="photo-preview-list">
       <li v-for="(photo, index) in selectedPhotos" :key="photo.id" class="photo-preview-item">
-        <img
-          :src="photo.previewUrl"
-          alt=""
-          class="photo-preview-image"
-        />
+        <img :src="photo.previewUrl" alt="" class="photo-preview-image" />
         <div class="photo-preview-meta">
           <p class="photo-preview-name">{{ photo.file.name }}</p>
           <p class="photo-preview-size">{{ formatBytes(photo.file.size) }}</p>
@@ -230,7 +224,11 @@ function onFilesSelected(event: Event): void {
             {{ t('treeForm.photos.mainBadge') }}
           </span>
         </div>
-        <button class="btn btn-outline-danger btn-sm" type="button" @click="removePhotoById(photo.id)">
+        <button
+          class="btn btn-outline-danger btn-sm"
+          type="button"
+          @click="removePhotoById(photo.id)"
+        >
           {{ t('treeForm.photos.remove') }}
         </button>
       </li>

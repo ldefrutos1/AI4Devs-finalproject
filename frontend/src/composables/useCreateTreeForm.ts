@@ -15,11 +15,7 @@ import {
 } from '@/composables/createTreeFormValidation'
 import { createTree, fetchProvinces, fetchSpecies } from '@/services/catalog/catalogService'
 import { uploadPhotosForTreeAfterCreate } from '@/services/media/treePhotoUploadSequence'
-import type {
-  MasterListItem,
-  PublicationState,
-  PublicMapVisibility,
-} from '@/types/catalog'
+import type { MasterListItem, PublicationState, PublicMapVisibility } from '@/types/catalog'
 
 interface SelectOption<TValue extends string> {
   value: TValue

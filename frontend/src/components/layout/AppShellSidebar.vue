@@ -85,7 +85,11 @@ function onNavigate(): void {
       <RouterLink class="sidebar-nav-link" :to="{ name: 'admin-masters' }" @click="onNavigate">
         {{ t('navigation.adminMasters') }}
       </RouterLink>
-      <RouterLink class="sidebar-nav-link" :to="{ name: 'admin-subscriptions' }" @click="onNavigate">
+      <RouterLink
+        class="sidebar-nav-link"
+        :to="{ name: 'admin-subscriptions' }"
+        @click="onNavigate"
+      >
         {{ t('navigation.adminSubscriptions') }}
       </RouterLink>
     </template>

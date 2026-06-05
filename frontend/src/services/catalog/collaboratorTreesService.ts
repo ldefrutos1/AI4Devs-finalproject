@@ -66,10 +66,7 @@ export async function updateCollaboratorTree(
   })
 }
 
-export async function deleteCollaboratorTree(
-  treeId: number,
-  signal?: AbortSignal,
-): Promise<void> {
+export async function deleteCollaboratorTree(treeId: number, signal?: AbortSignal): Promise<void> {
   await apiFetch<void>(`${COLLABORATOR_TREES_API_PATH}/${treeId}`, {
     method: 'DELETE',
     signal,

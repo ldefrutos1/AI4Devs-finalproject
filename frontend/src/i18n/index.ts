@@ -1,7 +1,7 @@
 import { createI18n } from 'vue-i18n'
 import { es, type MessageSchema } from '@/i18n/locales/es'
 
-const supportedLocales = ['es'] as const
+export const supportedLocales = ['es'] as const
 export type Locale = (typeof supportedLocales)[number]
 
 const loadedLocales = new Set<Locale>(['es'])

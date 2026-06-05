@@ -21,10 +21,7 @@ async function trySilentRefreshWithTimeout(timeoutMs = 800) {
   })
 
   try {
-    const refreshedUser = await Promise.race([
-      authService.signinSilent(),
-      timeoutPromise,
-    ])
+    const refreshedUser = await Promise.race([authService.signinSilent(), timeoutPromise])
     if (refreshedUser && !refreshedUser.expired) {
       return refreshedUser
     }
@@ -123,9 +120,11 @@ router.beforeEach(async (to) => {
   if (!to.meta.requiresAuth) {
     return true
   }
-  const requiredRoles = Array.isArray(to.meta.requiredRoles) ? (to.meta.requiredRoles as AppRole[]) : []
+  const requiredRoles = Array.isArray(to.meta.requiredRoles)
+    ? (to.meta.requiredRoles as AppRole[])
+    : []
 
-  let user = null
+  let user: Awaited<ReturnType<typeof authService.getUser>>
   try {
     user = await authService.getUser()
   } catch {

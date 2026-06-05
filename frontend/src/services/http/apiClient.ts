@@ -32,7 +32,11 @@ function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError'
 }
 
-function appendArrayQueryParam(searchParams: URLSearchParams, key: string, values: Array<QueryPrimitive | null | undefined>): void {
+function appendArrayQueryParam(
+  searchParams: URLSearchParams,
+  key: string,
+  values: Array<QueryPrimitive | null | undefined>,
+): void {
   searchParams.delete(key)
   for (const value of values) {
     if (value !== undefined && value !== null) {
@@ -104,7 +108,11 @@ async function parseProblem(response: Response): Promise<ProblemDetails | undefi
   }
 }
 
-async function requestWithAuthRetry<T>(path: string, init: ApiFetchOptions, hasRetried401: boolean): Promise<T> {
+async function requestWithAuthRetry<T>(
+  path: string,
+  init: ApiFetchOptions,
+  hasRetried401: boolean,
+): Promise<T> {
   const user = await authService.getUser()
   const token = authService.getAccessToken(user)
   const headers = buildHeaders(init, token)
@@ -149,10 +157,7 @@ async function requestWithAuthRetry<T>(path: string, init: ApiFetchOptions, hasR
   throw new HttpError(response.status, problem)
 }
 
-export async function apiFetch<T>(
-  path: string,
-  init: ApiFetchOptions = {},
-): Promise<T> {
+export async function apiFetch<T>(path: string, init: ApiFetchOptions = {}): Promise<T> {
   return requestWithAuthRetry<T>(path, init, false)
 }
 

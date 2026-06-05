@@ -54,8 +54,7 @@ function showPreviousPhoto(): void {
   if (!hasMultiplePhotos.value) {
     return
   }
-  selectedIndex.value =
-    (selectedIndex.value - 1 + props.photos.length) % props.photos.length
+  selectedIndex.value = (selectedIndex.value - 1 + props.photos.length) % props.photos.length
 }
 
 function showNextPhoto(): void {
@@ -115,11 +114,7 @@ onBeforeUnmount(() => {
     <div class="tree-photo-viewer-content">
       <header class="tree-photo-viewer-header">
         <p class="tree-photo-viewer-title">{{ title }}</p>
-        <button
-          type="button"
-          class="btn btn-secondary btn-sm"
-          @click="close"
-        >
+        <button type="button" class="btn btn-secondary btn-sm" @click="close">
           {{ t('treesDetail.gallery.close') }}
         </button>
       </header>
@@ -162,11 +157,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div v-if="hasMultiplePhotos" class="tree-photo-viewer-controls">
-        <button
-          type="button"
-          class="btn btn-secondary btn-sm"
-          @click="showPreviousPhoto"
-        >
+        <button type="button" class="btn btn-secondary btn-sm" @click="showPreviousPhoto">
           {{ t('treesDetail.gallery.previous') }}
         </button>
         <span class="muted">{{
@@ -175,11 +166,7 @@ onBeforeUnmount(() => {
             total: photos.length,
           })
         }}</span>
-        <button
-          type="button"
-          class="btn btn-secondary btn-sm"
-          @click="showNextPhoto"
-        >
+        <button type="button" class="btn btn-secondary btn-sm" @click="showNextPhoto">
           {{ t('treesDetail.gallery.next') }}
         </button>
       </div>

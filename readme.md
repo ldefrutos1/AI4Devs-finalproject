@@ -15,11 +15,11 @@
 
 ### **1.1. Tu nombre completo:**
 
-Luís María de Frutos Redondo
+Luís María de Frutos Redondo.
 
 ### **1.2. Nombre del proyecto:**
 
-MyTreeLibrary
+MyTreeLibrary.
 
 ### **1.3. Descripción breve del proyecto:**
 
@@ -60,15 +60,11 @@ La solución está dirigida a aficionados a la naturaleza en general y puede res
 
 #### Registro y publicación de árboles
 
-El sistema permite registrar árboles mediante fichas con información relevante, fotografías y ubicación, posibilitando su publicación para consulta pública.
-
-#### Edición y baja de fichas
-
-Los usuarios autenticados con perfil de colaborador pueden dar de alta nuevas fichas de ejemplares; así como la edición o eliminación de aquellos registros creados por ellos mismos. El sistema permite edición de todos los ejemplares a los usuarios con perfil de administrador.
+El sistema permite registrar árboles mediante fichas con información relevante, fotografías y ubicación, posibilitando su publicación para consulta pública. Los usuarios autenticados con perfil de colaborador pueden dar de alta nuevas fichas de ejemplares; así como la edición o eliminación de aquellos registros creados por ellos mismos. El sistema permite la edición de todos los ejemplares a los usuarios con perfil de administrador.
 
 #### Consulta pública y visualización geográfica
 
-El sistema implementa una consulta pública de árboles publicados mediante listado y detalle, mostrando en la ficha de detalle las fotografías de cada árbol y su localización sobre mapa de forma clara e intuitiva.
+El sistema implementa una consulta pública de los árboles publicados mediante listado y detalle; mostrando en la ficha de detalle las fotografías de cada árbol y su localización sobre mapa de forma clara e intuitiva.
 
 #### Notificaciones
 
@@ -118,10 +114,10 @@ A continuación se incluye el diagrama de casos de uso del sistema.
 
 | ID | Nombre | Actor principal |
 | --- | --- | --- |
-| UC-01 | Consultar árboles publicados y mapa | Público |
-| UC-02 | Registrarse para recibir notificaciones (e-mail) | Público |
+| UC-01 | Consultar árboles publicados y su ubicación | Público |
+| UC-02 | Registrarse para recibir notificaciones | Público |
 | UC-03 | Registrar árbol | Colaborador |
-| UC-04 | Modificar y eliminar árboles del colaborador | Colaborador |
+| UC-04 | Modificar y eliminar árboles  | Colaborador |
 | UC-05 | Identificar árbol asistido por IA (imagen) | Colaborador |
 | UC-06 | Consultar asistente IA (chat) | Colaborador |
 | UC-07 | Gestionar tablas de catálogo (maestros taxonómicos) | ADMIN |
@@ -311,7 +307,7 @@ Además del init de Postgres/Keycloak en Compose, **catalog-service** aplica sem
 
 ### **3.1. Diagrama de arquitectura:**
 
-La aplicación se desarrolla en microservicios con Spring en la parte de backend y Vue como tecnología frontend. Aunque es una **arquitectura sobredimensionada** para el alcance real del sistema, se ha seleccionado esta implementación **por motivos didácticos**, con el fin de adquirir experiencia en estas tecnologías.
+La aplicación se desarrolla en microservicios con Spring en la parte de backend y Vue como tecnología frontend.
 
 #### Patrón y Stack tecnológico
 

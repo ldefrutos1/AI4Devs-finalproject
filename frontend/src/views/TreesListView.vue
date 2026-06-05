@@ -51,9 +51,7 @@ const DEFAULT_TREE_CARD_IMAGE = '/MyTreeLibrary.png'
 
 const { hasRole } = useAuth()
 
-const canUsePrivilegedTreeFilters = computed(
-  () => hasRole('COLABORADOR') || hasRole('ADMIN'),
-)
+const canUsePrivilegedTreeFilters = computed(() => hasRole('COLABORADOR') || hasRole('ADMIN'))
 const privilegedFiltersExpanded = ref(false)
 
 const isLoading = ref(false)
@@ -125,8 +123,7 @@ async function loadTrees(): Promise<void> {
   errorMessage.value = ''
 
   try {
-    const sendPrivileged =
-      canUsePrivilegedTreeFilters.value && privilegedFiltersExpanded.value
+    const sendPrivileged = canUsePrivilegedTreeFilters.value && privilegedFiltersExpanded.value
     const response = await fetchPublicTrees({
       page: page.value,
       size: size.value,
@@ -284,7 +281,11 @@ onMounted(async () => {
               <label class="form-label" for="trees-filter-state">{{
                 t('treesList.filters.state.label')
               }}</label>
-              <select id="trees-filter-state" v-model="filters.publicationState" class="form-control">
+              <select
+                id="trees-filter-state"
+                v-model="filters.publicationState"
+                class="form-control"
+              >
                 <option value="">{{ t('treesList.filters.state.all') }}</option>
                 <option value="BORRADOR">{{ t('treesList.filters.state.borrador') }}</option>
                 <option value="PUBLICADO">{{ t('treesList.filters.state.publicado') }}</option>
@@ -294,7 +295,11 @@ onMounted(async () => {
               <label class="form-label" for="trees-filter-visibility">{{
                 t('treesList.filters.visibility.label')
               }}</label>
-              <select id="trees-filter-visibility" v-model="filters.publicMapVisibility" class="form-control">
+              <select
+                id="trees-filter-visibility"
+                v-model="filters.publicMapVisibility"
+                class="form-control"
+              >
                 <option value="">{{ t('treesList.filters.visibility.all') }}</option>
                 <option value="PRIVADO">{{ t('treesList.filters.visibility.privado') }}</option>
                 <option value="PUBLICO">{{ t('treesList.filters.visibility.publico') }}</option>
@@ -303,7 +308,12 @@ onMounted(async () => {
           </div>
 
           <div class="catalog-toolbar__actions">
-            <button class="btn btn-secondary btn-sm" type="button" :disabled="isLoading" @click="clearFilters">
+            <button
+              class="btn btn-secondary btn-sm"
+              type="button"
+              :disabled="isLoading"
+              @click="clearFilters"
+            >
               {{ t('treesList.filters.clear') }}
             </button>
             <button
@@ -324,7 +334,11 @@ onMounted(async () => {
             >
               {{ t('treesList.filters.fewerFilters') }}
             </button>
-            <button class="btn btn-primary-soft btn-sm catalog-toolbar__submit" type="submit" :disabled="isLoading">
+            <button
+              class="btn btn-primary-soft btn-sm catalog-toolbar__submit"
+              type="submit"
+              :disabled="isLoading"
+            >
               {{ t('treesList.filters.apply') }}
             </button>
           </div>

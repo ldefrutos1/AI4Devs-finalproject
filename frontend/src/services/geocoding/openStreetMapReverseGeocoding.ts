@@ -86,7 +86,9 @@ function findMatchingProvince(
 ): ProvinceOption | null {
   const normalizedProvince = toComparableProvinceName(provinceNameFromOsm)
   const matchingProvince = provinceOptions.find((candidate) => {
-    const normalizedCandidate = toComparableProvinceName(normalizeProvinceOptionLabel(candidate.label))
+    const normalizedCandidate = toComparableProvinceName(
+      normalizeProvinceOptionLabel(candidate.label),
+    )
     return (
       normalizedCandidate === normalizedProvince ||
       normalizedProvince.includes(normalizedCandidate) ||

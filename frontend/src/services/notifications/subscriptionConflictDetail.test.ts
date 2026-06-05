@@ -4,7 +4,9 @@ import { classifyPublicSubscriptionConflictDetail } from '@/services/notificatio
 describe('classifyPublicSubscriptionConflictDetail', () => {
   it('clasifica mensaje de correo ya activo', () => {
     expect(
-      classifyPublicSubscriptionConflictDetail('Este correo electrónico ya está suscrito a las notificaciones.'),
+      classifyPublicSubscriptionConflictDetail(
+        'Este correo electrónico ya está suscrito a las notificaciones.',
+      ),
     ).toBe('already_active')
   })
 

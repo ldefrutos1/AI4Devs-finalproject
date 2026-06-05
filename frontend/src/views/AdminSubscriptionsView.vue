@@ -5,7 +5,10 @@ import { useRoute } from 'vue-router'
 import MtlConfirmDialog from '@/components/MtlConfirmDialog.vue'
 import PageBackLink from '@/components/layout/PageBackLink.vue'
 import { useAdminSubscriptionsList } from '@/composables/useAdminSubscriptionsList'
-import type { EstadoSuscripcion, SubscriptionAdminItem } from '@/services/notifications/adminSubscriptions'
+import type {
+  EstadoSuscripcion,
+  SubscriptionAdminItem,
+} from '@/services/notifications/adminSubscriptions'
 
 type SubscriptionConfirmKind = 'cancel' | 'reactivate'
 
@@ -165,7 +168,9 @@ function onDismissModal(): void {
               <select id="admin-sub-filter-estado" v-model="filterEstado" class="form-control">
                 <option value="">{{ t('adminSubscriptions.filters.estado.all') }}</option>
                 <option value="ACTIVA">{{ t('adminSubscriptions.filters.estado.activa') }}</option>
-                <option value="CANCELADA">{{ t('adminSubscriptions.filters.estado.cancelada') }}</option>
+                <option value="CANCELADA">
+                  {{ t('adminSubscriptions.filters.estado.cancelada') }}
+                </option>
               </select>
             </div>
           </div>
@@ -207,7 +212,10 @@ function onDismissModal(): void {
 
       <div v-else class="catalog-toolbar__panel admin-subscriptions-table-panel">
         <div class="mtl-admin-table-wrap">
-          <table class="mtl-admin-table mtl-admin-table--stack" :aria-label="t('adminSubscriptions.title')">
+          <table
+            class="mtl-admin-table mtl-admin-table--stack"
+            :aria-label="t('adminSubscriptions.title')"
+          >
             <thead>
               <tr>
                 <th scope="col">{{ t('adminSubscriptions.fields.email') }}</th>
@@ -224,12 +232,19 @@ function onDismissModal(): void {
                 <td :data-label="t('adminSubscriptions.fields.estado')">
                   {{ estadoLabel(row.estadoSuscripcion) }}
                 </td>
-                <td :data-label="t('adminSubscriptions.fields.altaEn')">{{ formatDate(row.altaEn) }}</td>
+                <td :data-label="t('adminSubscriptions.fields.altaEn')">
+                  {{ formatDate(row.altaEn) }}
+                </td>
                 <td :data-label="t('adminSubscriptions.fields.confirmadoEn')">
                   {{ formatDate(row.confirmadoEn) }}
                 </td>
-                <td :data-label="t('adminSubscriptions.fields.bajaEn')">{{ formatDate(row.bajaEn) }}</td>
-                <td class="mtl-admin-table__actions" :data-label="t('adminSubscriptions.fields.actions')">
+                <td :data-label="t('adminSubscriptions.fields.bajaEn')">
+                  {{ formatDate(row.bajaEn) }}
+                </td>
+                <td
+                  class="mtl-admin-table__actions"
+                  :data-label="t('adminSubscriptions.fields.actions')"
+                >
                   <button
                     v-if="row.estadoSuscripcion === 'ACTIVA'"
                     type="button"

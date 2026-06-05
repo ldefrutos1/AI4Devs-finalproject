@@ -287,7 +287,12 @@ onMounted(async () => {
           </div>
 
           <div class="catalog-toolbar__actions">
-            <button class="btn btn-secondary btn-sm" type="button" :disabled="isLoading" @click="clearFilters">
+            <button
+              class="btn btn-secondary btn-sm"
+              type="button"
+              :disabled="isLoading"
+              @click="clearFilters"
+            >
               {{ t('myTrees.filters.clear') }}
             </button>
             <button
@@ -308,7 +313,11 @@ onMounted(async () => {
             >
               {{ t('myTrees.filters.fewerFilters') }}
             </button>
-            <button class="btn btn-primary-soft btn-sm catalog-toolbar__submit" type="submit" :disabled="isLoading">
+            <button
+              class="btn btn-primary-soft btn-sm catalog-toolbar__submit"
+              type="submit"
+              :disabled="isLoading"
+            >
               {{ t('myTrees.filters.apply') }}
             </button>
           </div>
@@ -324,7 +333,9 @@ onMounted(async () => {
         {{ t('myTrees.resultsCount', { count: totalResults }) }}
       </p>
 
-      <p v-if="!hasResults" class="status-note" data-testid="my-trees-empty">{{ t('myTrees.empty') }}</p>
+      <p v-if="!hasResults" class="status-note" data-testid="my-trees-empty">
+        {{ t('myTrees.empty') }}
+      </p>
 
       <div v-else class="catalog-grid">
         <article
