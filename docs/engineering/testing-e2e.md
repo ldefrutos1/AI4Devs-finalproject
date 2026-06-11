@@ -36,10 +36,11 @@ Construye y arranca un **stack mínimo y efímero** y ejecuta Playwright como co
 - Selectores estables por **`data-testid`** en las vistas implicadas (`tree-form*`, `my-trees-*`, `tree-delete-button`, `tree-delete-confirm`, `nav-login`); evitan acoplarse al copy i18n. El formulario de Keycloak se localiza por sus ids estables (`#username`, `#password`, `#kc-login`).
 - El **login es por UI** (Authorization Code + PKCE; `directAccessGrants` desactivado): el helper [e2e/fixtures/auth.ts](../../e2e/fixtures/auth.ts) pulsa "Conectarse" y completa el formulario de Keycloak.
 
-## 4. Integración continua (PR)
+## 4. Integración continua
 
-- Workflow: [.github/workflows/e2e-playwright.yml](../../.github/workflows/e2e-playwright.yml). En cada `pull_request` a `main`/`develop`: compila los jars (`-pl catalog-service,media-service,api-gateway -am ... -DskipTests`), levanta el stack e2e (`--abort-on-container-exit --exit-code-from playwright`), publica `playwright-report` como artifact y hace `down -v`.
-- **Bloqueo de merge:** marcar la verificación **"E2E Playwright (alta de ejemplar)"** como **required** en la protección de rama (Settings → Branches del repositorio; no se configura por código).
+- **Por defecto (cada PR/push a `main`/`develop`):** [.github/workflows/ci.yml](../../.github/workflows/ci.yml) — `mvn test` en `services/` y `npm test` en `frontend/` (sin Docker).
+- **E2E Playwright (opcional, pesado):** [.github/workflows/e2e-playwright.yml](../../.github/workflows/e2e-playwright.yml) — solo **`workflow_dispatch`** (manual desde Actions). Compila jars, levanta el stack e2e (`--abort-on-container-exit --exit-code-from playwright`), publica `playwright-report` y hace `down -v`.
+- **Bloqueo de merge:** marcar como **required** las verificaciones de **CI** (Java + frontend). El E2E Playwright solo si el equipo decide exigirlo de forma explícita.
 
 ## 5. Ejecutar
 
