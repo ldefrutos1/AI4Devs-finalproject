@@ -1,108 +1,56 @@
 # Nueva rama de trabajo
 
-Crea una rama nueva desde **`main` actualizado**, dejando la rama anterior intacta para su PR. Norma del repo: [github-branching.md](../../docs/onboarding/github-branching.md).
+Crea una rama desde **`main` actualizado**. La rama se abre **en local**; GitHub la ve en el primer `push`. Norma: [github-branching.md](../../docs/onboarding/github-branching.md).
 
----
+Invoca con `/git-new-branch` o `@.cursor/commands/git-new-branch.md`.
 
-## Validación del flujo (respecto a la guía)
+## Reglas
 
-| Paso que planteabas | ¿Alineado con `github-branching.md`? | Qué hacer en este comando |
-|---------------------|--------------------------------------|---------------------------|
-| 1. Commit de cambios pendientes en la rama actual (con confirmación) | **Sí** (recomendable; alternativa: `git stash`) | Preguntar si hay cambios; ofrecer commit vía [git-commit.md](git-commit.md) o stash |
-| 2. Actualizar `main` desde remoto (`git pull`) | **Sí** — es el § «Crear la rama en local» | Tras `checkout main`, `git pull origin main` |
-| 3. Merge de la rama actual **→** `main` local | **No** en el flujo habitual | **No hacerlo** salvo petición explícita: integrar en `main` local sin PR ensucia la línea base. El merge a `main` va por **PR en GitHub** |
-| 4. Crear la nueva rama | **Sí** — `git checkout -b prefijo/nombre` desde `main` | Pedir prefijo (`feature`/`fix`/`chore`) y nombre |
+- **No** mergear la rama anterior en `main` local (integración solo por PR).
+- **No** hacer `push` de la rama nueva salvo petición explícita.
+- Working tree limpio antes de ramificar: commit (recomendado), `git stash`, o abortar.
 
-**Flujo canónico del proyecto** (rama nueva desde `main` limpio y al día):
+## Pedir al usuario
 
-1. Cerrar o guardar trabajo en la rama actual (commit confirmado o stash).
-2. `git checkout main`
-3. `git pull origin main`
-4. `git checkout -b feature/mi-tarea` (o `fix/…`, `chore/…`)
-5. La rama anterior sigue existiendo para `push` + PR; no hace falta mergearla a `main` local antes.
+1. **Nombre** (sin prefijo): p. ej. `control-acceso-fotografias`.
+2. **Prefijo:** `feature` | `fix` | `chore`.
+3. Si hay **cambios sin commitear:** commit ([git-commit.md](git-commit.md)), stash, o abortar.
 
-**Opcional** (solo si el usuario lo pide al cerrar la rama anterior): en la rama vieja, `git merge main` para traer `main` **a la feature** (no al revés). Útil si seguirá trabajando en esa rama; no es necesario para crear la rama nueva.
+## Pasos del agente (en orden)
 
----
+1. `git status` y `git branch --show-current`. Si hay cambios: `git diff --stat`, confirmar con el usuario, luego commit vía [git-commit.md](git-commit.md) o `git stash push -m "WIP antes de nueva rama"` (recuperar: `git stash pop`). Si aborta: parar.
 
-## Uso en Cursor
+2. `git checkout main` (si falla, volver al paso 1).
 
-Invoca `/git-new-branch` o `@.cursor/commands/git-new-branch.md`.
+3. `git pull origin main` (conflicto → parar; que lo resuelva el usuario).
 
-### Datos a pedir al usuario
-
-1. **Nombre** de la rama (sin prefijo): p. ej. `control-acceso-fotografias`.
-2. **Prefijo:** `feature` | `fix` | `chore` (según [github-branching.md](../../docs/onboarding/github-branching.md)).
-3. Si hay **cambios sin commitear**: ¿commit (recomendado), stash, o abortar?
-
-### Pasos que debe ejecutar el agente (en orden)
-
-1. `git status` y `git branch --show-current`. Si hay cambios:
-   - Mostrar resumen (`git diff --stat`).
-   - **Preguntar confirmación** antes de commitear.
-   - Si confirma commit: seguir [git-commit.md](git-commit.md) (mensaje con diff real).
-   - Si prefiere stash: `git stash push -m "WIP antes de nueva rama"` (avisar cómo recuperar: `git stash pop`).
-   - Si aborta: parar.
-
-2. `git checkout main`  
-   Si falla por cambios restantes, volver al paso 1.
-
-3. `git pull origin main`  
-   Si hay conflicto, parar y pedir al usuario resolver.
-
-4. **No** ejecutar `git merge <rama-anterior>` en `main` salvo que el usuario diga explícitamente que quiere integrar esa rama en local (explicar que lo normal es PR).
+4. **No** `git merge <rama-anterior>` en `main` salvo petición explícita.
 
 5. `git checkout -b <prefijo>/<nombre>` (minúsculas, guiones).
 
-6. Mostrar: rama creada, rama anterior que quedó en remoto/local, y recordatorio:
-   - Primera subida: `git push -u origin HEAD`
-   - PR hacia `main` cuando corresponda ([github-branching.md](../../docs/onboarding/github-branching.md) § Pull requests).
+6. Informar: rama creada, rama anterior intacta, recordatorio `git push -u origin HEAD` y PR hacia `main` ([github-branching.md](../../docs/onboarding/github-branching.md)).
 
-**No** hacer `push` de la rama nueva salvo petición explícita.
+**Opcional** (solo si lo pide al cerrar la rama anterior): en la rama vieja, `git merge main` (traer `main` **a la feature**, no al revés).
 
----
-
-## Manual rápido (PowerShell)
-
-Sustituye variables al inicio; ejecuta bloque a bloque.
+## Manual rápido
 
 ```powershell
-$prefijo = "fix"          # feature | fix | chore
-$nombre  = "mi-tarea"     # minúsculas y guiones
+# Alternativa: .\scripts\dev\git-new-branch.ps1 -Prefix feature -Name mi-tarea
 
-git status
-git branch --show-current
-```
-
-Si hay cambios pendientes → commit o stash antes de seguir (ver [git-commit.md](git-commit.md)).
-
-```powershell
 git checkout main
 git pull origin main
-git checkout -b "${prefijo}/${nombre}"
-git branch --show-current
+git checkout -b feature/mi-tarea
+git push -u origin HEAD   # cuando toque subir
 ```
-
-Primera subida de la rama nueva:
-
-```powershell
-git push -u origin HEAD
-```
-
----
 
 ## Errores frecuentes
 
 | Situación | Acción |
 |-----------|--------|
-| «Cannot checkout: uncommitted changes» | Commit o `git stash` |
-| Estás en `main` sin cambios | Saltar paso 1; pull + `checkout -b` |
-| Quieres seguir en la rama vieja más tarde | No borrarla; abre PR o `git checkout <rama-vieja>` |
-| Creaste la rama desde `main` desactualizado | `git checkout main`, `git pull`, borrar rama local errónea si no tiene commits importantes, volver a crear |
-
----
+| Cambios sin commitear | Commit o `git stash` |
+| Ya en `main` limpio | Saltar paso 1; pull + `checkout -b` |
+| Rama creada desde `main` viejo | `git checkout main`, `git pull`, borrar rama errónea si no tiene commits, recrear |
 
 ## Referencias
 
-- [github-branching.md](../../docs/onboarding/github-branching.md)
-- [git-commit.md](git-commit.md)
+- [github-branching.md](../../docs/onboarding/github-branching.md) · [git-commit.md](git-commit.md)
