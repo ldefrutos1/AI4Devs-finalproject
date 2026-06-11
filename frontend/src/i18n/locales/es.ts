@@ -2,6 +2,7 @@ export const es = {
   common: {
     cancel: 'Cancelar',
     emptyValue: '—',
+    filtersTitle: 'Filtros de búsqueda',
   },
   appShell: {
     brand: 'MyTreeLibrary',
@@ -126,7 +127,9 @@ export const es = {
     title: 'Gestión de suscripciones',
     description:
       'Listado de correos suscritos a avisos del catálogo. Puedes pasar cada suscripción a cancelada o reactivarla; no se borran filas (MVP).',
+    listTitle: 'Suscripciones registradas',
     loading: 'Cargando suscripciones…',
+    emptyTitle: 'Sin suscripciones',
     empty: 'No hay suscripciones que mostrar con el filtro actual.',
     resultsCount: '{count} resultado(s)',
     filters: {
@@ -300,6 +303,7 @@ export const es = {
     title: 'Ejemplares de MyTreeLibrary',
     description: 'Explora fichas publicadas y filtra por especie, municipio o provincia.',
     loading: 'Cargando ejemplares publicados...',
+    emptyTitle: 'Sin resultados',
     empty: 'No hay resultados para los filtros seleccionados.',
     imageUnavailable: 'Imagen no disponible',
     viewDetail: 'Ver detalle',
@@ -360,6 +364,7 @@ export const es = {
     description:
       'Gestiona tus fichas registradas y accede a la edición con los filtros habituales.',
     loading: 'Cargando tus fichas...',
+    emptyTitle: 'Sin ejemplares',
     empty: 'No hay resultados para los filtros seleccionados.',
     edit: 'Editar',
     resultsCount: '{count} resultado(s)',
@@ -405,6 +410,7 @@ export const es = {
     coordinatesPair: '{lat}, {lng}',
     coordinatesWithAltitude: '{lat}, {lng} · {altitude} m',
     sections: {
+      media: 'Fotografías y mapa',
       facts: 'Datos de la ficha',
     },
     fields: {
@@ -502,6 +508,12 @@ export const es = {
     loadingMasters: 'Cargando especies y provincias...',
     submit: 'Crear ficha',
     submitting: 'Guardando...',
+    sections: {
+      speciesAndVisibility: 'Especie y visibilidad',
+      media: 'Fotografías y mapa',
+      location: 'Ubicación',
+      coordinates: 'Coordenadas',
+    },
     fields: {
       species: {
         label: 'Especie *',

@@ -290,7 +290,11 @@ El proyecto tiene **tipado de mensajes** (`MessageSchema`, `as const`) para redu
 
 ## 11. Estilos: tokens y clases de formulario
 
-- Variables globales en **`:root`** dentro de `style.css` (fondo, texto, primario, etc.).
+- Variables globales en **`src/styles/tokens.css`** (colores, espaciado, tipografía, anchos de contenido, etc.) importadas vía `style.css`.
+- Tipografía: `--font-sans`, escala `--text-xs` … `--text-3xl`, pesos `--font-normal` / `--font-semibold` / `--font-bold`, interlineado `--leading-*`. Usar estos tokens en CSS nuevo en lugar de `rem` sueltos.
+- Anchos de página: `--content-narrow` (auth), `--content-default` (home), `--content-form` (formularios compactos), `--content-wide` (listados, catálogo, detalle). El shell `.container` usa `--content-wide` y `--content-gutter`.
+- Bordes y sombras: `--border`, `--border-strong`, `--border-subtle`; `--shadow-xs`, `--shadow-soft`, `--shadow`, `--shadow-elevated`. Preferir tokens frente a valores sueltos.
+- Feedback UI: `.mtl-alert` (+ `--success`, `--error`, `--warning`, `--info`), `.mtl-badge` (+ variantes semánticas), `.mtl-empty-state`. Las clases legacy `.success`, `.error` (no `.field-error`) y `.status-note` comparten el mismo estilo.
 - **Evita** estilos globales del tipo `input { ... }` para todo el sitio: chocan con librerías UI.
 - Para formularios usamos clases como **`.form-label`**, **`.form-control`**, **`.form-textarea`** (ver `CreateTreeView.vue`).
 

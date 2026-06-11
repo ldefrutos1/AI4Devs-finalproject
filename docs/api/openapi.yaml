@@ -367,6 +367,64 @@ paths:
         "409":
           $ref: "#/components/responses/ProblemConflict"
 
+  /api/catalog/species/{speciesId}/enrichment:
+    parameters:
+      - $ref: "#/components/parameters/TaxonomySpeciesId"
+    get:
+      tags: [catalog]
+      summary: Consultar enriquecimiento Mongo de especie (HU-015)
+      description: >
+        **COLABORADOR** y **ADMIN:** solo lectura. Devuelve el documento `especie_detalle` vinculado
+        al maestro SQL (`speciesId`). **404** si la especie no existe en PostgreSQL. **200** con cuerpo
+        parcial (p. ej. solo `speciesId`, `scientificName`, `commonName` desde SQL) si aún no hay
+        documento Mongo; no confundir con especie inexistente.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Enriquecimiento de especie (completo o parcial)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpeciesEnrichmentResponse"
+        "401":
+          $ref: "#/components/responses/ProblemUnauthorized"
+        "403":
+          $ref: "#/components/responses/ProblemForbidden"
+        "404":
+          $ref: "#/components/responses/ProblemNotFound"
+    put:
+      tags: [catalog]
+      summary: Reemplazar enriquecimiento Mongo de especie (HU-015)
+      description: >
+        Solo **ADMIN**. `PUT` reemplaza el contenido de enriquecimiento enviado; el servidor **reinyecta
+        siempre** en el upsert la proyección mínima desde PostgreSQL (`speciesId`, `scientificName`,
+        `commonName`). No valida JSON generado por LLM (§6.3 de mongo.md — responsabilidad de
+        ai-assistant-service / **HU-016**).
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SpeciesEnrichmentReplaceRequest"
+      responses:
+        "200":
+          description: Enriquecimiento persistido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SpeciesEnrichmentResponse"
+        "400":
+          $ref: "#/components/responses/ProblemBadRequest"
+        "401":
+          $ref: "#/components/responses/ProblemUnauthorized"
+        "403":
+          $ref: "#/components/responses/ProblemForbidden"
+        "404":
+          $ref: "#/components/responses/ProblemNotFound"
+
   /api/catalog/trees:
     get:
       tags: [catalog]
@@ -417,7 +475,9 @@ paths:
               $ref: "#/components/schemas/CreateTreeRequest"
       responses:
         "201":
-          description: Creado
+          description: >
+            Creado. Si PostgreSQL persiste correctamente pero falla la proyección mínima en Mongo,
+            la ficha queda guardada y `enrichmentWarning` informa del problema (HU-015).
           headers:
             Location:
               description: URI de la ficha creada
@@ -463,7 +523,8 @@ paths:
       summary: Reemplazar ficha de árbol (HU-008)
       description: >
         Actualización completa (`PUT`); cuerpo simétrico al alta. No publica evento Kafka ni
-        notificación a suscriptores.
+        notificación a suscriptores. Si PostgreSQL persiste correctamente pero falla la proyección
+        en Mongo, la ficha queda guardada y `enrichmentWarning` informa del problema (HU-015).
       security:
         - bearerAuth: []
       requestBody:
@@ -535,6 +596,64 @@ paths:
         "404":
           $ref: "#/components/responses/ProblemNotFound"
 
+  /api/catalog/trees/{treeId}/enrichment:
+    parameters:
+      - $ref: "#/components/parameters/TreeId"
+    get:
+      tags: [catalog]
+      summary: Consultar enriquecimiento Mongo del ejemplar (HU-015)
+      description: >
+        Sub-recurso paralelo a `.../media-submission-permission`. **COLABORADOR:** solo fichas
+        propias. **ADMIN:** cualquier ficha. **404** si el árbol no existe o no hay permiso. **200**
+        con cuerpo parcial si la ficha existe en SQL pero aún no hay documento `ejemplar_detalle`
+        en Mongo.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Enriquecimiento del ejemplar (completo o parcial)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TreeEnrichmentResponse"
+        "401":
+          $ref: "#/components/responses/ProblemUnauthorized"
+        "403":
+          $ref: "#/components/responses/ProblemForbidden"
+        "404":
+          $ref: "#/components/responses/ProblemNotFound"
+    put:
+      tags: [catalog]
+      summary: Reemplazar enriquecimiento Mongo del ejemplar (HU-015)
+      description: >
+        `PUT` reemplaza el documento de enriquecimiento del ejemplar (medidas, estado sanitario,
+        etiquetas, observaciones embebidas). Mismas reglas de propiedad que la edición de ficha
+        (**HU-008**). En `measurements`, cada valor numérico debe ser un número JSON **finito**
+        (no NaN ni infinito); valores inválidos → **400**.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TreeEnrichmentReplaceRequest"
+      responses:
+        "200":
+          description: Enriquecimiento persistido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TreeEnrichmentResponse"
+        "400":
+          $ref: "#/components/responses/ProblemBadRequest"
+        "401":
+          $ref: "#/components/responses/ProblemUnauthorized"
+        "403":
+          $ref: "#/components/responses/ProblemForbidden"
+        "404":
+          $ref: "#/components/responses/ProblemNotFound"
+
   /api/catalog/public/trees:
     get:
       tags: [catalog-public]
@@ -577,6 +696,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/PublicTreeDetailResponse"
+        "404":
+          $ref: "#/components/responses/ProblemNotFound"
+
+  /api/catalog/public/trees/{treeId}/enrichment:
+    get:
+      tags: [catalog-public]
+      summary: Consultar enriquecimiento público de árbol publicado (HU-015)
+      description: >
+        Respuesta **compuesta** con bloques opcionales `speciesEnrichment` y `treeEnrichment` para
+        popup de especie y bloque colapsable del ejemplar en detalle público (**HU-002**). Misma
+        regla de visibilidad que `GET /api/catalog/public/trees/{treeId}`. **404** si el árbol no
+        existe o no es publicable. **200** con uno o ambos bloques ausentes si no hay documentos
+        Mongo. No existe `GET` público de enriquecimiento por `speciesId` aislado.
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/PublicTreeId"
+      responses:
+        "200":
+          description: Enriquecimiento compuesto (bloques opcionales)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicTreeEnrichmentResponse"
         "404":
           $ref: "#/components/responses/ProblemNotFound"
 
@@ -1444,6 +1586,11 @@ components:
           type: integer
           format: int64
           description: Identificador del árbol creado (`ejemplar_id`)
+        enrichmentWarning:
+          type: string
+          description: >
+            Presente cuando la ficha se guardó en PostgreSQL pero falló la proyección mínima en
+            MongoDB (HU-015). Ausente si el enriquecimiento inicial se persistió correctamente.
     MediaSubmissionPermissionResponse:
       type: object
       required: [treeId, actorUsuarioAppId]
@@ -1594,6 +1741,180 @@ components:
         modifiedAt:
           type: string
           format: date-time
+        enrichmentWarning:
+          type: string
+          description: >
+            Presente cuando la ficha se guardó en PostgreSQL pero falló la proyección o sincronización
+            en MongoDB (HU-015). Ausente si Mongo se actualizó correctamente tras el `PUT`.
+    SpeciesEnrichmentResponse:
+      type: object
+      required: [speciesId]
+      description: >
+        Lectura de `especie_detalle` (Mongo) con proyección mínima desde SQL. Campos de enriquecimiento
+        pueden omitirse si aún no hay documento Mongo; `speciesId` identifica siempre la especie maestra.
+      properties:
+        speciesId:
+          type: integer
+          format: int64
+          description: Identificador canónico de especie (`especie_id` / `especie_pg_id`).
+        scientificName:
+          type: string
+          description: Nombre científico desnormalizado desde PostgreSQL (proyección mínima).
+        commonName:
+          type: string
+          description: Nombre común desnormalizado desde PostgreSQL (proyección mínima).
+        synonyms:
+          type: array
+          items:
+            type: string
+        distribution:
+          $ref: "#/components/schemas/SpeciesDistribution"
+        ecologicalData:
+          type: object
+          additionalProperties: true
+          description: Datos ecológicos semiestructurados (hábitat, altitud, clima, etc.).
+        references:
+          type: array
+          items:
+            $ref: "#/components/schemas/BibliographicReference"
+    SpeciesEnrichmentReplaceRequest:
+      type: object
+      description: >
+        Cuerpo de `PUT /species/{speciesId}/enrichment`: reemplazo del contenido de enriquecimiento.
+        El servidor reinyecta siempre `speciesId`, `scientificName` y `commonName` desde el maestro SQL.
+      properties:
+        synonyms:
+          type: array
+          items:
+            type: string
+        distribution:
+          $ref: "#/components/schemas/SpeciesDistribution"
+        ecologicalData:
+          type: object
+          additionalProperties: true
+        references:
+          type: array
+          items:
+            $ref: "#/components/schemas/BibliographicReference"
+    SpeciesDistribution:
+      type: object
+      properties:
+        continents:
+          type: array
+          items:
+            type: string
+        countries:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+    BibliographicReference:
+      type: object
+      properties:
+        title:
+          type: string
+        authors:
+          type: array
+          items:
+            type: string
+        source:
+          type: string
+        year:
+          type: integer
+          format: int32
+        url:
+          type: string
+          format: uri
+    TreeEnrichmentResponse:
+      type: object
+      required: [treeId]
+      description: >
+        Lectura de `ejemplar_detalle` (Mongo). Puede ser parcial si la ficha existe en SQL pero aún no
+        hay documento de enriquecimiento.
+      properties:
+        treeId:
+          type: integer
+          format: int64
+          description: Identificador del ejemplar (`ejemplar_id` / `ejemplar_pg_id`).
+        speciesId:
+          type: integer
+          format: int64
+          description: Especie vinculada (`especie_pg_id`).
+        measurements:
+          $ref: "#/components/schemas/TreeMeasurements"
+        healthStatus:
+          type: object
+          additionalProperties: true
+          description: Valoración sanitaria semiestructurada (plagas, lesiones, revisión, etc.).
+        tags:
+          type: array
+          items:
+            type: string
+        observations:
+          type: array
+          items:
+            $ref: "#/components/schemas/FieldObservation"
+    TreeEnrichmentReplaceRequest:
+      type: object
+      description: >
+        Cuerpo de `PUT /trees/{treeId}/enrichment`: reemplazo completo del enriquecimiento del ejemplar
+        (observaciones embebidas incluidas).
+      properties:
+        measurements:
+          $ref: "#/components/schemas/TreeMeasurements"
+        healthStatus:
+          type: object
+          additionalProperties: true
+        tags:
+          type: array
+          items:
+            type: string
+        observations:
+          type: array
+          items:
+            $ref: "#/components/schemas/FieldObservation"
+    TreeMeasurements:
+      type: object
+      additionalProperties:
+        type: number
+        format: double
+      description: >
+        Medidas físicas del ejemplar (p. ej. `heightM`, `trunkDiameterCm`, `crownDiameterM`,
+        `trunkPerimeterCm`). Cada propiedad presente debe ser un número JSON **finito**; NaN o
+        infinito → **400** Problem.
+      example:
+        heightM: 24.5
+        trunkDiameterCm: 187
+        crownDiameterM: 18
+        trunkPerimeterCm: 587
+    FieldObservation:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        text:
+          type: string
+        author:
+          type: string
+        conditions:
+          type: object
+          additionalProperties: true
+          description: Contexto opcional (temperatura, humedad, época, etc.).
+    PublicTreeEnrichmentResponse:
+      type: object
+      description: >
+        Respuesta compuesta para detalle público: bloques opcionales según existan documentos Mongo.
+      properties:
+        speciesEnrichment:
+          allOf:
+            - $ref: "#/components/schemas/SpeciesEnrichmentResponse"
+          nullable: true
+        treeEnrichment:
+          allOf:
+            - $ref: "#/components/schemas/TreeEnrichmentResponse"
+          nullable: true
     SpeciesListItem:
       type: object
       required: [id, label, genusId, genusLabel]

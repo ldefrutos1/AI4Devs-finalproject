@@ -32,7 +32,7 @@ function onEmailInput(): void {
 
     <template v-if="successEmail">
       <div class="tree-form" role="region" :aria-label="t('subscriptionNew.title')">
-        <output class="success tree-form-page__flash" aria-live="polite">{{
+        <output class="mtl-alert mtl-alert--success tree-form-page__flash" aria-live="polite">{{
           t('subscriptionNew.success', { email: successEmail })
         }}</output>
         <div class="field-full actions page-actions-footer">

@@ -8,6 +8,7 @@ import { useTreeListPrimaryPhotos } from '@/composables/useTreeListPrimaryPhotos
 import { fetchPublicProvinceNames, fetchPublicTrees } from '@/services/catalog/catalogService'
 import { HttpError, NetworkError } from '@/services/http/apiClient'
 import type { PublicTreeListItem } from '@/types/catalog'
+import { mapVisibilityBadgeClass, publicationStateBadgeClass } from '@/utils/catalogBadgeClass'
 
 const { t } = useI18n()
 
@@ -225,12 +226,12 @@ onMounted(async () => {
     <header class="page-header">
       <PageBackLink :to="{ name: 'home' }">{{ t('navigation.home') }}</PageBackLink>
       <h1 class="page-header__title">{{ t('treesList.title') }}</h1>
-      <p class="page-header__description">{{ t('treesList.description') }}</p>
     </header>
 
     <section class="catalog-toolbar" :aria-label="t('treesList.filters.apply')">
       <form class="catalog-toolbar__form" @submit.prevent="applyFilters">
         <div class="catalog-toolbar__panel">
+          <h2 class="catalog-toolbar__title">{{ t('common.filtersTitle') }}</h2>
           <div class="catalog-toolbar__fields">
             <div class="filter-field">
               <label class="form-label" for="trees-filter-species">{{
@@ -349,12 +350,15 @@ onMounted(async () => {
     <p v-if="isLoading" class="status-note">{{ t('treesList.loading') }}</p>
     <p v-else-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
 
-    <template v-else-if="isSuccess">
+    <section v-else-if="isSuccess" class="catalog-results">
       <p class="catalog-results-count muted">
         {{ t('treesList.resultsCount', { count: totalResults }) }}
       </p>
 
-      <p v-if="!hasResults" class="status-note">{{ t('treesList.empty') }}</p>
+      <div v-if="!hasResults" class="mtl-empty-state">
+        <p class="mtl-empty-state__title">{{ t('treesList.emptyTitle') }}</p>
+        <p class="mtl-empty-state__text">{{ t('treesList.empty') }}</p>
+      </div>
 
       <div v-else class="catalog-grid">
         <article v-for="tree in trees" :key="tree.treeId" class="catalog-card">
@@ -376,8 +380,10 @@ onMounted(async () => {
             </h2>
             <p class="catalog-card__location">{{ locationLine(tree) }}</p>
             <div class="catalog-card__badges">
-              <span class="mtl-badge">{{ publicationStateLabel(tree.publicationState) }}</span>
-              <span class="mtl-badge mtl-badge--muted">{{
+              <span :class="publicationStateBadgeClass(tree.publicationState)">{{
+                publicationStateLabel(tree.publicationState)
+              }}</span>
+              <span :class="mapVisibilityBadgeClass(tree.publicMapVisibility)">{{
                 mapVisibilityLabel(tree.publicMapVisibility)
               }}</span>
             </div>
@@ -409,6 +415,6 @@ onMounted(async () => {
           {{ t('treesList.pagination.next') }}
         </button>
       </nav>
-    </template>
+    </section>
   </div>
 </template>

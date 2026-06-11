@@ -34,8 +34,9 @@ async function retryLogin(): Promise<void> {
   <div class="auth-flow-page">
     <header class="page-header auth-flow-page__header">
       <h1 class="page-header__title">{{ t('authGuardError.title') }}</h1>
-      <p class="page-header__description">{{ t(descriptionKey) }}</p>
     </header>
+
+    <p class="status-note">{{ t(descriptionKey) }}</p>
 
     <div class="page-actions-footer auth-flow-page__actions">
       <RouterLink class="btn btn-secondary" :to="{ name: 'home' }">

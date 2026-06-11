@@ -141,12 +141,21 @@ function onDismissModal(): void {
     <header class="page-header">
       <PageBackLink :to="{ name: 'home' }">{{ t('navigation.home') }}</PageBackLink>
       <h1 class="page-header__title">{{ t(pageTitleKey) }}</h1>
-      <p class="page-header__description">{{ t('adminSubscriptions.description') }}</p>
     </header>
 
-    <section class="catalog-toolbar" :aria-label="t('adminSubscriptions.filters.apply')">
+    <output
+      v-if="statusMessage"
+      class="mtl-alert mtl-alert--success tree-form-page__flash"
+      aria-live="polite"
+    >
+      {{ statusMessage }}
+    </output>
+
+    <div class="admin-subscriptions-layout">
+      <section class="catalog-toolbar" :aria-label="t('adminSubscriptions.filters.apply')">
       <form class="catalog-toolbar__form" @submit.prevent="applyFilter">
         <div class="catalog-toolbar__panel">
+          <h2 class="catalog-toolbar__title">{{ t('common.filtersTitle') }}</h2>
           <div class="catalog-toolbar__fields catalog-toolbar__fields--pair">
             <div class="filter-field">
               <label class="form-label" for="admin-sub-filter-email">{{
@@ -196,25 +205,30 @@ function onDismissModal(): void {
       </form>
     </section>
 
-    <output v-if="statusMessage" class="success tree-form-page__flash" aria-live="polite">{{
-      statusMessage
-    }}</output>
+    <h2 class="tree-detail-panel__title admin-list-section-title">
+      {{ t('adminSubscriptions.listTitle') }}
+    </h2>
 
     <p v-if="isLoading" class="status-note">{{ t('adminSubscriptions.loading') }}</p>
     <p v-else-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
 
     <template v-else-if="isListStateOk">
-      <p class="catalog-results-count muted">
-        {{ t('adminSubscriptions.resultsCount', { count: totalElements }) }}
-      </p>
+      <div class="mtl-admin-list-toolbar">
+        <p class="catalog-results-count muted">
+          {{ t('adminSubscriptions.resultsCount', { count: totalElements }) }}
+        </p>
+      </div>
 
-      <p v-if="!hasRows" class="status-note">{{ t('adminSubscriptions.empty') }}</p>
+      <div v-if="!hasRows" class="mtl-empty-state">
+        <p class="mtl-empty-state__title">{{ t('adminSubscriptions.emptyTitle') }}</p>
+        <p class="mtl-empty-state__text">{{ t('adminSubscriptions.empty') }}</p>
+      </div>
 
       <div v-else class="catalog-toolbar__panel admin-subscriptions-table-panel">
         <div class="mtl-admin-table-wrap">
           <table
             class="mtl-admin-table mtl-admin-table--stack"
-            :aria-label="t('adminSubscriptions.title')"
+            :aria-label="t('adminSubscriptions.listTitle')"
           >
             <thead>
               <tr>
@@ -276,7 +290,7 @@ function onDismissModal(): void {
         :aria-label="t('adminSubscriptions.pagination.navLabel')"
       >
         <button
-          class="btn btn-secondary btn-sm"
+          class="btn btn-secondary btn-sm catalog-pagination__btn"
           type="button"
           :disabled="!hasPrevious || isLoading"
           @click="goPrevious()"
@@ -292,7 +306,7 @@ function onDismissModal(): void {
           }}
         </span>
         <button
-          class="btn btn-secondary btn-sm"
+          class="btn btn-secondary btn-sm catalog-pagination__btn"
           type="button"
           :disabled="!hasNext || isLoading"
           @click="goNext()"
@@ -301,6 +315,7 @@ function onDismissModal(): void {
         </button>
       </nav>
     </template>
+    </div>
 
     <MtlConfirmDialog
       v-model:open="confirmOpen"

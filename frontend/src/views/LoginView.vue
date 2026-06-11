@@ -18,7 +18,6 @@ onMounted(async () => {
   <div class="auth-flow-page">
     <header class="page-header auth-flow-page__header">
       <h1 class="page-header__title">{{ t('login.title') }}</h1>
-      <p class="page-header__description">{{ t('login.description') }}</p>
     </header>
     <p class="status-note" role="status">{{ t('login.redirecting') }}</p>
   </div>

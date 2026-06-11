@@ -13,10 +13,6 @@ const isAdmin = computed(() => isAuthenticated.value && auth.hasRole('ADMIN'))
 const homeTitle = computed(() =>
   isAdmin.value ? t('home.adminTitle') : t('home.collaboratorTitle'),
 )
-const homeDescription = computed(() =>
-  isAdmin.value ? t('home.adminDescription') : t('home.collaboratorDescription'),
-)
-
 const navProfile = computed(() =>
   buildNavigationProfileState(auth.isReady.value, auth.isAuthenticated.value, auth.hasRole),
 )
@@ -31,23 +27,12 @@ const pageTitle = computed(() => {
   }
   return t('appShell.brand')
 })
-
-const pageDescription = computed(() => {
-  if (isAuthenticated.value) {
-    return homeDescription.value
-  }
-  if (auth.isReady.value) {
-    return t('home.visitorHeroDescription')
-  }
-  return t('home.authInitializing')
-})
 </script>
 
 <template>
   <div class="home-page">
     <header class="page-header">
       <h1 class="page-header__title">{{ pageTitle }}</h1>
-      <p class="page-header__description">{{ pageDescription }}</p>
     </header>
 
     <nav v-if="isAuthenticated" class="home-dashboard__body" :aria-label="t('home.panelNavAria')">

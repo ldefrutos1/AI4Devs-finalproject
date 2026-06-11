@@ -106,19 +106,23 @@ onMounted(async () => {
     <header class="page-header">
       <PageBackLink :to="{ name: 'home' }">{{ t('navigation.home') }}</PageBackLink>
       <h1 class="page-header__title">{{ t(pageTitleKey) }}</h1>
-      <p class="page-header__description">{{ t('adminMasters.description') }}</p>
     </header>
 
     <p v-if="isLoading" class="status-note">{{ t('adminMasters.loading') }}</p>
     <p v-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
-    <output v-if="statusMessage" class="success tree-form-page__flash" aria-live="polite">{{
-      statusMessage
-    }}</output>
+    <output
+      v-if="statusMessage"
+      class="mtl-alert mtl-alert--success tree-form-page__flash"
+      aria-live="polite"
+    >
+      {{ statusMessage }}
+    </output>
 
     <div v-if="!isLoading" class="admin-masters-layout">
       <section class="catalog-toolbar" :aria-label="t('adminMasters.filters.apply')">
         <form class="catalog-toolbar__form" @submit.prevent="onApplySpeciesFilter">
           <div class="catalog-toolbar__panel">
+            <h2 class="catalog-toolbar__title">{{ t('common.filtersTitle') }}</h2>
             <div class="catalog-toolbar__fields catalog-toolbar__fields--pair">
               <div class="filter-field">
                 <label class="form-label" for="admin-masters-filter-species">{{
@@ -171,7 +175,7 @@ onMounted(async () => {
         </form>
       </section>
 
-      <h2 class="tree-detail-panel__title admin-masters-section-title">
+      <h2 class="tree-detail-panel__title admin-list-section-title">
         {{ t('adminMasters.listTitle') }}
       </h2>
 
@@ -189,9 +193,9 @@ onMounted(async () => {
           </div>
         </div>
 
-        <p v-if="!hasSpeciesRows && !errorMessage" class="status-note">
-          {{ t('adminMasters.emptyList') }}
-        </p>
+        <div v-if="!hasSpeciesRows && !errorMessage" class="mtl-empty-state">
+          <p class="mtl-empty-state__text">{{ t('adminMasters.emptyList') }}</p>
+        </div>
 
         <div v-else-if="hasSpeciesRows" class="catalog-toolbar__panel admin-masters-table-panel">
           <div class="mtl-admin-table-wrap">
@@ -243,7 +247,7 @@ onMounted(async () => {
           :aria-label="t('adminMasters.pagination.navLabel')"
         >
           <button
-            class="btn btn-secondary btn-sm"
+            class="btn btn-secondary btn-sm catalog-pagination__btn"
             type="button"
             :disabled="!hasSpeciesPrevious || isSpeciesListLoading"
             @click="goPreviousSpeciesPage()"
@@ -259,7 +263,7 @@ onMounted(async () => {
             }}
           </span>
           <button
-            class="btn btn-secondary btn-sm"
+            class="btn btn-secondary btn-sm catalog-pagination__btn"
             type="button"
             :disabled="!hasSpeciesNext || isSpeciesListLoading"
             @click="goNextSpeciesPage()"

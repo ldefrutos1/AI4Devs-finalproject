@@ -44,6 +44,7 @@ describe('AdminSubscriptionsView', () => {
     await flushPromises()
 
     expect(wrapper.get('h1.page-header__title').text()).toContain('Gestión de suscripciones')
+    expect(wrapper.get('.admin-list-section-title').text()).toContain('Suscripciones registradas')
     expect(wrapper.find('#admin-sub-filter-email').exists()).toBe(true)
     expect(wrapper.find('#admin-sub-filter-estado').exists()).toBe(true)
     expect(wrapper.find('.catalog-toolbar__fields--pair').exists()).toBe(true)

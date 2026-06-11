@@ -2,12 +2,11 @@ package com.mtl.catalog.controller;
 
 import com.mtl.catalog.application.CollaboratorEjemplarQueryService;
 import com.mtl.catalog.application.CollaboratorEjemplarQueryService.CollaboratorEjemplarFilters;
-import com.mtl.catalog.application.CreatedEjemplarResult;
+import com.mtl.catalog.application.CollaboratorEjemplarWriteService;
 import com.mtl.catalog.application.PublicEjemplarQueryService;
 import com.mtl.catalog.application.EjemplarMediaSubmissionPermissionService;
 import com.mtl.catalog.application.EjemplarDeletionService;
-import com.mtl.catalog.application.EjemplarModificationService;
-import com.mtl.catalog.application.EjemplarRegistrationService;
+import com.mtl.catalog.application.RegisteredEjemplarOutcome;
 import com.mtl.catalog.dto.CollaboratorEjemplarDetailDto;
 import com.mtl.catalog.dto.CollaboratorEjemplarPageResponse;
 import com.mtl.catalog.dto.CreateEjemplarRequest;
@@ -43,22 +42,19 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @Validated
 public class CatalogEjemplaresController {
 
-  private final EjemplarRegistrationService ejemplarRegistrationService;
-  private final EjemplarModificationService ejemplarModificationService;
+  private final CollaboratorEjemplarWriteService collaboratorEjemplarWriteService;
   private final EjemplarDeletionService ejemplarDeletionService;
   private final CollaboratorEjemplarQueryService collaboratorEjemplarQueryService;
   private final PublicEjemplarQueryService publicEjemplarQueryService;
   private final EjemplarMediaSubmissionPermissionService ejemplarMediaSubmissionPermissionService;
 
   public CatalogEjemplaresController(
-      EjemplarRegistrationService ejemplarRegistrationService,
-      EjemplarModificationService ejemplarModificationService,
+      CollaboratorEjemplarWriteService collaboratorEjemplarWriteService,
       EjemplarDeletionService ejemplarDeletionService,
       CollaboratorEjemplarQueryService collaboratorEjemplarQueryService,
       PublicEjemplarQueryService publicEjemplarQueryService,
       EjemplarMediaSubmissionPermissionService ejemplarMediaSubmissionPermissionService) {
-    this.ejemplarRegistrationService = ejemplarRegistrationService;
-    this.ejemplarModificationService = ejemplarModificationService;
+    this.collaboratorEjemplarWriteService = collaboratorEjemplarWriteService;
     this.ejemplarDeletionService = ejemplarDeletionService;
     this.collaboratorEjemplarQueryService = collaboratorEjemplarQueryService;
     this.publicEjemplarQueryService = publicEjemplarQueryService;
@@ -96,7 +92,7 @@ public class CatalogEjemplaresController {
       @PathVariable long treeId,
       @Valid @RequestBody CreateEjemplarRequest request,
       @AuthenticationPrincipal Jwt jwt) {
-    return ejemplarModificationService.updateEjemplar(treeId, request, jwt);
+    return collaboratorEjemplarWriteService.updateEjemplar(treeId, request, jwt);
   }
 
   @DeleteMapping("/trees/{treeId}")
@@ -109,14 +105,15 @@ public class CatalogEjemplaresController {
   @PostMapping("/trees")
   public ResponseEntity<CreatedEjemplarResponse> createEjemplar(
       @Valid @RequestBody CreateEjemplarRequest request, @AuthenticationPrincipal Jwt jwt) {
-    CreatedEjemplarResult result = ejemplarRegistrationService.register(request, jwt);
+    RegisteredEjemplarOutcome outcome =
+        collaboratorEjemplarWriteService.registerEjemplar(request, jwt);
     URI location =
         ServletUriComponentsBuilder.fromCurrentContextPath()
             .path("/api/catalog/trees/{id}")
-            .buildAndExpand(result.treeId())
+            .buildAndExpand(outcome.treeId())
             .toUri();
     return ResponseEntity.created(location)
-        .body(new CreatedEjemplarResponse(result.treeId()));
+        .body(new CreatedEjemplarResponse(outcome.treeId(), outcome.enrichmentWarning()));
   }
 
   @GetMapping("/trees/{treeId}/media-submission-permission")

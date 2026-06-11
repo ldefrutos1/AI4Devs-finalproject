@@ -18,4 +18,61 @@ public record CollaboratorEjemplarDetailDto(
     String speciesLabel,
     String provinceLabel,
     OffsetDateTime createdAt,
-    OffsetDateTime modifiedAt) {}
+    OffsetDateTime modifiedAt,
+    String enrichmentWarning) {
+
+  public CollaboratorEjemplarDetailDto(
+      long treeId,
+      long speciesId,
+      long provinceId,
+      BigDecimal latitude,
+      BigDecimal longitude,
+      String municipality,
+      String description,
+      Integer altitude,
+      String publicationState,
+      String publicMapVisibility,
+      long createdByUserId,
+      String speciesLabel,
+      String provinceLabel,
+      OffsetDateTime createdAt,
+      OffsetDateTime modifiedAt) {
+    this(
+        treeId,
+        speciesId,
+        provinceId,
+        latitude,
+        longitude,
+        municipality,
+        description,
+        altitude,
+        publicationState,
+        publicMapVisibility,
+        createdByUserId,
+        speciesLabel,
+        provinceLabel,
+        createdAt,
+        modifiedAt,
+        null);
+  }
+
+  public CollaboratorEjemplarDetailDto withEnrichmentWarning(String warning) {
+    return new CollaboratorEjemplarDetailDto(
+        treeId,
+        speciesId,
+        provinceId,
+        latitude,
+        longitude,
+        municipality,
+        description,
+        altitude,
+        publicationState,
+        publicMapVisibility,
+        createdByUserId,
+        speciesLabel,
+        provinceLabel,
+        createdAt,
+        modifiedAt,
+        warning);
+  }
+}

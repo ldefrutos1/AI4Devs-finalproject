@@ -30,6 +30,7 @@ describe('HomeDashboardTile', () => {
     expect(wrapper.find('.slot-icon').exists()).toBe(true)
     const link = wrapper.find('a.home-tile')
     expect(link.exists()).toBe(true)
+    expect(link.classes()).toContain('home-tile--default')
     expect(link.attributes('href')).toContain('/x')
   })
 })

@@ -11,6 +11,7 @@ import SpeciesAutocompleteInput from '@/components/SpeciesAutocompleteInput.vue'
 import { fetchSpecies } from '@/services/catalog/catalogService'
 import { fetchCollaboratorTrees } from '@/services/catalog/collaboratorTreesService'
 import type { CollaboratorTreeListItem, MasterListItem } from '@/types/catalog'
+import { mapVisibilityBadgeClass, publicationStateBadgeClass } from '@/utils/catalogBadgeClass'
 
 const { t } = useI18n()
 
@@ -219,12 +220,12 @@ onMounted(async () => {
     <header class="page-header">
       <PageBackLink :to="{ name: 'home' }">{{ t('navigation.home') }}</PageBackLink>
       <h1 class="page-header__title">{{ t('myTrees.title') }}</h1>
-      <p class="page-header__description">{{ t('myTrees.description') }}</p>
     </header>
 
     <section class="catalog-toolbar" :aria-label="t('myTrees.filters.apply')">
       <form class="catalog-toolbar__form" @submit.prevent="applyFilters">
         <div class="catalog-toolbar__panel">
+          <h2 class="catalog-toolbar__title">{{ t('common.filtersTitle') }}</h2>
           <div class="catalog-toolbar__fields">
             <div class="filter-field">
               <label class="form-label" for="my-trees-filter-species">{{
@@ -328,14 +329,15 @@ onMounted(async () => {
     <p v-if="isLoading" class="status-note">{{ t('myTrees.loading') }}</p>
     <p v-else-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
 
-    <template v-else-if="isSuccess">
+    <section v-else-if="isSuccess" class="catalog-results">
       <p class="catalog-results-count muted" data-testid="my-trees-results-count">
         {{ t('myTrees.resultsCount', { count: totalResults }) }}
       </p>
 
-      <p v-if="!hasResults" class="status-note" data-testid="my-trees-empty">
-        {{ t('myTrees.empty') }}
-      </p>
+      <div v-if="!hasResults" class="mtl-empty-state" data-testid="my-trees-empty">
+        <p class="mtl-empty-state__title">{{ t('myTrees.emptyTitle') }}</p>
+        <p class="mtl-empty-state__text">{{ t('myTrees.empty') }}</p>
+      </div>
 
       <div v-else class="catalog-grid">
         <article
@@ -363,8 +365,10 @@ onMounted(async () => {
             </h2>
             <p class="catalog-card__location">{{ locationLine(tree) }}</p>
             <div class="catalog-card__badges">
-              <span class="mtl-badge">{{ publicationStateLabel(tree.publicationState) }}</span>
-              <span class="mtl-badge mtl-badge--muted">{{
+              <span :class="publicationStateBadgeClass(tree.publicationState)">{{
+                publicationStateLabel(tree.publicationState)
+              }}</span>
+              <span :class="mapVisibilityBadgeClass(tree.publicMapVisibility)">{{
                 mapVisibilityLabel(tree.publicMapVisibility)
               }}</span>
             </div>
@@ -381,7 +385,7 @@ onMounted(async () => {
 
       <nav class="catalog-pagination" :aria-label="t('myTrees.pagination.navLabel')">
         <button
-          class="btn btn-secondary btn-sm"
+          class="btn btn-secondary btn-sm catalog-pagination__btn"
           type="button"
           :disabled="!hasPrevious || isLoading"
           @click="goToPreviousPage"
@@ -392,7 +396,7 @@ onMounted(async () => {
           {{ t('myTrees.pagination.pageStatus', { current: page + 1, total: totalPages }) }}
         </span>
         <button
-          class="btn btn-secondary btn-sm"
+          class="btn btn-secondary btn-sm catalog-pagination__btn"
           type="button"
           :disabled="!hasNext || isLoading"
           @click="goToNextPage"
@@ -400,6 +404,6 @@ onMounted(async () => {
           {{ t('myTrees.pagination.next') }}
         </button>
       </nav>
-    </template>
+    </section>
   </div>
 </template>

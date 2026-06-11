@@ -17,12 +17,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.mtl.catalog.application.CollaboratorEjemplarQueryService;
-import com.mtl.catalog.application.CreatedEjemplarResult;
+import com.mtl.catalog.application.CollaboratorEjemplarWriteService;
 import com.mtl.catalog.application.PublicEjemplarQueryService;
 import com.mtl.catalog.application.EjemplarMediaSubmissionPermissionService;
 import com.mtl.catalog.application.EjemplarDeletionService;
-import com.mtl.catalog.application.EjemplarModificationService;
-import com.mtl.catalog.application.EjemplarRegistrationService;
+import com.mtl.catalog.application.RegisteredEjemplarOutcome;
 import com.mtl.catalog.dto.CollaboratorEjemplarDetailDto;
 import com.mtl.catalog.dto.CollaboratorEjemplarListItemDto;
 import com.mtl.catalog.dto.CollaboratorEjemplarPageResponse;
@@ -65,8 +64,7 @@ class CatalogEjemplaresControllerWebMvcTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockitoBean private EjemplarRegistrationService ejemplarRegistrationService;
-  @MockitoBean private EjemplarModificationService ejemplarModificationService;
+  @MockitoBean private CollaboratorEjemplarWriteService collaboratorEjemplarWriteService;
   @MockitoBean private EjemplarDeletionService ejemplarDeletionService;
   @MockitoBean private CollaboratorEjemplarQueryService collaboratorEjemplarQueryService;
   @MockitoBean private PublicEjemplarQueryService publicEjemplarQueryService;
@@ -105,8 +103,8 @@ class CatalogEjemplaresControllerWebMvcTest {
 
   @Test
   void postTrees_creado201() throws Exception {
-    when(ejemplarRegistrationService.register(any(), any()))
-        .thenReturn(new CreatedEjemplarResult(42L, 5L, OffsetDateTime.parse("2024-01-02T12:00:00Z")));
+    when(collaboratorEjemplarWriteService.registerEjemplar(any(), any()))
+        .thenReturn(new RegisteredEjemplarOutcome(42L, null));
 
     JwtAuthenticationToken authentication = collaboratorAuthentication();
 
@@ -128,6 +126,31 @@ class CatalogEjemplaresControllerWebMvcTest {
         .andExpect(status().isCreated())
         .andExpect(header().exists("Location"))
         .andExpect(jsonPath("$.treeId").value(42));
+  }
+
+  @Test
+  void postTrees_falloProyeccionMongo_devuelve201ConEnrichmentWarning() throws Exception {
+    when(collaboratorEjemplarWriteService.registerEjemplar(any(), any()))
+        .thenReturn(new RegisteredEjemplarOutcome(42L, "Aviso de enriquecimiento incompleto."));
+
+    mockMvc
+        .perform(
+            withJwtPrincipal(
+                post("/api/catalog/trees")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                          "speciesId": 10,
+                          "provinceId": 28,
+                          "latitude": 40.0,
+                          "longitude": -3.5
+                        }
+                        """),
+                collaboratorAuthentication()))
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.treeId").value(42))
+        .andExpect(jsonPath("$.enrichmentWarning").value("Aviso de enriquecimiento incompleto."));
   }
 
   @Test
@@ -159,7 +182,7 @@ class CatalogEjemplaresControllerWebMvcTest {
 
   @Test
   void putCollaboratorTree_devuelve200ConDetalle() throws Exception {
-    when(ejemplarModificationService.updateEjemplar(anyLong(), any(), any(Jwt.class)))
+    when(collaboratorEjemplarWriteService.updateEjemplar(anyLong(), any(), any(Jwt.class)))
         .thenReturn(
             new CollaboratorEjemplarDetailDto(
                 42L,
@@ -176,7 +199,8 @@ class CatalogEjemplaresControllerWebMvcTest {
                 "Encina (Quercus ilex)",
                 "Madrid (29)",
                 OffsetDateTime.parse("2024-01-01T10:00:00Z"),
-                OffsetDateTime.parse("2024-02-01T12:00:00Z")));
+                OffsetDateTime.parse("2024-02-01T12:00:00Z"),
+                null));
 
     mockMvc
         .perform(

@@ -116,13 +116,16 @@ onMounted(async () => {
     <header class="page-header tree-form-page__header">
       <PageBackLink :to="{ name: 'mis-ejemplares' }">{{ t('treeEdit.backToList') }}</PageBackLink>
       <h1 class="page-header__title">{{ pageTitle }}</h1>
-      <p class="page-header__description">{{ t('treeEdit.description') }}</p>
     </header>
 
-    <output v-if="createSuccessMessage" class="success tree-form-page__flash" aria-live="polite">{{
-      createSuccessMessage
-    }}</output>
-    <p v-if="createWarningMessage" class="error tree-form-page__flash" role="alert">
+    <output
+      v-if="createSuccessMessage"
+      class="mtl-alert mtl-alert--success tree-form-page__flash"
+      aria-live="polite"
+    >
+      {{ createSuccessMessage }}
+    </output>
+    <p v-if="createWarningMessage" class="mtl-alert mtl-alert--warning tree-form-page__flash" role="alert">
       {{ createWarningMessage }}
     </p>
 
@@ -130,181 +133,216 @@ onMounted(async () => {
     <p v-else-if="loadError" class="error" role="alert">{{ loadError }}</p>
 
     <form v-else-if="isReady" class="tree-form" @submit.prevent="onSubmit">
-      <div class="field-full tree-form-species-status-row">
-        <div class="field species-field">
-          <label class="form-label" for="edit-speciesId">{{
-            t('treeForm.fields.species.label')
-          }}</label>
-          <SpeciesAutocompleteInput
-            ref="speciesAutocompleteRef"
-            input-id="edit-speciesId"
-            v-model="form.speciesId"
-            :species="species"
-            required
-            :aria-invalid="Boolean(fieldErrors.speciesId)"
-            :placeholder="t('treeForm.fields.species.placeholder')"
+      <section
+        class="tree-form-section"
+        aria-labelledby="tree-edit-species-heading"
+      >
+        <h2 id="tree-edit-species-heading" class="tree-form-section__title">
+          {{ t('treeForm.sections.speciesAndVisibility') }}
+        </h2>
+        <div class="tree-form-species-status-row">
+          <div class="field species-field">
+            <label class="form-label" for="edit-speciesId">{{
+              t('treeForm.fields.species.label')
+            }}</label>
+            <SpeciesAutocompleteInput
+              ref="speciesAutocompleteRef"
+              input-id="edit-speciesId"
+              v-model="form.speciesId"
+              :species="species"
+              required
+              :aria-invalid="Boolean(fieldErrors.speciesId)"
+              :placeholder="t('treeForm.fields.species.placeholder')"
+            />
+            <small v-if="fieldErrors.speciesId" class="field-error">{{
+              fieldErrors.speciesId
+            }}</small>
+          </div>
+
+          <div class="field">
+            <label class="form-label" for="edit-publicationState">{{
+              t('treeForm.fields.publicationState.label')
+            }}</label>
+            <select id="edit-publicationState" v-model="form.publicationState" class="form-control">
+              <option v-for="item in publicationStateOptions" :key="item.value" :value="item.value">
+                {{ item.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label class="form-label" for="edit-publicMapVisibility">{{
+              t('treeForm.fields.publicMapVisibility.label')
+            }}</label>
+            <select
+              id="edit-publicMapVisibility"
+              v-model="form.publicMapVisibility"
+              class="form-control"
+            >
+              <option v-for="item in mapVisibilityOptions" :key="item.value" :value="item.value">
+                {{ item.label }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="tree-form-section tree-form-section--media"
+        aria-labelledby="tree-edit-media-heading"
+      >
+        <h2 id="tree-edit-media-heading" class="tree-form-section__title">
+          {{ t('treeForm.sections.media') }}
+        </h2>
+        <div class="tree-form-media-grid tree-detail-visual-grid tree-edit-visual-grid">
+          <EditTreeGalleryPanel
+            :gallery="editTreeGalleryOptions"
+            :gallery-photo-error="galleryPhotoError"
           />
-          <small v-if="fieldErrors.speciesId" class="field-error">{{
-            fieldErrors.speciesId
-          }}</small>
-        </div>
 
-        <div class="field">
-          <label class="form-label" for="edit-publicationState">{{
-            t('treeForm.fields.publicationState.label')
-          }}</label>
-          <select id="edit-publicationState" v-model="form.publicationState" class="form-control">
-            <option v-for="item in publicationStateOptions" :key="item.value" :value="item.value">
-              {{ item.label }}
-            </option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label class="form-label" for="edit-publicMapVisibility">{{
-            t('treeForm.fields.publicMapVisibility.label')
-          }}</label>
-          <select
-            id="edit-publicMapVisibility"
-            v-model="form.publicMapVisibility"
-            class="form-control"
+          <section
+            class="tree-detail-panel tree-form-map-slot"
+            aria-labelledby="tree-edit-map-heading"
           >
-            <option v-for="item in mapVisibilityOptions" :key="item.value" :value="item.value">
-              {{ item.label }}
-            </option>
-          </select>
+            <h3 id="tree-edit-map-heading" class="tree-detail-panel__title">
+              {{ t('treesDetail.map.title') }}
+            </h3>
+            <TreeLocationMapPreview
+              :latitude="form.latitude"
+              :longitude="form.longitude"
+              :show-marker="showMapMarker"
+              @pick-coordinates="onMapPickCoordinates"
+            />
+          </section>
         </div>
-      </div>
+      </section>
 
-      <div class="field-full tree-detail-visual-grid tree-edit-visual-grid">
-        <EditTreeGalleryPanel :gallery="editTreeGalleryOptions" :gallery-photo-error="galleryPhotoError" />
+      <section
+        class="tree-form-section"
+        aria-labelledby="tree-edit-location-heading"
+      >
+        <h2 id="tree-edit-location-heading" class="tree-form-section__title">
+          {{ t('treeForm.sections.location') }}
+        </h2>
+        <div class="tree-form-location-row">
+          <div class="field">
+            <label class="form-label" for="edit-provinceId">{{
+              t('treeForm.fields.province.label')
+            }}</label>
+            <select
+              id="edit-provinceId"
+              v-model="form.provinceId"
+              class="form-control"
+              required
+              :aria-invalid="Boolean(fieldErrors.provinceId)"
+            >
+              <option disabled value="">{{ t('treeForm.fields.province.placeholder') }}</option>
+              <option v-for="item in provinces" :key="item.id" :value="String(item.id)">
+                {{ item.label }}
+              </option>
+            </select>
+            <small v-if="fieldErrors.provinceId" class="field-error">{{
+              fieldErrors.provinceId
+            }}</small>
+          </div>
 
-        <section
-          class="tree-detail-panel tree-form-map-slot"
-          aria-labelledby="tree-edit-map-heading"
-        >
-          <h2 id="tree-edit-map-heading" class="tree-detail-panel__title">
-            {{ t('treesDetail.map.title') }}
-          </h2>
-          <TreeLocationMapPreview
-            :latitude="form.latitude"
-            :longitude="form.longitude"
-            :show-marker="showMapMarker"
-            @pick-coordinates="onMapPickCoordinates"
-          />
-        </section>
-      </div>
+          <div class="field">
+            <label class="form-label" for="edit-municipality">{{
+              t('treeForm.fields.municipality.label')
+            }}</label>
+            <input
+              id="edit-municipality"
+              v-model="form.municipality"
+              class="form-control"
+              type="text"
+              maxlength="255"
+              :placeholder="t('treeForm.fields.municipality.placeholder')"
+            />
+          </div>
+        </div>
 
-      <div class="field-full tree-form-location-row">
-        <div class="field">
-          <label class="form-label" for="edit-provinceId">{{
-            t('treeForm.fields.province.label')
+        <div class="field tree-form-field-block">
+          <label class="form-label" for="edit-description">{{
+            t('treeForm.fields.description.label')
           }}</label>
-          <select
-            id="edit-provinceId"
-            v-model="form.provinceId"
-            class="form-control"
-            required
-            :aria-invalid="Boolean(fieldErrors.provinceId)"
-          >
-            <option disabled value="">{{ t('treeForm.fields.province.placeholder') }}</option>
-            <option v-for="item in provinces" :key="item.id" :value="String(item.id)">
-              {{ item.label }}
-            </option>
-          </select>
-          <small v-if="fieldErrors.provinceId" class="field-error">{{
-            fieldErrors.provinceId
+          <textarea
+            id="edit-description"
+            v-model="form.description"
+            class="form-control form-textarea"
+            rows="2"
+            :placeholder="t('treeForm.fields.description.placeholder')"
+            :aria-invalid="Boolean(fieldErrors.description)"
+            maxlength="5000"
+          />
+          <small v-if="fieldErrors.description" class="field-error">{{
+            fieldErrors.description
           }}</small>
         </div>
+      </section>
 
-        <div class="field">
-          <label class="form-label" for="edit-municipality">{{
-            t('treeForm.fields.municipality.label')
-          }}</label>
-          <input
-            id="edit-municipality"
-            v-model="form.municipality"
-            class="form-control"
-            type="text"
-            maxlength="255"
-            :placeholder="t('treeForm.fields.municipality.placeholder')"
-          />
+      <section
+        class="tree-form-section"
+        aria-labelledby="tree-edit-coordinates-heading"
+      >
+        <h2 id="tree-edit-coordinates-heading" class="tree-form-section__title">
+          {{ t('treeForm.sections.coordinates') }}
+        </h2>
+        <div class="tree-geo-row">
+          <div class="field">
+            <label class="form-label" for="edit-latitude">{{
+              t('treeForm.fields.latitude.label')
+            }}</label>
+            <input
+              id="edit-latitude"
+              v-model="form.latitude"
+              class="form-control"
+              type="number"
+              step="any"
+              min="-90"
+              max="90"
+              required
+              :placeholder="t('treeForm.fields.latitude.placeholder')"
+              :aria-invalid="Boolean(fieldErrors.latitude)"
+            />
+            <small v-if="fieldErrors.latitude" class="field-error">{{ fieldErrors.latitude }}</small>
+          </div>
+
+          <div class="field">
+            <label class="form-label" for="edit-longitude">{{
+              t('treeForm.fields.longitude.label')
+            }}</label>
+            <input
+              id="edit-longitude"
+              v-model="form.longitude"
+              class="form-control"
+              type="number"
+              step="any"
+              min="-180"
+              max="180"
+              required
+              :placeholder="t('treeForm.fields.longitude.placeholder')"
+              :aria-invalid="Boolean(fieldErrors.longitude)"
+            />
+            <small v-if="fieldErrors.longitude" class="field-error">{{
+              fieldErrors.longitude
+            }}</small>
+          </div>
+
+          <div class="field">
+            <label class="form-label" for="edit-altitude">{{
+              t('treeForm.fields.altitude.label')
+            }}</label>
+            <input
+              id="edit-altitude"
+              v-model="form.altitude"
+              class="form-control"
+              type="number"
+              step="any"
+              :placeholder="t('treeForm.fields.altitude.placeholder')"
+            />
+          </div>
         </div>
-      </div>
-
-      <div class="field field-full tree-form-field-block">
-        <label class="form-label" for="edit-description">{{
-          t('treeForm.fields.description.label')
-        }}</label>
-        <textarea
-          id="edit-description"
-          v-model="form.description"
-          class="form-control form-textarea"
-          rows="2"
-          :placeholder="t('treeForm.fields.description.placeholder')"
-          :aria-invalid="Boolean(fieldErrors.description)"
-          maxlength="5000"
-        />
-        <small v-if="fieldErrors.description" class="field-error">{{
-          fieldErrors.description
-        }}</small>
-      </div>
-
-      <div class="field-full tree-geo-row">
-        <div class="field">
-          <label class="form-label" for="edit-latitude">{{
-            t('treeForm.fields.latitude.label')
-          }}</label>
-          <input
-            id="edit-latitude"
-            v-model="form.latitude"
-            class="form-control"
-            type="number"
-            step="any"
-            min="-90"
-            max="90"
-            required
-            :placeholder="t('treeForm.fields.latitude.placeholder')"
-            :aria-invalid="Boolean(fieldErrors.latitude)"
-          />
-          <small v-if="fieldErrors.latitude" class="field-error">{{ fieldErrors.latitude }}</small>
-        </div>
-
-        <div class="field">
-          <label class="form-label" for="edit-longitude">{{
-            t('treeForm.fields.longitude.label')
-          }}</label>
-          <input
-            id="edit-longitude"
-            v-model="form.longitude"
-            class="form-control"
-            type="number"
-            step="any"
-            min="-180"
-            max="180"
-            required
-            :placeholder="t('treeForm.fields.longitude.placeholder')"
-            :aria-invalid="Boolean(fieldErrors.longitude)"
-          />
-          <small v-if="fieldErrors.longitude" class="field-error">{{
-            fieldErrors.longitude
-          }}</small>
-        </div>
-
-        <div class="field">
-          <label class="form-label" for="edit-altitude">{{
-            t('treeForm.fields.altitude.label')
-          }}</label>
-          <input
-            id="edit-altitude"
-            v-model="form.altitude"
-            class="form-control"
-            type="number"
-            step="any"
-            :placeholder="t('treeForm.fields.altitude.placeholder')"
-          />
-        </div>
-      </div>
+      </section>
 
       <p v-if="submitError" class="error field-full" role="alert">{{ submitError }}</p>
 

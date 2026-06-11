@@ -11,6 +11,7 @@ import { fetchTreePhotoGallery } from '@/services/media/treeGalleryService'
 import { HttpError, NetworkError } from '@/services/http/apiClient'
 import type { PublicTreeDetail } from '@/types/catalog'
 import type { TreePhotoGalleryItem } from '@/types/media'
+import { mapVisibilityBadgeClass, publicationStateBadgeClass } from '@/utils/catalogBadgeClass'
 
 const route = useRoute()
 const { t } = useI18n()
@@ -57,11 +58,6 @@ function mapVisibilityLabel(visibility: string): string {
   return visibility
 }
 
-function locationLine(detail: PublicTreeDetail): string {
-  const parts = [detail.municipality?.trim(), detail.province?.trim()].filter(Boolean)
-  return parts.length > 0 ? parts.join(' · ') : t('common.emptyValue')
-}
-
 function displayText(value: string | null | undefined): string {
   const trimmed = value?.trim() ?? ''
   return trimmed.length > 0 ? trimmed : t('common.emptyValue')
@@ -76,30 +72,25 @@ const treeId = computed(() => {
   return parsedId
 })
 
+const speciesCommonName = computed(() => tree.value?.commonName.trim() ?? '')
+const speciesScientificName = computed(() => tree.value?.scientificName.trim() ?? '')
+const hasCommonName = computed(() => speciesCommonName.value.length > 0)
+
 const speciesTitle = computed(() => {
   if (!tree.value) {
     return ''
   }
-  const common = tree.value.commonName.trim()
-  const scientific = tree.value.scientificName.trim()
-  if (common.length > 0) {
-    return `${common} (${scientific})`
+  if (hasCommonName.value) {
+    return `${speciesCommonName.value} (${speciesScientificName.value})`
   }
-  return scientific
+  return speciesScientificName.value
 })
 
 const pageTitle = computed(() => {
   if (tree.value) {
-    return speciesTitle.value
+    return hasCommonName.value ? speciesCommonName.value : speciesScientificName.value
   }
   return t('treesDetail.title')
-})
-
-const pageDescription = computed(() => {
-  if (tree.value) {
-    return locationLine(tree.value)
-  }
-  return t('treesDetail.description')
 })
 
 const mapLatLng = computed(() => ({
@@ -201,10 +192,14 @@ onMounted(async () => {
         t('treesDetail.backToList')
       }}</PageBackLink>
       <h1 class="page-header__title">{{ pageTitle }}</h1>
-      <p class="page-header__description">{{ pageDescription }}</p>
+      <p v-if="tree && hasCommonName" class="tree-detail-page__scientific">
+        {{ speciesScientificName }}
+      </p>
       <div v-if="tree" class="tree-detail-page__badges">
-        <span class="mtl-badge">{{ publicationStateLabel(tree.publicationState) }}</span>
-        <span class="mtl-badge mtl-badge--muted">{{
+        <span :class="publicationStateBadgeClass(tree.publicationState)">{{
+          publicationStateLabel(tree.publicationState)
+        }}</span>
+        <span :class="mapVisibilityBadgeClass(tree.publicMapVisibility)">{{
           mapVisibilityLabel(tree.publicMapVisibility)
         }}</span>
         <span class="mtl-badge mtl-badge--muted">{{
@@ -217,7 +212,10 @@ onMounted(async () => {
     <p v-else-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
 
     <template v-else-if="isSuccess && tree">
-      <div class="tree-detail-visual-grid">
+      <section
+        class="tree-detail-hero tree-detail-visual-grid"
+        :aria-label="t('treesDetail.sections.media')"
+      >
         <section class="tree-detail-panel" aria-labelledby="tree-detail-gallery-heading">
           <h2 id="tree-detail-gallery-heading" class="tree-detail-panel__title">
             {{ t('treesDetail.gallery.title') }}
@@ -275,7 +273,7 @@ onMounted(async () => {
             t('treesDetail.map.noLocation')
           }}</output>
         </section>
-      </div>
+      </section>
 
       <section class="tree-detail-facts" :aria-labelledby="'tree-detail-facts-heading'">
         <h2 id="tree-detail-facts-heading" class="tree-detail-panel__title">

@@ -10,7 +10,11 @@ defineProps<{
 </script>
 
 <template>
-  <RouterLink class="home-tile" :class="{ 'home-tile--primary': variant === 'primary' }" :to="to">
+  <RouterLink
+    class="home-tile"
+    :class="variant === 'primary' ? 'home-tile--primary' : 'home-tile--default'"
+    :to="to"
+  >
     <span class="home-tile__icon" aria-hidden="true">
       <slot name="icon" />
     </span>

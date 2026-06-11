@@ -12,21 +12,17 @@ body,
 }
 
 body {
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    Segoe UI,
-    Roboto,
-    sans-serif;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--font-normal);
+  line-height: var(--leading-normal);
   color: var(--text);
   background: var(--workspace-bg);
-  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
 .container {
-  width: min(1040px, 100% - 2rem);
+  width: min(var(--content-wide), 100% - var(--content-gutter));
   margin: 0 auto;
 }

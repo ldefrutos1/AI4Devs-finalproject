@@ -66,6 +66,14 @@ public class CatalogSecurityConfig {
                     .requestMatchers(
                         HttpMethod.GET, "/api/catalog/trees/*/media-submission-permission")
                     .hasAnyRole("COLABORADOR", "ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/catalog/species/*/enrichment")
+                    .hasAnyRole("COLABORADOR", "ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/catalog/species/*/enrichment")
+                    .hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/api/catalog/trees/*/enrichment")
+                    .hasAnyRole("COLABORADOR", "ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/api/catalog/trees/*/enrichment")
+                    .hasAnyRole("COLABORADOR", "ADMIN")
                     .anyRequest()
                     .authenticated())
         .exceptionHandling(
