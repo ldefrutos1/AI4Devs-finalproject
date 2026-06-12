@@ -1,7 +1,8 @@
 ﻿<script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, toRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
+import SpeciesEnrichmentPopup from '@/components/enrichment/SpeciesEnrichmentPopup.vue'
 import PageBackLink from '@/components/layout/PageBackLink.vue'
 import SpeciesAutocompleteInput from '@/components/SpeciesAutocompleteInput.vue'
 import TreePhotoUploadPicker from '@/components/TreePhotoUploadPicker.vue'
@@ -9,6 +10,7 @@ import TreeLocationMapPreview from '@/components/TreeLocationMapPreview.vue'
 import { areLatLngInValidRange } from '@/composables/createTreeFormValidation'
 import { useTreeLocationAutofill } from '@/composables/useTreeLocationAutofill'
 import { useCreateTreeForm } from '@/composables/useCreateTreeForm'
+import { useTreeFormEnrichment } from '@/composables/useTreeFormEnrichment'
 
 const { t } = useI18n()
 const {
@@ -28,6 +30,24 @@ const {
   submit,
 } = useCreateTreeForm()
 
+const treeId = computed(() => null)
+const enrichment = useTreeFormEnrichment({
+  treeId,
+  speciesId: toRef(form, 'speciesId'),
+})
+
+const {
+  speciesPopupOpen,
+  speciesEnrichment,
+  canEditSpeciesEnrichment,
+  isLoadingSpeciesEnrichment,
+  isSavingSpeciesEnrichment,
+  speciesEnrichmentError,
+  onSpeciesPopupOpen,
+  saveSpeciesEnrichment,
+} = enrichment
+
+const selectedSpeciesId = computed(() => form.speciesId.trim())
 const showMapMarker = computed(() => areLatLngInValidRange(form))
 const speciesAutocompleteRef = ref<InstanceType<typeof SpeciesAutocompleteInput> | null>(null)
 
@@ -52,6 +72,15 @@ function onFirstPhotoGps(payload: CoordinatesPayload): void {
 async function onSubmit(): Promise<void> {
   speciesAutocompleteRef.value?.commitSpeciesFromText()
   await submit()
+}
+
+async function onSpeciesEnrichmentSave(
+  payload: Parameters<typeof saveSpeciesEnrichment>[0],
+): Promise<void> {
+  const saved = await saveSpeciesEnrichment(payload)
+  if (saved) {
+    speciesPopupOpen.value = false
+  }
 }
 
 onMounted(async () => {
@@ -85,16 +114,29 @@ onMounted(async () => {
         <div class="tree-form-species-status-row">
           <div class="field species-field">
             <label class="form-label" for="speciesId">{{ t('treeForm.fields.species.label') }}</label>
-            <SpeciesAutocompleteInput
-              ref="speciesAutocompleteRef"
-              input-id="speciesId"
-              input-test-id="tree-form-species"
-              v-model="form.speciesId"
-              :species="species"
-              required
-              :aria-invalid="Boolean(fieldErrors.speciesId)"
-              :placeholder="t('treeForm.fields.species.placeholder')"
-            />
+            <div class="mtl-enrichment-species-row">
+              <SpeciesAutocompleteInput
+                ref="speciesAutocompleteRef"
+                input-id="speciesId"
+                input-test-id="tree-form-species"
+                v-model="form.speciesId"
+                :species="species"
+                required
+                :aria-invalid="Boolean(fieldErrors.speciesId)"
+                :placeholder="t('treeForm.fields.species.placeholder')"
+              />
+              <SpeciesEnrichmentPopup
+                v-model:open="speciesPopupOpen"
+                :trigger-disabled="selectedSpeciesId.length === 0"
+                :enrichment="speciesEnrichment"
+                :readonly="!canEditSpeciesEnrichment"
+                :loading="isLoadingSpeciesEnrichment"
+                :saving="isSavingSpeciesEnrichment"
+                :error="speciesEnrichmentError"
+                @open="onSpeciesPopupOpen"
+                @save="onSpeciesEnrichmentSave"
+              />
+            </div>
             <small v-if="fieldErrors.speciesId" class="field-error">{{
               fieldErrors.speciesId
             }}</small>
@@ -278,6 +320,16 @@ onMounted(async () => {
             />
           </div>
         </div>
+      </section>
+
+      <section
+        class="tree-form-section"
+        aria-labelledby="tree-create-enrichment-heading"
+      >
+        <h2 id="tree-create-enrichment-heading" class="tree-form-section__title">
+          {{ t('enrichment.tree.sectionTitle') }}
+        </h2>
+        <p class="status-note">{{ t('enrichment.tree.createUnavailable') }}</p>
       </section>
 
       <p v-if="submitError" class="error field-full" role="alert">{{ submitError }}</p>

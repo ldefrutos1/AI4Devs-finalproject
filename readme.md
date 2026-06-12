@@ -1414,7 +1414,7 @@ Cierra **HU-008** (UC-04): el colaborador puede **listar y filtrar** sus fichas,
 **Backend — catalog-service**
 - `GET /api/catalog/trees` (filtros, paginación, scope COLABORADOR/ADMIN).
 - `GET` / `PUT` / `DELETE` `/api/catalog/trees/{treeId}`.
-- Orquestación de baja: media → SQL → hook Mongo **stub** (`NoOpEjemplarEnrichmentDeletionPort`).
+- Orquestación de baja: media → SQL → hook Mongo (`MongoEjemplarEnrichmentDeletionPort` con **HU-015**; no-op si Mongo desactivado).
 - Cliente `RestMediaEjemplarPhotosClient` (`mtl.media.base-url`).
 - Auditoría R3, `JwtRealmRoles`, materialización `usuario_app`.
 
@@ -1460,8 +1460,8 @@ Cierra **HU-008** (UC-04): el colaborador puede **listar y filtrar** sus fichas,
 - **Riesgo:** borrado distribuido sin **rollback compensatorio** si falla SQL tras borrar fotos en media.
 - **Mitigación:** documentado en HU-008 y `services/README.md`; aborto si falla media **antes** del SQL; mejora futura sin saga.
 
-- **Riesgo:** borrado Mongo solo **stub** hasta **HU-015**.
-- **Mitigación:** `NoOpEjemplarEnrichmentDeletionPort`; ticket **TASK-HU-015-01** pendiente.
+- **Riesgo:** borrado Mongo omitido si `mtl.catalog.mongo.enabled=false` (perfil test o Mongo caído tras SQL).
+- **Mitigación:** activar Mongo en `dev`/`prod`; ver **HU-015** y `services/README.md` § HU-015.
 
 - **Riesgo:** requiere **catalog** (8081) y **media** (8082) en `dev` para DELETE con fotos.
 - **Mitigación:** `mtl.media.base-url` en `application-dev.properties`; checklist E2E documentada.

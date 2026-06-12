@@ -12,9 +12,9 @@
 
 **Estado del ticket:** columna **Estado** en cada fila; valores recomendados **Pendiente** (por defecto), **En curso**, **Hecho**, **Rechazado** (descartado con motivo registrado en la fila o en *Qué puede quedar*). Actualízala al cerrar o arrancar trabajo.
 
-**Contexto de equipo:** un ingeniero/a **full-stack**; stack en [readme.md](../../readme.md). Se asume **HU-001** (OIDC/JWT), **HU-005** (Alta de ejemplar y formulario de referencia), **HU-013** (rutas `/mis-ejemplares`, `/ejemplares/:id/edit`) y **HU-006** **cerrada** (fotos individuales y galería en edición vía **TASK-HU-006-14**). **TASK-HU-015-01** (borrado Mongo real) sigue pendiente; en este corte se entrega hook **stub/no-op**.
+**Contexto de equipo:** un ingeniero/a **full-stack**; stack en [readme.md](../../readme.md). Se asume **HU-001** (OIDC/JWT), **HU-005** (Alta de ejemplar y formulario de referencia), **HU-013** (rutas `/mis-ejemplares`, `/ejemplares/:id/edit`) y **HU-006** **cerrada** (fotos individuales y galería en edición vía **TASK-HU-006-14**). **TASK-HU-015-01** (borrado Mongo real) se entregó en **HU-015**; en el corte **HU-008** el hook ya invocaba el puerto (stub si Mongo desactivado).
 
-**Objetivo de este desglose:** cerrar el vertical **UC-04**: listado colaborador con filtros, lectura y **PUT** de ficha propia (o cualquier ficha si **ADMIN**), **DELETE** físico con cascada (media → SQL → hook Mongo stub), sin Kafka ni notificación (**R7**).
+**Objetivo de este desglose:** cerrar el vertical **UC-04**: listado colaborador con filtros, lectura y **PUT** de ficha propia (o cualquier ficha si **ADMIN**), **DELETE** físico con cascada (media → SQL → hook Mongo), sin Kafka ni notificación (**R7**).
 
 **Reglas aplicables por capa (referencia rápida):**
 
@@ -72,7 +72,7 @@ flowchart LR
 | **TASK-HU-008-03** | Detalle de ficha para edición | `GET /api/catalog/trees/{treeId}`: DTO de lectura con campos editables del alta; **403**/**404** según propiedad y existencia; materializar `usuario_app` si aplica (ADR-0004). | Hecho |
 | **TASK-HU-008-04** | Actualización de ficha (`PUT`) | Caso de uso + `PUT /api/catalog/trees/{treeId}`: validaciones **R1**/**R2**; creador inmutable; sin publicación Kafka; **AUDITORIA_CATALOGO** operación de modificación (**R3**). | Hecho |
 | **TASK-HU-008-06** | Cliente HTTP hacia media-service | En **catalog-service**: `RestMediaEjemplarPhotosClient` con relay JWT a `DELETE /api/media/trees/{treeId}/photos`; mapeo 403/404/502 a excepciones de dominio. El catálogo invoca siempre a media; **media-service** hace no-op si no hay filas de foto. | Hecho |
-| **TASK-HU-008-07** | Borrado de árbol con cascada | `DELETE /api/catalog/trees/{treeId}` vía `EjemplarDeletionService`: (1) **DELETE** media; error media → **abort**; (2) borrado físico `ejemplar` en PostgreSQL; (3) puerto `EjemplarEnrichmentDeletionPort` → **`NoOpEjemplarEnrichmentDeletionPort`** (stub **TASK-HU-015-01**). Auditoría de baja (**R3**). **Rollback compensatorio** tras fotos borradas: **no** implementado en MVP (deuda documentada). | Hecho |
+| **TASK-HU-008-07** | Borrado de árbol con cascada | `DELETE /api/catalog/trees/{treeId}` vía `EjemplarDeleteService`: (1) **DELETE** media; error media → **abort**; (2) borrado físico `ejemplar` en PostgreSQL; (3) puerto `EjemplarEnrichmentDeletionPort` (borrado Mongo real con **HU-015** si Mongo activo; no-op en caso contrario). Auditoría de baja (**R3**). **Rollback compensatorio** tras fotos borradas: **no** implementado en MVP (deuda documentada). | Hecho |
 
 ### Media-service (backend)
 
@@ -109,7 +109,7 @@ flowchart LR
 
 - **`PATCH`** parcial en `/api/catalog/trees/{treeId}`.
 - ~~Galería añadir/borrar foto en edición~~ — entregado en **[TASK-HU-006-14](HU-006-ticket-breakdown.md)** (HU-006 cerrada).
-- Borrado real en Mongo (**[TASK-HU-015-01](HU-015-ticket-breakdown.md)**) más allá del stub `NoOpEjemplarEnrichmentDeletionPort`.
+- ~~Borrado real en Mongo (**[TASK-HU-015-01](HU-015-ticket-breakdown.md)**)~~ — entregado en **HU-015**.
 - **Rollback compensatorio** si falla SQL (o Mongo real) tras borrar fotos en media (escenario BDD 8; sin saga en MVP).
 - Bloqueo optimista / ETag en edición concurrente.
 - Listado de usuarios creadores para filtro **ADMIN** (endpoint dedicado o maestro si no existe selector).
@@ -121,7 +121,7 @@ flowchart LR
 - **HU-005:** contrato **CreateEjemplarRequest**, maestros especie/provincia, formulario de referencia.
 - **HU-013:** rutas protegidas `/mis-ejemplares`, `/ejemplares/:id/edit`.
 - **HU-006:** **cerrada**; galería en edición (**TASK-HU-006-14**) entregada.
-- **HU-015:** **TASK-HU-015-01** (hook borrado Mongo; stub en este corte).
+- **HU-015:** **TASK-HU-015-01** (borrado Mongo real) **cerrado**; el hook de baja lo invoca desde **HU-008**.
 - **API Gateway:** `/api/catalog` y `/api/media` operativos.
 
 ## Cierre sugerido (definición de “hecho” para el corte)

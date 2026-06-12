@@ -140,7 +140,7 @@ export function useCreateTreeForm() {
           flash = 'photosWarning'
         }
       }
-      await router.push(treeEditRouteAfterCreate(treeId, flash))
+      await router.push(treeEditRouteAfterCreate(treeId, flash, response.enrichmentWarning))
     } catch (error: unknown) {
       submitError.value = toMessage(error)
     } finally {

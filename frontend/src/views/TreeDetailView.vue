@@ -2,10 +2,13 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import SpeciesEnrichmentPopup from '@/components/enrichment/SpeciesEnrichmentPopup.vue'
+import TreeEnrichmentPanel from '@/components/enrichment/TreeEnrichmentPanel.vue'
 import PageBackLink from '@/components/layout/PageBackLink.vue'
 import TreeLocationMapPreview from '@/components/TreeLocationMapPreview.vue'
 import TreePhotoFullscreenViewer from '@/components/TreePhotoFullscreenViewer.vue'
 import { areLatLngInValidRange } from '@/composables/createTreeFormValidation'
+import { usePublicTreeEnrichment } from '@/composables/usePublicTreeEnrichment'
 import { fetchPublicTreeDetail } from '@/services/catalog/catalogService'
 import { fetchTreePhotoGallery } from '@/services/media/treeGalleryService'
 import { HttpError, NetworkError } from '@/services/http/apiClient'
@@ -23,6 +26,29 @@ const tree = ref<PublicTreeDetail | null>(null)
 const galleryPhotos = ref<TreePhotoGalleryItem[]>([])
 const selectedPhotoIndex = ref(0)
 const isFullscreenOpen = ref(false)
+
+const treeId = computed(() => {
+  const rawId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
+  const parsedId = Number(rawId)
+  if (!Number.isInteger(parsedId) || parsedId <= 0) {
+    return null
+  }
+  return parsedId
+})
+
+const publicEnrichment = usePublicTreeEnrichment({
+  treeId,
+  treeDetail: computed(() => tree.value),
+})
+
+const {
+  displaySpeciesEnrichment,
+  treeEnrichmentDraft,
+  isLoadingEnrichment,
+  enrichmentError,
+  speciesPopupOpen,
+  treeEnrichmentExpanded,
+} = publicEnrichment
 
 function mapError(error: unknown): string {
   if (error instanceof NetworkError) {
@@ -62,15 +88,6 @@ function displayText(value: string | null | undefined): string {
   const trimmed = value?.trim() ?? ''
   return trimmed.length > 0 ? trimmed : t('common.emptyValue')
 }
-
-const treeId = computed(() => {
-  const rawId = Array.isArray(route.params.id) ? route.params.id[0] : route.params.id
-  const parsedId = Number(rawId)
-  if (!Number.isInteger(parsedId) || parsedId <= 0) {
-    return null
-  }
-  return parsedId
-})
 
 const speciesCommonName = computed(() => tree.value?.commonName.trim() ?? '')
 const speciesScientificName = computed(() => tree.value?.scientificName.trim() ?? '')
@@ -191,7 +208,17 @@ onMounted(async () => {
       <PageBackLink :to="{ name: 'ejemplares-list' }">{{
         t('treesDetail.backToList')
       }}</PageBackLink>
-      <h1 class="page-header__title">{{ pageTitle }}</h1>
+      <div class="tree-detail-page__title-row">
+        <h1 class="page-header__title">{{ pageTitle }}</h1>
+        <SpeciesEnrichmentPopup
+          v-model:open="speciesPopupOpen"
+          :trigger-disabled="false"
+          :enrichment="displaySpeciesEnrichment"
+          readonly
+          :loading="isLoadingEnrichment"
+          :error="enrichmentError"
+        />
+      </div>
       <p v-if="tree && hasCommonName" class="tree-detail-page__scientific">
         {{ speciesScientificName }}
       </p>
@@ -297,6 +324,19 @@ onMounted(async () => {
             <dd>{{ coordinatesLine }}</dd>
           </div>
         </dl>
+      </section>
+
+      <section
+        class="tree-detail-page__enrichment-section"
+        :aria-label="t('enrichment.tree.sectionTitle')"
+      >
+        <TreeEnrichmentPanel
+          v-model:expanded="treeEnrichmentExpanded"
+          :model-value="treeEnrichmentDraft"
+          readonly
+          :loading="isLoadingEnrichment"
+          :error="enrichmentError"
+        />
       </section>
 
       <footer class="actions page-actions-footer tree-detail-page__footer">
