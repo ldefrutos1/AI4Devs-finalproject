@@ -43,35 +43,23 @@ No hay umbral de cobertura % obligatorio; sí reglas mínimas por tipo de cambio
 
 ## 5. Definición de hecho para un cambio frontend con lógica
 
-- `npm run test` en `frontend/` pasa.
-- `npm run build` en `frontend/` pasa (`vue-tsc` + build Vite).
-- La nueva lógica relevante tiene tests añadidos/actualizados.
-- No hay copy hardcode en vistas para errores/placeholders si existe i18n.
+- `npm run lint`, `npm run typecheck` y `npm run test` pasan (comandos en [devsecops-ci.md](devsecops-ci.md)).
+- `npm run build` si el cambio afecta al bundle.
+- Tests e i18n según §2.
 
-## 6. Ejecutar tests frontend
+## 6. Ejecutar tests (Vitest)
 
-Desde `frontend/`:
+Lint, typecheck y audit: [devsecops-ci.md](devsecops-ci.md). Desde `frontend/`:
 
-- Todos los tests:
-
-  ```bash
-  npm run test
-  ```
-
-- Un archivo concreto:
-
-  ```bash
-  npx vitest run src/router/index.test.ts
-  ```
-
-- Por patrón de nombre:
-
-  ```bash
-  npx vitest run -t "redirige a auth-error"
-  ```
+```bash
+npm run test
+npx vitest run src/router/index.test.ts
+npx vitest run -t "redirige a auth-error"
+```
 
 ## 7. Referencias relacionadas (sin duplicar)
 
+- **DevSecOps / CI:** [devsecops-ci.md](devsecops-ci.md)
 - **E2E de UI (Playwright):** [testing-e2e.md](testing-e2e.md) — flujo de navegador extremo a extremo (carpeta `e2e/`); este documento cubre solo Vitest.
 - Reglas cortas IA: [frontend-security.mdc](../../.cursor/rules/frontend-security.mdc), [frontend-vue3.mdc](../../.cursor/rules/frontend-vue3.mdc), [quality-and-testing.mdc](../../.cursor/rules/quality-and-testing.mdc).
 - Guía de inicio frontend: [docs/onboarding/vue-development-guide.md](../onboarding/vue-development-guide.md).

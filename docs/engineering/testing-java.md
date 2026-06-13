@@ -60,7 +60,7 @@ No hay **umbral de cobertura %** obligatorio en CI; sí estas reglas **baratas d
 | **Contrato OpenAPI** (cuando exista en CI) | Forma de request/response | Comportamiento con Keycloak vivo |
 | **Cypress / Playwright** | OIDC y UX de sesión en SPA | 401/403 de API ni paginación de catálogo |
 
-**CI (MVP):** por defecto [.github/workflows/ci.yml](../../.github/workflows/ci.yml) ejecuta `mvn test` y Vitest del frontend; **no** exige E2E de sistema ni Playwright. Un job opcional (`e2e-back`) puede ejecutar `system-e2e-tests` con stack + token (ver README del módulo). Trazabilidad de clases: tags `hu001-s0N` y prefijo `Hu001Scenario0N…`. La **UI E2E (Playwright)** es manual vía [.github/workflows/e2e-playwright.yml](../../.github/workflows/e2e-playwright.yml) (ver [testing-e2e.md](testing-e2e.md) §4).
+**CI (MVP):** [.github/workflows/ci.yml](../../.github/workflows/ci.yml) — en cada PR: `mvn test`, frontend (`lint`, `typecheck`, Vitest) y Gitleaks. Dependencias (npm audit + OWASP): workflow manual — [devsecops-ci.md](devsecops-ci.md). Sin E2E obligatorio; Playwright manual: [e2e-playwright.yml](../../.github/workflows/e2e-playwright.yml), [testing-e2e.md](testing-e2e.md) §4.
 
 #### 2.1.2. Diseño del módulo `system-e2e-tests`
 

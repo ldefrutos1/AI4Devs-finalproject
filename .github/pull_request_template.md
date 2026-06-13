@@ -29,10 +29,10 @@
 
 <!-- Checklist de validación ejecutada -->
 
-- [ ] `frontend`: `npm run build`
+- [ ] `frontend`: `npm run lint` y `npm run typecheck`
 - [ ] `frontend`: `npm run test` (si aplica)
-- [ ] `services`: tests del módulo afectado (si aplica)
-- [ ] Prueba manual en local
+- [ ] `services`: `mvn -f services/pom.xml test` (módulo afectado, si aplica)
+- [ ] Prueba manual en local (si aplica)
 
 ## Checklist único de calidad (front/back)
 
@@ -45,6 +45,16 @@
 - [ ] Seguridad revisada (auth, validaciones, secretos, permisos, si aplica)
 - [ ] **Frontend (si aplica):** textos en `i18n`, consistencia visual y responsive
 - [ ] **Backend (si aplica):** validaciones, manejo de errores y cobertura de tests
+
+## Seguridad y dependencias (DevSecOps)
+
+<!-- Ver docs/engineering/devsecops-ci.md -->
+
+- [ ] No hay secretos reales en el diff (`.env`, tokens, claves); Gitleaks debe pasar en CI
+- [ ] Si toca auth/JWT/roles: revisado según [api-security.mdc](.cursor/rules/api-security.mdc) y [jwt-gateway-strategy.md](docs/security/jwt-gateway-strategy.md)
+- [ ] Si añade dependencia npm/Maven: sin CVE high/critical conocidos (o issue de mitigación)
+- [ ] Si toca frontend con datos de usuario: sin `v-html` sin sanitizar; sin secretos en `VITE_*`
+- [ ] Si el cambio es grande o toca deps: `npm audit` / OWASP en local o workflow *Security — dependencias* ([devsecops-ci.md](docs/engineering/devsecops-ci.md))
 
 ## Riesgos / impacto
 
