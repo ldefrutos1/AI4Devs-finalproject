@@ -1,3 +1,19 @@
+## Trazabilidad (obligatorio)
+
+| Campo | Valor |
+|-------|--------|
+| **HU** | HU-xxx |
+| **Ticket(s)** | TASK-HU-xxx-nn |
+| **Breakdown** | [docs/backlog/HU-xxx-ticket-breakdown.md](docs/backlog/HU-xxx-ticket-breakdown.md) |
+
+**Alcance del ticket en esta PR** (1–2 frases; coherente con el breakdown):
+
+- 
+
+**Fuera de alcance** *(opcional)*:
+
+- Ninguno
+
 ## Resumen
 
 <!-- Qué problema resuelve y por qué este cambio aporta valor -->
@@ -68,3 +84,9 @@
 <!-- Puntos concretos donde quieres feedback del revisor -->
 
 - 
+
+## Cierre de trazabilidad (autor, antes de merge)
+
+- [ ] Ticket(s) → **Hecho** en el breakdown
+- [ ] Si era el último ticket: **Estado** de la HU en [backlog.md](docs/backlog/backlog.md) §3 → **Cerrada**
+- [ ] Si quedan tickets pendientes: §3 → **En curso**

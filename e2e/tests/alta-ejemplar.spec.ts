@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { loginAsCollaborator } from '../fixtures/auth'
+import { expectCreateTreeFormReady } from '../fixtures/treeForm'
 
 /**
  * E2E del flujo de alta de ejemplar (colaborador):
@@ -31,8 +32,7 @@ test('alta, consulta y borrado de un ejemplar por un colaborador', async ({ page
     await page.goto('/ejemplares/new')
 
     // El formulario solo se renderiza cuando los maestros (especies/provincias) han cargado.
-    const form = page.getByTestId('tree-form')
-    await expect(form).toBeVisible()
+    await expectCreateTreeFormReady(page)
 
     // Especie: abrir el autocompletado y elegir la primera sugerencia disponible.
     await page.getByTestId('tree-form-species').click()

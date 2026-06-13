@@ -59,7 +59,7 @@ class CatalogEnrichmentApiIT {
     registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
     registry.add("spring.datasource.username", POSTGRES::getUsername);
     registry.add("spring.datasource.password", POSTGRES::getPassword);
-    registry.add("spring.data.mongodb.uri", MONGO::getConnectionString);
+    registry.add("spring.mongodb.uri", MONGO::getConnectionString);
     registry.add("mtl.catalog.mongo.enabled", () -> "true");
   }
 

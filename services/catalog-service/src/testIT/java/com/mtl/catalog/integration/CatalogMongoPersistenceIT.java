@@ -41,7 +41,7 @@ class CatalogMongoPersistenceIT {
 
   @DynamicPropertySource
   static void mongoProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.data.mongodb.uri", MONGO::getConnectionString);
+    registry.add("spring.mongodb.uri", MONGO::getConnectionString);
   }
 
   @Autowired private EspecieDetalleMongoRepository especieDetalleMongoRepository;

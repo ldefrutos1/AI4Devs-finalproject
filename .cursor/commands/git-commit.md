@@ -28,9 +28,13 @@ Invoca este comando (p. ej. `/git-commit`) o menciona `@.cursor/commands/git-com
 ```
 tipo(ámbito opcional): resumen en una línea (máx. ~72 caracteres)
 
+TASK-HU-xxx-nn
+
 - Bullet con cambio concreto 1
 - Bullet con cambio concreto 2
 ```
+
+La línea `TASK-HU-xxx-nn` es opcional en fixes puntuales; recomendada en trabajo de backlog.
 
 | `tipo` | Cuándo |
 |--------|--------|

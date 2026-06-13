@@ -39,6 +39,7 @@ Si envías la plantilla **sin rellenar**, el agente no tiene una tarea ejecutabl
 
 - Comandos: [p. ej. `mvn -pl … verify` o `mvn test` desde `services/`]
 - Documentación: [actualizar / no actualizar; qué ficheros como máximo]
+- Trazabilidad: PR con HU + TASK; tras merge, ticket **Hecho** en breakdown y **Estado** coherente en `backlog.md` §3
 
 ## Modo
 
