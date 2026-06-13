@@ -1,0 +1,31 @@
+# Gitleaks — MyTreeLibrary
+# Extiende reglas por defecto; allowlist para fixtures de desarrollo local (no producción).
+
+title = "MyTreeLibrary gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Contraseñas y usuarios de ejemplo en Compose, .env.example y docs de arranque local"
+paths = [
+  '''(?:^|/)infra/compose/\.env\.example$''',
+  '''(?:^|/)frontend/\.env\.example$''',
+  '''(?:^|/)e2e/\.env\.example$''',
+  '''(?:^|/)services/.*/src/main/resources/application-dev\.properties$''',
+  '''(?:^|/)services/.*/src/test/resources/''',
+  '''(?:^|/)docs/''',
+  '''(?:^|/)infra/compose/README\.md$''',
+  '''(?:^|/)frontend/README\.md$''',
+  '''(?:^|/)services/README\.md$''',
+  '''(?:^|/)readme\.md$''',
+]
+
+regexes = [
+  '''mtl_dev_password''',
+  '''mtl_mongo_dev_password''',
+  '''minio_dev_password''',
+  '''admin_dev_password''',
+  '''keycloak_dev_password''',
+  '''colaborador_dev''',
+]

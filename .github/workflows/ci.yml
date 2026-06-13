@@ -1,6 +1,6 @@
 name: CI
 
-# Pipeline por defecto en PR/push: tests Java (Surefire) y frontend (Vitest).
+# Pipeline por defecto en PR/push: tests Java, frontend (lint, typecheck, Vitest) y Gitleaks.
 # E2E Playwright (Docker pesado): solo manual en e2e-playwright.yml.
 
 on:
@@ -34,7 +34,7 @@ jobs:
         run: mvn -f services/pom.xml test -B
 
   frontend:
-    name: Tests frontend (Vitest)
+    name: Calidad y tests frontend
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -53,6 +53,34 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Ejecutar tests
+      - name: ESLint
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Typecheck (vue-tsc)
+        working-directory: frontend
+        run: npm run typecheck
+
+      - name: Ejecutar tests (Vitest)
         working-directory: frontend
         run: npm test
+
+  gitleaks:
+    name: Secretos (Gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Gitleaks (diff en PR / último commit en push)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml
