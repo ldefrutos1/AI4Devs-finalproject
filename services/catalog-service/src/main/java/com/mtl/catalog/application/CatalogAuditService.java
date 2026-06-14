@@ -5,6 +5,8 @@ import com.mtl.catalog.infrastructure.persistence.jpa.repository.AuditoriaCatalo
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CatalogAuditService {
@@ -12,6 +14,8 @@ public class CatalogAuditService {
   public static final String OPERACION_EJEMPLAR_CREADO = "EJEMPLAR_CREADO";
   public static final String OPERACION_EJEMPLAR_MODIFICADO = "EJEMPLAR_MODIFICADO";
   public static final String OPERACION_EJEMPLAR_ELIMINADO = "EJEMPLAR_ELIMINADO";
+  public static final String OPERACION_EJEMPLAR_ELIMINACION_PARCIAL_FALLIDA =
+      "EJEMPLAR_ELIMINACION_PARCIAL_FALLIDA";
   public static final String OPERACION_FAMILIA_CREADA = "FAMILIA_CREADA";
   public static final String OPERACION_GENERO_CREADO = "GENERO_CREADO";
   public static final String OPERACION_ESPECIE_CREADA = "ESPECIE_CREADA";
@@ -69,6 +73,31 @@ public class CatalogAuditService {
     auditoriaCatalogoRepository.save(row);
   }
 
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void recordEjemplarDeletePartialFailure(
+      long actorUsuarioAppId,
+      long ejemplarId,
+      long especieId,
+      long provinciaId,
+      String faseFallida,
+      String correlationId,
+      RuntimeException error) {
+    AuditoriaCatalogo row = new AuditoriaCatalogo();
+    row.setActorUsuarioAppId(actorUsuarioAppId);
+    row.setOperacion(OPERACION_EJEMPLAR_ELIMINACION_PARCIAL_FALLIDA);
+    row.setOcurridoEn(OffsetDateTime.now(ZoneOffset.UTC));
+    row.setDatosPreviosResumen(
+        "ejemplar_id=%d especie_id=%d provincia_id=%d media_delete=OK"
+            .formatted(ejemplarId, especieId, provinciaId));
+    row.setDatosNuevosResumen(
+        "estado=PENDING_MANUAL_REVIEW fase_fallida=%s correlation_id=%s error=%s"
+            .formatted(
+                safe(faseFallida),
+                safe(correlationId),
+                safe(error.getClass().getSimpleName() + ": " + error.getMessage())));
+    auditoriaCatalogoRepository.save(row);
+  }
+
   public void recordFamilyCreated(long actorUsuarioAppId, String resumen) {
     AuditoriaCatalogo row = new AuditoriaCatalogo();
     row.setActorUsuarioAppId(actorUsuarioAppId);
@@ -118,5 +147,13 @@ public class CatalogAuditService {
     row.setDatosPreviosResumen(resumen);
     row.setDatosNuevosResumen(null);
     auditoriaCatalogoRepository.save(row);
+  }
+
+  private static String safe(String value) {
+    if (value == null || value.isBlank()) {
+      return "n/a";
+    }
+    String normalized = value.replace('\n', ' ').replace('\r', ' ').trim();
+    return normalized.length() <= 500 ? normalized : normalized.substring(0, 500);
   }
 }

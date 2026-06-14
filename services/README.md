@@ -178,6 +178,36 @@ En **catalog-service**, `application-prod.properties` fija además `spring.datas
 
 ---
 
+### Patron comun MVC: seguridad, errores y correlacion
+
+Para nuevos microservicios MVC o al tocar seguridad/errores en servicios existentes, tomar
+**catalog-service** como implementacion de referencia hasta que exista una libreria compartida.
+No extraer un modulo comun en el MVP salvo repeticion dolorosa y decision explicita.
+
+Piezas esperadas por servicio:
+
+| Responsabilidad | Paquete/clase de referencia |
+|-----------------|-----------------------------|
+| JWT Resource Server y rutas por rol | `catalog-service/.../config/CatalogSecurityConfig.java` |
+| Roles Keycloak realm (`realm_access.roles` -> `ROLE_*`) | `catalog-service/.../config/KeycloakRealmRoleConverter.java` |
+| Correlacion `X-Correlation-Id` en MDC y respuesta | `catalog-service/.../web/CorrelationIdFilter.java` |
+| Errores 401/403 como `application/problem+json` | `catalog-service/.../web/error/ProblemAuthenticationEntryPoint.java` y `ProblemAccessDeniedHandler.java` |
+| Enriquecimiento de `ProblemDetail` con `correlationId` | `catalog-service/.../web/error/ProblemDetailEnricher.java` |
+| Escritura manual de Problem JSON | `catalog-service/.../web/error/ProblemHttpWriter.java` |
+| Advice global de errores de negocio/validacion | `catalog-service/.../web/error/CatalogExceptionHandler.java` |
+
+Checklist minimo al crear o alinear un servicio MVC:
+
+- Mantener `SecurityFilterChain` stateless, sin `httpBasic`, `formLogin` ni `logout`.
+- Permitir solo `health`, `info`, `prometheus` y las rutas publicas definidas en OpenAPI.
+- Convertir roles de realm Keycloak con el mismo criterio que `catalog-service`.
+- Devolver 401/403 y errores de negocio en formato `ProblemDetail`; sin HTML ni JSON ad hoc.
+- Propagar o generar `X-Correlation-Id`, guardarlo en MDC y anadirlo al `ProblemDetail`.
+- No loguear tokens, secretos ni PII; usar mensajes parametrizados.
+- Si hay diferencias por dominio, documentarlas en el servicio o en el ticket/PR.
+
+---
+
 ## 5. Enfoque por historias de usuario
 
 Los puntos **5 en adelante** del roadmap (dominio, Kafka, media, IA, front, CI, etc.) se irán desarrollando **historia a historia**; este README puede ampliarse cuando cerréis el primer flujo extremo a extremo (JWT + catálogo + notificación, etc.).
@@ -189,8 +219,8 @@ Los puntos **5 en adelante** del roadmap (dominio, Kafka, media, IA, front, CI, 
 - **API catálogo** (`catalog-service`, JWT **COLABORADOR** / **ADMIN**): `GET /api/catalog/trees` (listado con filtros y paginación), `GET|PUT|DELETE /api/catalog/trees/{treeId}`. **COLABORADOR:** solo fichas propias (`usuario_app_id` del actor). **ADMIN:** cualquier ficha; filtro opcional `createdByUserId` en listado. Validación de rango de fechas `createdFrom` ≤ `createdTo` (**400**). Actualización solo **`PUT`** (sin **`PATCH`** en MVP). **PUT**/**DELETE** no publican Kafka ni disparan notificación (**R7**); auditoría en **`AUDITORIA_CATALOGO`** (**R3**, [ADR-0004](../docs/adr/0004-catalog-rest-write-and-audit.md)).
 - **API media** (borrado en cascada y galería en edición): `DELETE /api/media/trees/{treeId}/photos` (todas las fotos del ejemplar: metadatos + objetos en bucket; no-op si no hay filas); `DELETE /api/media/photos/{photoId}` (una foto, **HU-006**). Media valida permiso llamando a catálogo (`GET /api/catalog/trees/{treeId}/media-submission-permission`).
 - **Orden de baja** (`EjemplarDeleteService` en **catalog-service**): (1) `DELETE` en **media-service** con relay del Bearer del cliente; si media responde error → **abort** (el ejemplar **no** se borra en PostgreSQL); (2) borrado físico de `ejemplar` en PostgreSQL; (3) puerto `EjemplarEnrichmentDeletionPort` — con Mongo activo (**HU-015**, `mtl.catalog.mongo.enabled=true`): `MongoEjemplarEnrichmentDeletionPort` elimina físicamente `ejemplar_detalle` por `ejemplar_pg_id`; con Mongo desactivado: `NoOpEjemplarEnrichmentDeletionPort` (solo log). La llamada HTTP a media queda **fuera** de la transacción JPA del catálogo.
-- **Límites MVP:** no hay **rollback compensatorio** si falla el paso SQL (o el borrado Mongo) **después** de haber borrado fotos en media (escenario BDD 8 de [HU-008-edicion-de-mis-arboles.md](../docs/backlog/HU-008-edicion-de-mis-arboles.md)); no saga distribuida.
-- **Cliente catalog → media:** `mtl.media.base-url` (por defecto `http://localhost:8082` en `application.properties`; en **`dev`**: `${MTL_MEDIA_BASE_URL:http://localhost:8082}`). Sin **media-service** en marcha, `DELETE` de árbol con fotos devuelve **502** al cliente.
+- **Límites MVP:** no hay **rollback compensatorio** si falla el paso SQL (o el borrado Mongo) **después** de haber borrado fotos en media (escenario BDD 8 de [HU-008-edicion-de-mis-arboles.md](../docs/backlog/HU-008-edicion-de-mis-arboles.md)); no saga distribuida. Si ocurre tras media OK, se audita `EJEMPLAR_ELIMINACION_PARCIAL_FALLIDA` en `catalog.auditoria_catalogo`.
+- **Cliente catalog → media:** `mtl.media.base-url` (por defecto `http://localhost:8082` en `application.properties`; en **`dev`**: `${MTL_MEDIA_BASE_URL:http://localhost:8082}`). Sin **media-service** en marcha, `DELETE` de árbol con fotos devuelve **502** al cliente. Timeouts: `mtl.media.connect-timeout=PT2S`, `mtl.media.read-timeout=PT5S`.
 - **Tests automáticos:** `mvn -pl catalog-service,media-service test` (unitarios/WebMvc; orden media→SQL: `EjemplarDeletionServiceTest`). **IT** catalog↔media en runtime (**TASK-HU-008-11**): **rechazado** en el desglose; verificación manual en [frontend/README.md](../frontend/README.md) (apartado HU-008).
 - **Arranque local típico:** Compose + **catalog-service** **8081** + **media-service** **8082** + gateway **8080** (o llamadas directas a 8081/8082 en depuración). Contrato: [openapi.yaml](../docs/api/openapi.yaml).
 

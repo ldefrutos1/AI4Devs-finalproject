@@ -1,8 +1,12 @@
 package com.mtl.catalog.application;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +28,7 @@ class EjemplarDeletionServiceTest {
   @Mock private UsuarioAppMaterializationService usuarioAppMaterializationService;
   @Mock private EjemplarDeleteService ejemplarDeleteService;
   @Mock private MediaEjemplarPhotosClient mediaEjemplarPhotosClient;
+  @Mock private CatalogAuditService catalogAuditService;
   @InjectMocks private EjemplarDeletionService ejemplarDeletionService;
 
   @Test
@@ -41,6 +46,42 @@ class EjemplarDeletionServiceTest {
     order.verify(ejemplarDeleteService).authorize(42L, 5L, false);
     order.verify(mediaEjemplarPhotosClient).deleteAllPhotosForEjemplar(42L, jwt);
     order.verify(ejemplarDeleteService).commitPhysicalDelete(auth, 5L);
+  }
+
+  @Test
+  void deleteEjemplar_auditaFalloParcialSiMediaOkYFallaBorradoCatalogo() {
+    UsuarioApp actor = usuario(5L);
+    EjemplarDeleteAuthorization auth = new EjemplarDeleteAuthorization(42L, 10L, 28L);
+    Jwt jwt = collaboratorJwt();
+    RuntimeException failure = new IllegalStateException("fallo sql");
+
+    when(usuarioAppMaterializationService.materialize(any(OidcUserProfile.class))).thenReturn(actor);
+    when(ejemplarDeleteService.authorize(42L, 5L, false)).thenReturn(auth);
+    doThrow(failure).when(ejemplarDeleteService).commitPhysicalDelete(auth, 5L);
+
+    assertThrows(IllegalStateException.class, () -> ejemplarDeletionService.deleteEjemplar(42L, jwt));
+
+    verify(mediaEjemplarPhotosClient).deleteAllPhotosForEjemplar(42L, jwt);
+    verify(catalogAuditService)
+        .recordEjemplarDeletePartialFailure(5L, 42L, 10L, 28L, "CATALOG_DELETE", null, failure);
+  }
+
+  @Test
+  void deleteEjemplar_noAuditaFalloParcialSiFallaMedia() {
+    UsuarioApp actor = usuario(5L);
+    EjemplarDeleteAuthorization auth = new EjemplarDeleteAuthorization(42L, 10L, 28L);
+    Jwt jwt = collaboratorJwt();
+    RuntimeException failure = new IllegalStateException("media caido");
+
+    when(usuarioAppMaterializationService.materialize(any(OidcUserProfile.class))).thenReturn(actor);
+    when(ejemplarDeleteService.authorize(42L, 5L, false)).thenReturn(auth);
+    doThrow(failure).when(mediaEjemplarPhotosClient).deleteAllPhotosForEjemplar(42L, jwt);
+
+    assertThrows(IllegalStateException.class, () -> ejemplarDeletionService.deleteEjemplar(42L, jwt));
+
+    verify(ejemplarDeleteService, never()).commitPhysicalDelete(any(), eq(5L));
+    verify(catalogAuditService, never())
+        .recordEjemplarDeletePartialFailure(anyLong(), anyLong(), anyLong(), anyLong(), any(), any(), any());
   }
 
   private static UsuarioApp usuario(long id) {

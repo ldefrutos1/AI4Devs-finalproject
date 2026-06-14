@@ -6,13 +6,13 @@
 | **Refinamiento** | [HU-015-proyeccion-y-enriquecimiento-mongo.md](HU-015-proyeccion-y-enriquecimiento-mongo.md) |
 | **Épica** | Catálogo colaborador |
 | **Título HU** | Proyección y enriquecimiento Mongo |
-| **Estado HU** | **Hecho** |
+| **Estado HU** | **Cerrada** (14/14 tickets **Hecho**) |
 
 **Convención de ID de ticket:** `TASK-HU-015-<nn>`.
 
 **Estado del ticket:** columna **Estado** en cada fila; valores recomendados **Pendiente** (por defecto), **En curso**, **Hecho**, **Rechazado**. Actualízala al cerrar o arrancar trabajo.
 
-**Contexto de equipo:** un ingeniero/a **full-stack**; stack en [readme.md](../../readme.md). Se asume **HU-005** (alta), **HU-008** (edición/baja; hook Mongo **stub**), **HU-013** (rutas), **HU-002** (detalle público) y Mongo en Compose operativo. **HU-016** consumirá los endpoints de **`especie_detalle`** desde el **frontend** (sin comunicación ai-service ↔ catalog-service).
+**Contexto de equipo:** un ingeniero/a **full-stack**; stack en [readme.md](../../readme.md). Se asume **HU-005** (alta), **HU-008** (edición/baja; hook Mongo vía **TASK-HU-015-01**), **HU-013** (rutas), **HU-002** (detalle público) y Mongo en Compose operativo. **HU-016** consumirá los endpoints de **`especie_detalle`** desde el **frontend** (sin comunicación ai-service ↔ catalog-service).
 
 **Objetivo de este desglose:** capa Mongo en **catalog-service**, API de enriquecimiento, proyección mínima tras SQL, borrado real en cascada (**TASK-01**), UI (popup especie + div colapsable ejemplar) en alta, edición y detalle público; sin IA ni sync SQL→Mongo en renombre/baja de especie.
 
@@ -131,7 +131,7 @@ flowchart LR
 
 ## Dependencias externas a esta HU
 
-- **HU-005** / **HU-008:** POST/PUT/DELETE de fichas; hook de borrado stub → **TASK-01**.
+- **HU-005** / **HU-008:** POST/PUT/DELETE de fichas; borrado Mongo en cascada (**TASK-HU-015-01** **Hecho**).
 - **HU-002:** detalle público donde se integra **TASK-12**.
 - **HU-013:** rutas y guardas.
 - **HU-016:** reutiliza endpoints de **TASK-04** desde el frontend (sin acoplar microservicios).

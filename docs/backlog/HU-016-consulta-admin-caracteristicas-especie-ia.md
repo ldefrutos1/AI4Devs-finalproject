@@ -9,6 +9,7 @@
 | **Título** | Consulta de características de especie (ADMIN, MVP) |
 | **Estimación de complejidad** | M |
 | **Prioridad** | Media |
+| **Estado** | **Pendiente** (sin breakdown; API de especie **HU-015** **Cerrada**) |
 
 **Historia de usuario**
 

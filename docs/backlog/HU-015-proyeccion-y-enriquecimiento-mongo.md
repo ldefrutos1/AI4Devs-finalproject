@@ -9,6 +9,7 @@
 | **Título** | Proyección y enriquecimiento Mongo |
 | **Estimación de complejidad** | L |
 | **Prioridad** | Media |
+| **Estado** | **Cerrada** |
 
 **Historia de usuario**
 
@@ -48,7 +49,7 @@ Como colaborador o administrador del catálogo, quiero consultar y, cuando corre
 
 - Infra **MongoDB** en Compose operativa.
 - [mongo-hybrid.mdc](../../.cursor/rules/mongo-hybrid.mdc), [ADR-0002](../adr/0002-claves-primarias-numericas-frente-a-uuid.md) y [ADR-0006](../adr/0006-ejemplar-aggregate-http-kafka-naming.md).
-- **HU-005** (alta de ejemplar), **HU-008** (edición/baja; hook de borrado stub → real), **HU-013** (rutas y guardas).
+- **HU-005** (alta de ejemplar), **HU-008** (edición/baja; borrado Mongo **TASK-HU-015-01** **Hecho**), **HU-013** (rutas y guardas).
 - **HU-002** (detalle público donde se muestra enriquecimiento en solo lectura).
 - **HU-016:** el **frontend** de `/admin/masters` usa los mismos endpoints de catálogo para cargar/guardar `especie_detalle`; **ai-assistant-service** no se comunica con **catalog-service**.
 
@@ -152,4 +153,24 @@ Desglose de tickets: [HU-015-ticket-breakdown.md](HU-015-ticket-breakdown.md). C
 
 ## 4. Esfuerzo estimado de implementación
 
-Orden de magnitud **L**: **catalog-service** (Spring Data Mongo, repositorios, orquestación post-commit SQL, sustitución del stub de borrado, endpoints OpenAPI), **frontend** (componentes reutilizables popup/div colapsable en **CreateTreeView**, **EditTreeView**, **TreeDetailView**), pruebas unitarias e integración Testcontainers. Cifra en persona-días: **no fijada en fuentes**.
+Orden de magnitud **L**: **catalog-service** (Spring Data Mongo, repositorios, orquestación post-commit SQL, borrado en cascada Mongo, endpoints OpenAPI), **frontend** (componentes reutilizables popup/div colapsable en **CreateTreeView**, **EditTreeView**, **TreeDetailView**), pruebas unitarias e integración Testcontainers. Cifra en persona-días: **no fijada en fuentes**.
+
+## 5. Estado de implementación en código (corte HU-015, 2026)
+
+Objetivo: trazar lo construido frente a la HU completa (secciones 2–3).
+
+| Pieza | Estado | Notas |
+|-------|--------|--------|
+| **Capa Mongo** (`especie_detalle`, `ejemplar_detalle`, índices) | Hecho | **TASK-02**; `mtl.catalog.mongo.enabled=true`; URI Spring Boot 4: `spring.mongodb.uri`. |
+| **Contrato OpenAPI enriquecimientos** | Hecho | **TASK-03**; rutas autenticadas y `GET /api/catalog/public/trees/{treeId}/enrichment`; `enrichmentWarning` en POST/PUT de árbol. |
+| **API especie y ejemplar** | Hecho | **TASK-04**, **TASK-05**; autorización por rol. |
+| **Proyección mínima post-SQL** | Hecho | **TASK-06**; aviso `enrichmentWarning` si falla Mongo tras éxito SQL. |
+| **Borrado cascada Mongo (HU-008)** | Hecho | **TASK-01**; `MongoEjemplarEnrichmentDeletionPort` / `NoOp` si Mongo desactivado. |
+| **Lectura pública compuesta** | Hecho | **TASK-07** + integración en **TreeDetailView** (**TASK-12**). |
+| **Tests backend Mongo/API** | Hecho | **TASK-08**; `*IT` con Testcontainers Mongo. |
+| **Cliente API frontend** | Hecho | **TASK-09**; `enrichmentService.ts`. |
+| **Componentes UI** (popup especie, panel ejemplar) | Hecho | **TASK-10**; `components/enrichment/*`. |
+| **Integración alta/edición/detalle público** | Hecho | **TASK-11**, **TASK-12**; `useTreeFormEnrichment`, `usePublicTreeEnrichment`. |
+| **Tests frontend** | Hecho | **TASK-13**; Vitest en servicio, composables y componentes. |
+| **Documentación operativa E2E** | Hecho | **TASK-14**; [services/README.md](../../services/README.md), [frontend/README.md](../../frontend/README.md). |
+| **Desglose HU-015** | Hecho | [HU-015-ticket-breakdown.md](HU-015-ticket-breakdown.md); HU **Cerrada** en [backlog.md](backlog.md) §3. |

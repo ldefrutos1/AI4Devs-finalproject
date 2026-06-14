@@ -799,7 +799,7 @@ sequenceDiagram
 
 En el MVP solo aplica la consulta de características de especie por **ADMIN** ([HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md)); identificación por imagen y chat: [HU-009](docs/backlog/backlog.md) y [HU-010](docs/backlog/backlog.md) (próxima versión). Detalle de historias: [backlog](docs/backlog/backlog.md) §3.
 
-**Flujo de consulta IA (MVP; especie vía ai-assistant-service y catalog-service):**
+**Flujo de consulta IA (MVP; orquestación en la SPA — sin llamadas ai-assistant-service → catalog-service):**
 
 ```mermaid
 sequenceDiagram
@@ -809,9 +809,12 @@ sequenceDiagram
   participant AIS as ai_assistant_service
   participant CAT as catalog_service
   SPA->>KC: Registro_o_login_PKCE
-  SPA->>GW: Consulta_IA_o_datos_especie
+  SPA->>GW: Solicitar_enriquecimiento_IA
   GW->>AIS: Proxy_JWT
-  AIS->>CAT: Remitir_informacion
+  AIS-->>SPA: JSON_validado_orientativo
+  SPA->>GW: Guardar_especie_detalle
+  GW->>CAT: PUT_enrichment
+  CAT-->>SPA: especie_detalle_persistido
 ```
 
 
@@ -1149,7 +1152,7 @@ Para el Alta de ejemplar, los valores admitidos son:
 
 #### **4.2.2 MongoDB (catalog-service; modelo en mongo.md)**
 
-Almacén de **enriquecimiento** (*system of enrichment*): no sustituye a PostgreSQL. Dos colecciones principales — `especie_detalle` (datos ampliados de especie, p. ej. vía LLM en **HU-016**) y `ejemplar_detalle` (medidas, etiquetas y observaciones del ejemplar; `ejemplar_pg_id` = `catalog.ejemplar.ejemplar_id`). Desnormalización controlada de nombres de especie para búsqueda sin join obligatorio con SQL. Diseño, índices y validación: [mongo.md](docs/data-model/mongo.md). Implementación prevista en **catalog-service** (**HU-015**); en el MVP la integración sigue en curso.
+Almacén de **enriquecimiento** (*system of enrichment*): no sustituye a PostgreSQL. Dos colecciones principales — `especie_detalle` (datos ampliados de especie, p. ej. vía LLM en **HU-016**) y `ejemplar_detalle` (medidas, etiquetas y observaciones del ejemplar; `ejemplar_pg_id` = `catalog.ejemplar.ejemplar_id`). Desnormalización controlada de nombres de especie para búsqueda sin join obligatorio con SQL. Diseño, índices y validación: [mongo.md](docs/data-model/mongo.md). Implementado en **catalog-service** y consumido desde el **frontend** (**HU-015**, **Cerrada**).
 
 ```mermaid
 erDiagram
@@ -1276,7 +1279,7 @@ erDiagram
 
 ### **4.3. Descripción de entidades principales (orientación física)**
 
-Las entidades físicas se reparten por servicio y almacén como se indica en §3.2: un servidor **PostgreSQL** con cuatro esquemas `catalog`, `media`, `notification` y `ai`; una base **MongoDB** de enriquecimiento (colecciones en [mongo.md](docs/data-model/mongo.md)), con acceso previsto desde **catalog-service** (**HU-015**). El flujo **HU-016** actualiza `especie_detalle` según §6 de `mongo.md` (orquestación en **ai-assistant-service**).
+Las entidades físicas se reparten por servicio y almacén como se indica en §3.2: un servidor **PostgreSQL** con cuatro esquemas `catalog`, `media`, `notification` y `ai`; una base **MongoDB** de enriquecimiento (colecciones en [mongo.md](docs/data-model/mongo.md)), con acceso desde **catalog-service** (**HU-015**, **Cerrada**). El flujo **HU-016** persiste `especie_detalle` vía **frontend** → **catalog-service** (orquestación en la SPA; **ai-assistant-service** valida JSON LLM y no escribe en Mongo).
 
 **Usuario de aplicación:** La auditoría de la aplicación se implementa en torno al usuario proporcionado por el token generado por Keycloak como proveedor OIDC. Para evitar duplicidades los diversos esquemas almacenan el identificador estable del proveedor (`sub`) que se guarda en el campo **`subject_oidc`**. En el caso de catalog-service este campo se guarda en una tabla USUARIO_APP con unicidad, no como clave primaria; esto permite trazabilidad sin duplicar la información; las FK de los campos de auditoría `creado_por` y `modificado_por` referencian a la clave primaria de esta tabla.
 

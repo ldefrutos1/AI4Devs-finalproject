@@ -4,6 +4,7 @@ import com.mtl.notification.web.CorrelationIdFilter;
 import org.slf4j.MDC;
 import org.springframework.http.ProblemDetail;
 
+/** Añade contexto operativo (p. ej. correlación) a {@link ProblemDetail} sin acoplar controladores. */
 public final class ProblemDetailEnricher {
 
   private ProblemDetailEnricher() {}

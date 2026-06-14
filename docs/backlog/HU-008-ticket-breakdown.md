@@ -126,6 +126,6 @@ flowchart LR
 
 ## Cierre sugerido (definición de “hecho” para el corte)
 
-Un **COLABORADOR** autenticado puede listar y filtrar sus fichas en **Mis árboles**, abrir una ficha en edición, guardar cambios con **PUT**, gestionar fotos en galería y eliminar una ficha con **DELETE** (cascada media → SQL → hook Mongo stub). Un **ADMIN** puede listar con filtro por creador y editar/eliminar cualquier ficha. Ante error en media durante la baja, el árbol no se elimina en PostgreSQL. Contrato OpenAPI cerrado; tests unitarios/WebMvc en catalog, media y frontend en verde.
+Un **COLABORADOR** autenticado puede listar y filtrar sus fichas en **Mis árboles**, abrir una ficha en edición, guardar cambios con **PUT**, gestionar fotos en galería y eliminar una ficha con **DELETE** (cascada media → SQL → hook Mongo). Un **ADMIN** puede listar con filtro por creador y editar/eliminar cualquier ficha. Ante error en media durante la baja, el árbol no se elimina en PostgreSQL. Si falla tras media OK, se audita `EJEMPLAR_ELIMINACION_PARCIAL_FALLIDA`; clientes HTTP internos con timeouts explícitos. Contrato OpenAPI cerrado; tests unitarios/WebMvc en catalog, media y frontend en verde.
 
 **Cierre de tickets:** todos **Hecho** salvo **TASK-HU-008-11** (**Rechazado**). HU **Cerrada** en [backlog.md](backlog.md) y [HU-008-edicion-de-mis-arboles.md](HU-008-edicion-de-mis-arboles.md). Verificación manual recomendada: [frontend/README.md](../../frontend/README.md) (apartado HU-008).
