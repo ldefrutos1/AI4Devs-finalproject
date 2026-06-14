@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { TREE_EDIT_SAVE_FLASH_QUERY } from '@/composables/treeCreateRedirect'
 import { useI18n } from 'vue-i18n'
 import PageBackLink from '@/components/layout/PageBackLink.vue'
 import { useAbortableRequest } from '@/composables/useAbortableRequest'
@@ -14,6 +15,9 @@ import type { CollaboratorTreeListItem, MasterListItem } from '@/types/catalog'
 import { mapVisibilityBadgeClass, publicationStateBadgeClass } from '@/utils/catalogBadgeClass'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
+const saveSuccessMessage = ref('')
 
 function formatSpeciesTitle(tree: CollaboratorTreeListItem): string {
   const common = tree.commonName.trim()
@@ -209,7 +213,21 @@ async function goToNextPage(): Promise<void> {
   await loadTrees()
 }
 
+function applySaveFlashFromRoute(): void {
+  if (route.query[TREE_EDIT_SAVE_FLASH_QUERY] !== '1') {
+    return
+  }
+  saveSuccessMessage.value = t('treeEdit.messages.saveSuccess')
+  const query = { ...route.query }
+  delete query[TREE_EDIT_SAVE_FLASH_QUERY]
+  void router.replace({
+    name: route.name ?? undefined,
+    query,
+  })
+}
+
 onMounted(async () => {
+  applySaveFlashFromRoute()
   await loadSpeciesOptions()
   await loadTrees()
 })
@@ -325,6 +343,14 @@ onMounted(async () => {
         </div>
       </form>
     </section>
+
+    <output
+      v-if="saveSuccessMessage"
+      class="mtl-alert mtl-alert--success"
+      aria-live="polite"
+    >
+      {{ saveSuccessMessage }}
+    </output>
 
     <p v-if="isLoading" class="status-note">{{ t('myTrees.loading') }}</p>
     <p v-else-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>

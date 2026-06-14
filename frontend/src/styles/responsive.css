@@ -225,6 +225,19 @@ select.form-control {
   border-color: var(--danger);
 }
 
+.form-control[readonly],
+.form-control:read-only,
+textarea.form-control[readonly] {
+  background: var(--bg-soft);
+  cursor: default;
+}
+
+.form-text {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+}
+
 .form-textarea {
   resize: vertical;
 }

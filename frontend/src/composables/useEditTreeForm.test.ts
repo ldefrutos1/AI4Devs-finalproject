@@ -39,6 +39,19 @@ vi.mock('@/services/media/treePhotoUploadSequence', () => ({
   uploadPhotosForTree: vi.fn(),
 }))
 
+vi.mock('@/services/catalog/enrichmentService', () => ({
+  fetchSpeciesEnrichment: vi.fn(),
+  fetchTreeEnrichment: vi.fn(),
+  updateSpeciesEnrichment: vi.fn(),
+  updateTreeEnrichment: vi.fn(),
+}))
+
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: () => ({
+    hasRole: () => false,
+  }),
+}))
+
 import { fetchProvinces, fetchSpecies } from '@/services/catalog/catalogService'
 import {
   deleteCollaboratorTree,
@@ -46,6 +59,7 @@ import {
   updateCollaboratorTree,
 } from '@/services/catalog/collaboratorTreesService'
 import { fetchTreePhotoGallery } from '@/services/media/treeGalleryService'
+import { updateTreeEnrichment, fetchTreeEnrichment } from '@/services/catalog/enrichmentService'
 
 const detailFixture = {
   treeId: 42,
@@ -95,6 +109,15 @@ describe('useEditTreeForm', () => {
     vi.mocked(fetchTreePhotoGallery).mockResolvedValue([])
     vi.mocked(updateCollaboratorTree).mockResolvedValue(detailFixture)
     vi.mocked(deleteCollaboratorTree).mockResolvedValue(undefined)
+    vi.mocked(updateTreeEnrichment).mockResolvedValue({
+      treeId: 42,
+      tags: [],
+    })
+    vi.mocked(fetchTreeEnrichment).mockResolvedValue({
+      treeId: 42,
+      tags: [],
+      measurements: {},
+    })
   })
 
   it('initialize con id inválido expone loadError', async () => {
@@ -131,7 +154,73 @@ describe('useEditTreeForm', () => {
       expect.objectContaining({ speciesId: 1, provinceId: 2 }),
       expect.any(AbortSignal),
     )
-    expect(routerPush).toHaveBeenCalledWith({ name: 'mis-ejemplares' })
+    expect(updateTreeEnrichment).toHaveBeenCalled()
+    expect(routerPush).toHaveBeenCalledWith({ name: 'mis-ejemplares', query: { saved: '1' } })
+  })
+
+  it('submit con enrichmentWarning permanece en edición y muestra aviso', async () => {
+    vi.mocked(updateCollaboratorTree).mockResolvedValue({
+      ...detailFixture,
+      enrichmentWarning: 'Proyección Mongo incompleta.',
+    })
+    const form = mountForm(42)
+    await form.initialize()
+    await nextTick()
+    form.enrichment.treeEnrichmentDraft.value = {
+      tags: [],
+      measurements: {},
+      healthStatus: {},
+      observations: [],
+    }
+
+    const ok = await form.submit()
+    await nextTick()
+
+    expect(ok).toBe(true)
+    expect(form.enrichment.mongoProjectionWarning.value).toBe('Proyección Mongo incompleta.')
+    expect(form.submitSuccessMessage.value).toContain('información ampliada')
+    expect(routerPush).not.toHaveBeenCalled()
+  })
+
+  it('submit bloquea si el enriquecimiento del ejemplar no es válido', async () => {
+    const form = mountForm(42)
+    await form.initialize()
+    await nextTick()
+    form.enrichment.onTreeEnrichmentDraftState({
+      dirty: true,
+      valid: false,
+      errorKey: 'invalidJson',
+    })
+
+    const ok = await form.submit()
+    await nextTick()
+
+    expect(ok).toBe(false)
+    expect(updateCollaboratorTree).not.toHaveBeenCalled()
+    expect(form.enrichment.treeEnrichmentExpanded.value).toBe(true)
+    expect(form.enrichment.treeEnrichmentError.value).toBeTruthy()
+  })
+
+  it('submit falla si no se puede guardar el enriquecimiento del ejemplar', async () => {
+    vi.mocked(updateTreeEnrichment).mockRejectedValue(
+      new HttpError(502, { title: 'Bad Gateway', status: 502 }),
+    )
+    const form = mountForm(42)
+    await form.initialize()
+    await nextTick()
+    form.enrichment.treeEnrichmentDraft.value = {
+      tags: ['x'],
+      measurements: {},
+      healthStatus: {},
+      observations: [],
+    }
+
+    const ok = await form.submit()
+    await nextTick()
+
+    expect(ok).toBe(false)
+    expect(routerPush).not.toHaveBeenCalled()
+    expect(form.enrichment.treeEnrichmentError.value).toBeTruthy()
   })
 
   it('submit con validación fallida no llama al servicio', async () => {

@@ -2,6 +2,8 @@
 import { computed, onMounted, ref, toRef } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import SpeciesEnrichmentPopup from '@/components/enrichment/SpeciesEnrichmentPopup.vue'
+import TreeEnrichmentPanel from '@/components/enrichment/TreeEnrichmentPanel.vue'
 import EditTreeGalleryPanel from '@/components/EditTreeGalleryPanel.vue'
 import MtlConfirmDialog from '@/components/MtlConfirmDialog.vue'
 import PageBackLink from '@/components/layout/PageBackLink.vue'
@@ -43,6 +45,7 @@ const {
   isDeleting,
   fieldErrors,
   submitError,
+  submitSuccessMessage,
   deleteError,
   galleryPhotoError,
   isDeletingPhoto,
@@ -53,7 +56,31 @@ const {
   addGalleryPhoto,
   removeGalleryPhoto,
   removeTree,
+  enrichment,
 } = useEditTreeForm(treeId)
+
+const {
+  speciesPopupOpen,
+  speciesEnrichment,
+  canEditSpeciesEnrichment,
+  isLoadingSpeciesEnrichment,
+  isSavingSpeciesEnrichment,
+  speciesEnrichmentError,
+  treeEnrichmentDraft,
+  isLoadingTreeEnrichment,
+  treeEnrichmentError,
+  treeEnrichmentExpanded,
+  mongoProjectionWarning,
+  onSpeciesPopupOpen,
+  onTreeEnrichmentDraftState,
+  saveSpeciesEnrichment,
+} = enrichment
+
+const selectedSpeciesId = computed(() => form.speciesId.trim())
+const mongoWarningMessage = computed(() => {
+  const warning = mongoProjectionWarning.value.trim()
+  return warning.length > 0 ? warning : t('enrichment.mongoProjectionWarning')
+})
 
 const showMapMarker = computed(() => areLatLngInValidRange(form))
 const deleteConfirmOpen = ref(false)
@@ -105,6 +132,15 @@ async function onSubmit(): Promise<void> {
   await submit()
 }
 
+async function onSpeciesEnrichmentSave(
+  payload: Parameters<typeof saveSpeciesEnrichment>[0],
+): Promise<void> {
+  const saved = await saveSpeciesEnrichment(payload)
+  if (saved) {
+    speciesPopupOpen.value = false
+  }
+}
+
 onMounted(async () => {
   applyFromRoute()
   await initialize()
@@ -128,6 +164,20 @@ onMounted(async () => {
     <p v-if="createWarningMessage" class="mtl-alert mtl-alert--warning tree-form-page__flash" role="alert">
       {{ createWarningMessage }}
     </p>
+    <output
+      v-if="submitSuccessMessage"
+      class="mtl-alert mtl-alert--success tree-form-page__flash"
+      aria-live="polite"
+    >
+      {{ submitSuccessMessage }}
+    </output>
+    <p
+      v-if="mongoProjectionWarning"
+      class="mtl-alert mtl-alert--warning tree-form-page__flash"
+      role="alert"
+    >
+      {{ mongoWarningMessage }}
+    </p>
 
     <p v-if="isLoading" class="status-note">{{ t('treeEdit.loading') }}</p>
     <p v-else-if="loadError" class="error" role="alert">{{ loadError }}</p>
@@ -145,15 +195,28 @@ onMounted(async () => {
             <label class="form-label" for="edit-speciesId">{{
               t('treeForm.fields.species.label')
             }}</label>
-            <SpeciesAutocompleteInput
-              ref="speciesAutocompleteRef"
-              input-id="edit-speciesId"
-              v-model="form.speciesId"
-              :species="species"
-              required
-              :aria-invalid="Boolean(fieldErrors.speciesId)"
-              :placeholder="t('treeForm.fields.species.placeholder')"
-            />
+            <div class="mtl-enrichment-species-row">
+              <SpeciesAutocompleteInput
+                ref="speciesAutocompleteRef"
+                input-id="edit-speciesId"
+                v-model="form.speciesId"
+                :species="species"
+                required
+                :aria-invalid="Boolean(fieldErrors.speciesId)"
+                :placeholder="t('treeForm.fields.species.placeholder')"
+              />
+              <SpeciesEnrichmentPopup
+                v-model:open="speciesPopupOpen"
+                :trigger-disabled="selectedSpeciesId.length === 0"
+                :enrichment="speciesEnrichment"
+                :readonly="!canEditSpeciesEnrichment"
+                :loading="isLoadingSpeciesEnrichment"
+                :saving="isSavingSpeciesEnrichment"
+                :error="speciesEnrichmentError"
+                @open="onSpeciesPopupOpen"
+                @save="onSpeciesEnrichmentSave"
+              />
+            </div>
             <small v-if="fieldErrors.speciesId" class="field-error">{{
               fieldErrors.speciesId
             }}</small>
@@ -343,6 +406,14 @@ onMounted(async () => {
           </div>
         </div>
       </section>
+
+      <TreeEnrichmentPanel
+        v-model="treeEnrichmentDraft"
+        v-model:expanded="treeEnrichmentExpanded"
+        :loading="isLoadingTreeEnrichment"
+        :error="treeEnrichmentError"
+        @draft-state="onTreeEnrichmentDraftState"
+      />
 
       <p v-if="submitError" class="error field-full" role="alert">{{ submitError }}</p>
 

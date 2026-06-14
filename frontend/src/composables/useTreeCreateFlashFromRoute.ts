@@ -27,6 +27,12 @@ export function useTreeCreateFlashFromRoute() {
       warningMessage.value = t('treeEdit.messages.createdFromFormPhotosWarning')
     }
 
+    const historyState = globalThis.history.state as { enrichmentWarning?: string } | null
+    const mongoWarning = historyState?.enrichmentWarning?.trim()
+    if (mongoWarning) {
+      warningMessage.value = mongoWarning
+    }
+
     const query = { ...route.query }
     delete query[TREE_CREATE_FLASH_QUERY]
     void router.replace({

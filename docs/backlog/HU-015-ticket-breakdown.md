@@ -6,7 +6,7 @@
 | **Refinamiento** | [HU-015-proyeccion-y-enriquecimiento-mongo.md](HU-015-proyeccion-y-enriquecimiento-mongo.md) |
 | **Épica** | Catálogo colaborador |
 | **Título HU** | Proyección y enriquecimiento Mongo |
-| **Estado HU** | **Pendiente** |
+| **Estado HU** | **Hecho** |
 
 **Convención de ID de ticket:** `TASK-HU-015-<nn>`.
 
@@ -107,17 +107,17 @@ flowchart LR
 
 | ID | Título | Descripción breve | Estado |
 |----|--------|-------------------|--------|
-| **TASK-HU-015-09** | Cliente API enriquecimientos | Servicio TS (p. ej. `enrichmentService.ts`): `GET`/`PUT` especie y ejemplar autenticado; `GET` público por `treeId`; `AbortSignal`; mapeo Problem; tests Vitest. | Pendiente |
-| **TASK-HU-015-10** | Componentes UI reutilizables | **Icono + popup** `especie_detalle` (lectura colaborador/público; edición **ADMIN** en contexto autenticado). **Div colapsable** `ejemplar_detalle` (edición colaborador/ADMIN en alta-edición; solo lectura en público). Copy: contenido compartido por especie; aviso orientativo donde aplique. | Pendiente |
-| **TASK-HU-015-11** | Integración alta y edición de ejemplar | En **CreateTreeView** y **EditTreeView**: bloques de **TASK-10**; guardado de enriquecimiento vía API; manejo de advertencia Mongo post-SQL; sin acción de IA. Tests en composables/vistas críticas. | Pendiente |
-| **TASK-HU-015-12** | Integración detalle público | En **TreeDetailView** (**HU-002**): mismo patrón UI **solo lectura**; carga vía endpoint público; no mostrar en listado. | Pendiente |
-| **TASK-HU-015-13** | Pruebas frontend HU-015 | Vitest: servicio de enriquecimiento, componentes (roles lectura/edición), integración en vistas según impacto. | Pendiente |
+| **TASK-HU-015-09** | Cliente API enriquecimientos | Servicio TS (p. ej. `enrichmentService.ts`): `GET`/`PUT` especie y ejemplar autenticado; `GET` público por `treeId`; `AbortSignal`; mapeo Problem; tests Vitest. | Hecho |
+| **TASK-HU-015-10** | Componentes UI reutilizables | **Icono + popup** `especie_detalle` (lectura colaborador/público; edición **ADMIN** en contexto autenticado). **Div colapsable** `ejemplar_detalle` (edición colaborador/ADMIN en alta-edición; solo lectura en público). Copy: contenido compartido por especie; aviso orientativo donde aplique. | Hecho |
+| **TASK-HU-015-11** | Integración alta y edición de ejemplar | En **CreateTreeView** y **EditTreeView**: bloques de **TASK-10**; guardado de enriquecimiento vía API; manejo de advertencia Mongo post-SQL; sin acción de IA. Tests en composables/vistas críticas. | Hecho |
+| **TASK-HU-015-12** | Integración detalle público | En **TreeDetailView** (**HU-002**): mismo patrón UI **solo lectura**; carga vía endpoint público; no mostrar en listado. | Hecho |
+| **TASK-HU-015-13** | Pruebas frontend HU-015 | Vitest: servicio de enriquecimiento, componentes (roles lectura/edición), integración en vistas según impacto. | Hecho |
 
 ### Documentación
 
 | ID | Título | Descripción breve | Estado |
 |----|--------|-------------------|--------|
-| **TASK-HU-015-14** | Documentación E2E y operativa | Actualizar [services/README.md](../../services/README.md) (Mongo, endpoints, borrado cascada, límites) y [frontend/README.md](../../frontend/README.md) (bloques UI, verificación manual BDD HU-015). Sustituir referencias al stub Mongo donde corresponda tras **TASK-01**. | Pendiente |
+| **TASK-HU-015-14** | Documentación E2E y operativa | Actualizar [services/README.md](../../services/README.md) (Mongo, endpoints, borrado cascada, límites) y [frontend/README.md](../../frontend/README.md) (bloques UI, verificación manual BDD HU-015). Sustituir referencias al stub Mongo donde corresponda tras **TASK-01**. | Hecho |
 
 ---
 

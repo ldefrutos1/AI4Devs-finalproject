@@ -31,6 +31,8 @@ export interface CreateTreeRequest {
 
 export interface CreatedTreeResponse {
   treeId: number
+  /** Presente si PostgreSQL guardó la ficha pero falló la proyección mínima en Mongo (HU-015). */
+  enrichmentWarning?: string
 }
 
 export interface PublicTreeListItem {
@@ -110,4 +112,6 @@ export interface CollaboratorTreeDetail {
   provinceLabel?: string
   createdAt?: string
   modifiedAt?: string
+  /** Presente si PostgreSQL guardó la ficha pero falló la proyección/sincronización en Mongo (HU-015). */
+  enrichmentWarning?: string
 }

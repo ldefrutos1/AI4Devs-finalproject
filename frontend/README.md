@@ -97,3 +97,38 @@ Usuario de prueba (Keycloak): `colaborador` / `colaborador_dev` (rol **COLABORAD
 6. **Sin notificación por edición/baja (R7):** tras **PUT** o **DELETE**, no debe generarse correo de “nuevo árbol” a suscriptores (solo el alta dispara **UC-09**).
 
 Checks automáticos previos: `npm run build`, `npm run test` en `frontend/`; `mvn -f services/pom.xml -pl catalog-service,media-service test` en backend.
+
+## Enriquecimiento Mongo (HU-015)
+
+Bloques de UI para `especie_detalle` (popup) y `ejemplar_detalle` (panel colapsable). Contrato HTTP: [openapi.yaml](../docs/api/openapi.yaml); modelo: [mongo.md](../docs/data-model/mongo.md).
+
+### Piezas principales
+
+| Capa | Ficheros |
+|------|----------|
+| Servicio API | `src/services/catalog/enrichmentService.ts`, `enrichmentErrors.ts` |
+| Composables | `useTreeFormEnrichment` (alta/edición autenticada), `usePublicTreeEnrichment` (detalle público), `enrichmentFormDraft`, `enrichmentGuidedForms`, `enrichmentSummaries` |
+| Componentes | `SpeciesEnrichmentPopup.vue`, `TreeEnrichmentPanel.vue`, editores guiados (`HealthStatusFieldEditor`, `SpeciesEcologicalFieldEditor`, `SpeciesReferencesFieldEditor`) |
+| Estilos | `src/styles/enrichment.css` (importado en `style.css`) |
+| i18n | claves bajo `enrichment.*` en `src/i18n/locales/es.ts` |
+
+### Superficies de UI
+
+- **Alta** (`/ejemplares/new`): icono de especie con popup (lectura colaborador; edición **ADMIN**). Sección de ejemplar con mensaje `enrichment.tree.createUnavailable` (el enriquecimiento del ejemplar se edita tras crear la ficha).
+- **Edición** (`/ejemplares/:id/edit`): popup de especie + panel colapsable de ejemplar; los cambios del panel se persisten al pulsar **Guardar ficha** (mismo flujo que el formulario SQL). Aviso no bloqueante si la respuesta trae `enrichmentWarning` tras guardar SQL.
+- **Detalle público** (`/ejemplares/:id` o ruta pública equivalente): popup y panel en **solo lectura**; carga con `GET /api/catalog/public/trees/{treeId}/enrichment`. Si no hay documento Mongo del ejemplar, el panel expandido muestra solo el aviso vacío (sin campos vacíos).
+
+### Verificación manual E2E (TASK-HU-015-14)
+
+Prerrequisitos: Compose con **MongoDB** (`27017`), Postgres, Keycloak; **catalog-service** en perfil `dev` con `mtl.catalog.mongo.enabled=true`; **api-gateway** **8080**. En `frontend/`: `npm run dev`.
+
+Usuarios de prueba: `colaborador` / `colaborador_dev` (**COLABORADOR**); usuario **ADMIN** si está configurado en Keycloak.
+
+1. **Escenario 1 — Colaborador edita ejemplar (BDD §2):** crear o editar una ficha propia. Tras guardar SQL, expandir **Información ampliada del ejemplar**, rellenar medidas/etiquetas/observaciones y guardar ficha. Comprobar `PUT /api/catalog/trees/{treeId}/enrichment` **200** y datos al recargar. El popup de especie debe ser solo lectura para colaborador.
+2. **Escenario 2 — ADMIN edita especie:** como **ADMIN**, abrir el icono junto al selector de especie, modificar sinónimos o datos ecológicos y **Guardar** en el popup. Comprobar `PUT /api/catalog/species/{speciesId}/enrichment` **200**. No debe aparecer acción de IA.
+3. **Escenario 3 — Detalle público:** abrir una ficha **publicada** con enriquecimiento (sin login). Ver popup de especie y panel de ejemplar en solo lectura. El listado público no debe mostrar estos bloques.
+4. **Escenario 4 — Aviso Mongo post-SQL:** con Mongo detenido o URI incorrecta, guardar una ficha SQL válida. La ficha debe persistir (**200**/**201** en `POST`/`PUT` trees) y la UI mostrar aviso (`enrichmentWarning` o copy de proyección Mongo). Tras restaurar Mongo, editar el panel de ejemplar y guardar debe completar el enriquecimiento.
+5. **Escenario 5 — Borrado cascada:** en ficha con datos en Mongo, **Eliminar árbol** (**HU-008**). Tras **204**, el documento `ejemplar_detalle` no debe existir; `especie_detalle` permanece si la especie sigue en catálogo.
+6. **Escenario 7 — Validación compartida:** enviar `measurements` con valor no numérico en el panel → **400** Problem legible; colaborador sobre ficha ajena sigue con **403** (**HU-008**).
+
+Checks automáticos previos: `npm run build` y `npm run test` en `frontend/` (suite de enriquecimiento: `npx vitest run enrichment`); `mvn -f services/pom.xml -pl catalog-service verify` en backend (IT Mongo si Docker disponible).

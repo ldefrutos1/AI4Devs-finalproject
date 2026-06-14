@@ -1,7 +1,8 @@
-﻿import { computed, reactive, ref, type ComputedRef } from 'vue'
+﻿import { computed, reactive, ref, toRef, type ComputedRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useAbortableRequest } from '@/composables/useAbortableRequest'
+import { useTreeFormEnrichment } from '@/composables/useTreeFormEnrichment'
 import {
   validateCreateTreeForm,
   type CreateTreeField,
@@ -91,6 +92,7 @@ export function useEditTreeForm(treeId: ComputedRef<number | null>) {
   const isDeletingPhoto = ref(false)
   const isUploadingPhoto = ref(false)
   const submitError = ref('')
+  const submitSuccessMessage = ref('')
   const deleteError = ref('')
   const galleryPhotoError = ref('')
 
@@ -106,6 +108,11 @@ export function useEditTreeForm(treeId: ComputedRef<number | null>) {
     altitude: '',
     publicationState: 'BORRADOR',
     publicMapVisibility: 'PRIVADO',
+  })
+
+  const enrichment = useTreeFormEnrichment({
+    treeId,
+    speciesId: toRef(form, 'speciesId'),
   })
 
   const publicationStateOptions = computed<SelectOption<PublicationState>[]>(() => [
@@ -237,9 +244,14 @@ export function useEditTreeForm(treeId: ComputedRef<number | null>) {
     }
 
     submitError.value = ''
+    submitSuccessMessage.value = ''
     fieldErrors.value = {}
 
     if (!validateForm()) {
+      return false
+    }
+
+    if (!enrichment.validateBeforePersist()) {
       return false
     }
 
@@ -251,8 +263,20 @@ export function useEditTreeForm(treeId: ComputedRef<number | null>) {
 
     isSubmitting.value = true
     try {
-      await runWithAbort((signal) => updateCollaboratorTree(id, payload, signal))
-      await router.push({ name: 'mis-ejemplares' })
+      const detail = await runWithAbort((signal) => updateCollaboratorTree(id, payload, signal))
+      enrichment.setMongoProjectionWarning(detail.enrichmentWarning)
+
+      const enrichmentSaved = await enrichment.persistTreeEnrichment()
+      if (!enrichmentSaved) {
+        return false
+      }
+
+      if (detail.enrichmentWarning?.trim()) {
+        submitSuccessMessage.value = t('treeEdit.messages.saveSuccessWithProjectionWarning')
+        return true
+      }
+
+      await router.push({ name: 'mis-ejemplares', query: { saved: '1' } })
       return true
     } catch (error: unknown) {
       if (isRequestAbortError(error)) {
@@ -381,8 +405,10 @@ export function useEditTreeForm(treeId: ComputedRef<number | null>) {
     canAddGalleryPhoto,
     fieldErrors,
     submitError,
+    submitSuccessMessage,
     deleteError,
     galleryPhotoError,
+    enrichment,
     initialize,
     submit,
     addGalleryPhoto,

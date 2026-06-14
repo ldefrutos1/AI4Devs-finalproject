@@ -27,7 +27,7 @@ Como colaborador o administrador del catálogo, quiero consultar y, cuando corre
 - **Alta/edición de `ejemplar_detalle`** (incluidas observaciones embebidas): síncrona **después** del commit en PostgreSQL; mismas validaciones de negocio para **colaborador** y **ADMIN** sobre los campos del ejemplar.
 - **Consulta de `especie_detalle`:** colaborador y visitante público en **solo lectura**; **ADMIN** puede **editar** el documento (no puede disparar IA desde estas pantallas; el enriquecimiento con IA queda en **HU-016** desde `/admin/masters`).
 - **Resiliencia Mongo:** si falla la inserción o actualización en Mongo tras persistir correctamente la ficha en PostgreSQL, la operación de catálogo **se considera exitosa** y la UI **avisa** al usuario del problema con el enriquecimiento (mensaje no bloqueante; la ficha SQL queda guardada).
-- **Borrado de ejemplar (HU-008):** eliminación física del documento `ejemplar_detalle` en Mongo (no tombstone), vía **[TASK-HU-015-01](HU-015-ticket-breakdown.md)** sustituyendo el stub actual.
+- **Borrado de ejemplar (HU-008):** eliminación física del documento `ejemplar_detalle` en Mongo (no tombstone), vía **[TASK-HU-015-01](HU-015-ticket-breakdown.md)** (**Hecho**).
 - **UI** (alta, edición de ejemplar y detalle público de ficha publicada):
   - **`ejemplar_detalle`:** `div` **colapsable** en la parte inferior del formulario o detalle; al expandir, muestra y permite editar (colaborador/ADMIN en alta-edición) los campos Mongo del ejemplar y sus observaciones embebidas.
   - **`especie_detalle`:** **icono** junto al selector de especie que abre **popup/emergente** con el documento de la especie; solo lectura para colaborador y visitante; editable para **ADMIN** en pantallas autenticadas.
