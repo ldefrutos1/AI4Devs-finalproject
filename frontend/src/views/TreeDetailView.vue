@@ -209,7 +209,7 @@ onMounted(async () => {
         t('treesDetail.backToList')
       }}</PageBackLink>
       <div class="tree-detail-page__title-row">
-        <h1 class="page-header__title">{{ pageTitle }}</h1>
+        <h1 class="page-header__title" data-testid="public-tree-detail-species">{{ pageTitle }}</h1>
         <SpeciesEnrichmentPopup
           v-model:open="speciesPopupOpen"
           :trigger-disabled="false"
@@ -239,6 +239,7 @@ onMounted(async () => {
     <p v-else-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
 
     <template v-else-if="isSuccess && tree">
+      <div data-testid="public-tree-detail">
       <section
         class="tree-detail-hero tree-detail-visual-grid"
         :aria-label="t('treesDetail.sections.media')"
@@ -309,11 +310,11 @@ onMounted(async () => {
         <dl class="tree-detail-facts__grid">
           <div class="tree-detail-facts__item">
             <dt>{{ t('treesDetail.fields.province') }}</dt>
-            <dd>{{ displayText(tree.province) }}</dd>
+            <dd data-testid="public-tree-detail-province">{{ displayText(tree.province) }}</dd>
           </div>
           <div class="tree-detail-facts__item">
             <dt>{{ t('treesDetail.fields.municipality') }}</dt>
-            <dd>{{ displayText(tree.municipality) }}</dd>
+            <dd data-testid="public-tree-detail-municipality">{{ displayText(tree.municipality) }}</dd>
           </div>
           <div class="tree-detail-facts__item tree-detail-facts__item--full">
             <dt>{{ t('treesDetail.fields.description') }}</dt>
@@ -352,6 +353,7 @@ onMounted(async () => {
         :title="speciesTitle"
         @close="closeFullscreen"
       />
+      </div>
     </template>
 
     <p v-if="notFound && !isLoading" class="status-note">

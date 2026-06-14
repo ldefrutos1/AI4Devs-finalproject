@@ -113,6 +113,7 @@ onMounted(async () => {
     <output
       v-if="statusMessage"
       class="mtl-alert mtl-alert--success tree-form-page__flash"
+      data-testid="admin-masters-status-message"
       aria-live="polite"
     >
       {{ statusMessage }}
@@ -131,6 +132,7 @@ onMounted(async () => {
                 <SpeciesAutocompleteInput
                   ref="speciesAutocompleteRef"
                   input-id="admin-masters-filter-species"
+                  input-test-id="admin-masters-filter-species"
                   v-model="filterSpeciesId"
                   :species="speciesFilterOptions"
                   input-class="form-control"
@@ -166,6 +168,7 @@ onMounted(async () => {
               <button
                 type="submit"
                 class="btn btn-primary-soft btn-sm catalog-toolbar__submit"
+                data-testid="admin-masters-filter-apply"
                 :disabled="isSpeciesListLoading"
               >
                 {{ t('adminMasters.filters.apply') }}
@@ -187,7 +190,12 @@ onMounted(async () => {
             {{ t('adminMasters.resultsCount', { count: speciesTotalElements }) }}
           </p>
           <div class="mtl-admin-list-toolbar__actions">
-            <button type="button" class="btn btn-primary-soft btn-sm" @click="openCreateSpecies">
+            <button
+              type="button"
+              class="btn btn-primary-soft btn-sm"
+              data-testid="admin-masters-create-species"
+              @click="openCreateSpecies"
+            >
               {{ t('adminMasters.actions.create') }}
             </button>
           </div>
@@ -201,6 +209,7 @@ onMounted(async () => {
           <div class="mtl-admin-table-wrap">
             <table
               class="mtl-admin-table mtl-admin-table--stack"
+              data-testid="admin-masters-table"
               :aria-label="t('adminMasters.listTitle')"
             >
               <thead>
@@ -211,7 +220,12 @@ onMounted(async () => {
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="item in speciesList" :key="item.id">
+                <tr
+                  v-for="item in speciesList"
+                  :key="item.id"
+                  data-testid="admin-masters-row"
+                  :data-species-id="item.id"
+                >
                   <td :data-label="t('adminMasters.columns.species')">{{ item.label }}</td>
                   <td :data-label="t('adminMasters.columns.genus')">{{ item.genusLabel }}</td>
                   <td
@@ -229,6 +243,7 @@ onMounted(async () => {
                     <button
                       type="button"
                       class="btn btn-outline-danger btn-sm"
+                      data-testid="admin-masters-delete"
                       :disabled="isDeleting"
                       @click="askDelete(item)"
                     >
@@ -278,6 +293,8 @@ onMounted(async () => {
       v-model:open="showSpeciesModal"
       stack="species"
       form-id="admin-masters-form"
+      dialog-test-id="admin-masters-species-modal"
+      submit-test-id="admin-masters-species-submit"
       :title="speciesModalTitle"
       :cancel-label="t('adminMasters.actions.back')"
       :submit-label="t('adminMasters.actions.save')"
@@ -297,6 +314,7 @@ onMounted(async () => {
               v-model="formGenusId"
               v-bind="fieldA11y"
               class="form-control"
+              data-testid="admin-masters-species-genus"
               required
             >
               <option disabled value="">{{ t('adminMasters.form.selectGenus') }}</option>
@@ -325,6 +343,7 @@ onMounted(async () => {
             class="form-control"
             type="text"
             maxlength="255"
+            data-testid="admin-masters-species-scientific"
             required
           />
         </div>
@@ -340,6 +359,7 @@ onMounted(async () => {
             class="form-control"
             type="text"
             maxlength="255"
+            data-testid="admin-masters-species-common"
           />
         </div>
       </template>
@@ -465,6 +485,7 @@ onMounted(async () => {
       :cancel-label="t('common.cancel')"
       :confirm-label="t('adminMasters.actions.delete')"
       :confirm-danger="true"
+      confirm-test-id="admin-masters-confirm-delete"
       @confirm="confirmDelete"
     />
   </div>

@@ -17,12 +17,18 @@ const props = withDefaults(
     formError?: string
     submitDisabled?: boolean
     stack?: MtlFormDialogStack
+    /** `data-testid` opcional en el `<dialog>` (selectores E2E estables). */
+    dialogTestId?: string
+    /** `data-testid` opcional en el botón de envío (selectores E2E estables). */
+    submitTestId?: string
   }>(),
   {
     formId: undefined,
     formError: '',
     submitDisabled: false,
     stack: 'species',
+    dialogTestId: undefined,
+    submitTestId: undefined,
   },
 )
 
@@ -100,6 +106,7 @@ onBeforeUnmount(() => {
     ref="dialogRef"
     class="mtl-form-dialog"
     :class="stackClass"
+    :data-testid="dialogTestId"
     aria-modal="true"
     :aria-labelledby="titleId"
     :aria-describedby="formError ? errorId : undefined"
@@ -114,7 +121,12 @@ onBeforeUnmount(() => {
           <button type="button" class="btn btn-secondary" @click="onCancelClick">
             {{ cancelLabel }}
           </button>
-          <button type="submit" class="btn btn-primary tree-form-submit" :disabled="submitDisabled">
+          <button
+            type="submit"
+            class="btn btn-primary tree-form-submit"
+            :data-testid="submitTestId"
+            :disabled="submitDisabled"
+          >
             {{ submitLabel }}
           </button>
         </div>
