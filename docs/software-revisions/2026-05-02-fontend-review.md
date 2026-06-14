@@ -10,12 +10,16 @@
 Tras el avance de los cortes anteriores, el frontend cumple ya la mayoría de reglas de [`frontend-vue3.mdc`](../../.cursor/rules/frontend-vue3.mdc) y [`frontend-security.mdc`](../../.cursor/rules/frontend-security.mdc): Pinia como estado de auth, capa HTTP tipada con `NetworkError` / `HttpError`, composables de validación puros, guard de router con silent refresh, alias `@/`, i18n centralizada y tests mínimos con Vitest. Quedan **una incidencia crítica** y **seis altas** de tipo arquitectural / seguridad / performance que deberían abordarse antes de añadir nuevas HU significativas.
 ## Críticas
 ### [CRÍTICA] C1 — Duplicación íntegra de la lógica de extracción de roles entre store y router guard
+> **CORREGIDO 2026-06-14:** la extracción/normalización de roles está centralizada en `frontend/src/utils/jwtRoles.ts` y se consume desde store y router.
+
 - **Archivos**: `frontend/src/stores/auth.ts` (líneas ~8–85) y `frontend/src/router/index.ts` (líneas ~32–116).
 - **Síntoma**: `isRecord`, `normalizeRole`, `decodeJwtPayload`, `collectRolesFromClaims` y la función de extracción de roles (`extractUserRoles` en store, `extractTokenRoles` en router) están reimplementadas con el mismo código en ambos lugares.
 - **Riesgo**: cualquier cambio en el contrato de roles (nuevo claim `groups`, alias adicional, quitar `ROLE_`, etc.) obliga a tocar dos sitios. Cuando se desincronicen, la UI (navegación condicional basada en `hasRole`) y el guard (`requiredRoles`) dejarán pasar o bloquearán rutas con criterios distintos → bugs silenciosos difíciles de reproducir y con impacto en seguridad funcional.
 - **Fix recomendado**: extraer a `src/auth/jwtRoles.ts` (o `src/services/auth/roles.ts`) una función pura `extractRoles(user): AppRole[]`; consumirla desde `useAuthStore` y desde el guard. Mantener `APP_ROLES` como única fuente de verdad.
 ## Altas
 ### [ALTA] A1 — Todas las vistas se importan estáticamente en el router (bundle inicial hinchado)
+> **CORREGIDO 2026-06-14:** `frontend/src/router/index.ts` usa imports dinámicos para las vistas.
+
 - **Archivo**: `frontend/src/router/index.ts`, líneas 2–9 (`import AuthCallbackView from …`, `CreateTreeView`, `TreesDetailView`, `TreesListView`, `HomeView`, `PendingView`, etc.).
 - **Síntoma**: el bundle principal arrastra dependencias pesadas de vistas que la mayoría de usuarios no visitará en el primer paint: Leaflet + CSS + marker images (`TreeLocationMapPreview`), `exifr` (EXIF GPS), la cadena de subida binaria (`treePhotoUploadSequence`), etc.
 - **Riesgo**: Time-To-Interactive degradado de forma innecesaria, especialmente en móvil. Afecta al hit público (home, listado) que es el caso de uso masivo del producto.
@@ -33,6 +37,8 @@ Tras el avance de los cortes anteriores, el frontend cumple ya la mayoría de re
   1. Renombrar a `useCreateTreeErrorMapper` y restringir su ámbito explícitamente.
   2. Devolver un código estable (`'networkError' | 'unauthorized' | 'badRequest' | 'forbidden' | 'serviceError' | 'unexpectedError'`) y que cada vista aplique su `t(...)` local (mapper sin dependencia de i18n).
 ### [ALTA] A4 — Modelo de dominio del frontend mezcla español e inglés sin capa adapter
+> **CORREGIDO 2026-06-14:** los tipos principales de `catalog.ts` y `media.ts` usan nomenclatura técnica en inglés (`treeId`, `commonName`, `scientificName`, `latitude`, `originalFileName`, `mimeType`, etc.).
+
 - **Archivos**: `frontend/src/types/catalog.ts`, `frontend/src/types/media.ts`.
 - **Síntoma**: el mismo módulo define `PublicTreeDetail` con `nombreComun`, `nombreCientifico`, `provincia`, `municipio`, `latitud`, `longitud`, `altura`, `descripcion` y a la vez `CreateTreeRequest` con `speciesId`, `provinceId`, `latitude`, `longitude`, `altitude`, `municipality`, `description`. `types/media.ts` va en español (`arbolId`, `nombreFicheroOriginal`, `tipoMime`, `tamanoBytes`, `anchoPx`, `altoPx`, `orden`, `esPrincipal`). En `TreesDetailView.vue` conviven `tree.nombreComun` y `tree.publicMapVisibility` en la misma plantilla.
 - **Riesgo**: duplica el vocabulario del código, multiplica errores al tipear propiedades (`altitud` vs `altitude`, `municipio` vs `municipality`) y dificulta refactors. La incoherencia viene del backend (dominio en español, DTOs de escritura en inglés) pero el frontend la propaga tal cual.
@@ -51,7 +57,7 @@ Tras el avance de los cortes anteriores, el frontend cumple ya la mayoría de re
 - `useAuth()` dispara `authStore.initAuthState()` como efecto colateral en cada invocación (idempotente pero acopla inicialización a consumo).
 - `oidc-client-ts` usa `localStorage` para tokens — recogido por la excepción de la regla pero conviene evaluar `InMemoryWebStorage` + silent renew por iframe en producción, y añadir CSP estricta en el reverse-proxy.
 - `apiFetch` general no tiene timeout de red (solo el PUT a object storage lo tiene).
-- Leaflet se empaqueta por import estático (se resuelve con A1 al aplicar code-splitting).
+- Leaflet se empaqueta por import estático (se resuelve con A1 al aplicar code-splitting). **CORREGIDO 2026-06-14:** rutas con lazy loading.
 Estos quedan documentados para seguimiento pero fuera del alcance de este corte (severidad media/baja).
 ## Referencias
 - Reglas: [`frontend-vue3.mdc`](../../.cursor/rules/frontend-vue3.mdc), [`frontend-security.mdc`](../../.cursor/rules/frontend-security.mdc), [`frontend-ux.mdc`](../../.cursor/rules/frontend-ux.mdc).

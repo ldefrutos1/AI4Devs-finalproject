@@ -1,5 +1,6 @@
 Hallazgos (solo alta / crítica, ordenados)
 [ALTA] Falta de contrato de error homogéneo para 401/403 en el gateway.
+CORREGIDO 2026-06-14: api-gateway define handlers Problem para 401/403 y tests IT validan application/problem+json con correlationId.
 En la configuración de seguridad no se define ServerAuthenticationEntryPoint ni ServerAccessDeniedHandler; se usa la configuración por defecto de oauth2ResourceServer().jwt(...). Eso deja el formato de error 401/403 al comportamiento por defecto de Spring Security, en vez de unificarlo explícitamente con el contrato API (ProblemDetail homogéneo), que es un requisito explícito en la regla backend para gateway. 
 Además, en los tests de integración solo se valida el status code (401/403), no el cuerpo/headers del error contractual, por lo que esta desviación puede pasar inadvertida en CI. 
 
@@ -22,6 +23,7 @@ Además, los WebMvc tests desactivan filtros (addFilters = false), por lo que no
 
 Incidencias altas/críticas (ordenadas)
 [CRÍTICA] Inconsistencia del “punto único de entrada” en seguridad/contrato de error del API Gateway.
+CORREGIDO 2026-06-14: api-gateway centraliza 401/403 con ProblemServerAuthenticationEntryPoint y ProblemServerAccessDeniedHandler.
 A nivel de arquitectura, el gateway debería consolidar políticas transversales (seguridad y forma de error hacia cliente), pero actualmente usa oauth2ResourceServer().jwt(...) sin handlers explícitos de 401/403 en WebFlux. Esto rompe la uniformidad contractual frente a microservicios que sí implementan Problem* handlers. Resultado: el cliente puede recibir formatos distintos según dónde se origine el rechazo, debilitando el rol arquitectónico del gateway como frontera homogénea. 
 
 [ALTA] Riesgo operativo por falta de pruebas de integración de seguridad en media-service.

@@ -39,7 +39,9 @@
 
 - Descubrimiento **estático** (URIs en gateway); correcto para MVP/local, no para producción elástica sin más ADR.
 - **HU-011** (maestros admin) está implementada según tickets “Hecho”, pero el [backlog.md](../backlog/backlog.md) aún la marca “Pendiente” — desalineación documental, no de arquitectura.
+  - **CORREGIDO 2026-06-14:** `docs/backlog/backlog.md` marca HU-011 como **Cerrada**.
 - Sin pipeline CI visible en `.github/workflows` (véase aspecto adicional más abajo).
+  - **CORREGIDO 2026-06-14:** existen workflows en `.github/workflows` (`ci.yml`, `e2e-playwright.yml`, `security-dependencies.yml`).
 
 **Veredicto:** diseño maduro para un MVP con intención didáctica de microservicios; no es sobre-ingeniería gratuita y sí trazable a historias de usuario.
 
@@ -100,6 +102,7 @@
 
 - Cobertura **desigual en vistas** (mucho peso en composables — correcto en principio, pero listados/detalle público con pocos tests de integración UI).
 - Sin **E2E navegador** en el repo (aceptable si el curso valora Vitest + E2E back; conviene explicarlo en la memoria).
+  - **CORREGIDO 2026-06-14:** existe `e2e/`, guía `docs/engineering/testing-e2e.md` y workflow manual `e2e-playwright.yml`.
 - Router: faltan casos de **refresh silencioso** y rutas colaborador con sesión en tests.
 
 **Veredicto:** frontend profesional para MVP; la lógica crítica está probada; la capa “shell” y E2E UI son el hueco principal.
@@ -123,6 +126,7 @@
 - La **infraestructura para usar IA bien** está al 4,5; la **demostrabilidad en la entrega** depende de evidencias externas al código: PRs con trazabilidad HU/TASK, prompts/skills usados, revisión humana — no siempre visibles solo leyendo el repo.
 - Riesgo de **sobre-documentación** generada/asistida: hay que demostrar criterio (qué se aceptó/rechazó), no solo volumen de markdown.
 - Backlog vs código (p. ej. HU-011) sugiere que conviene **una pasada humana de cierre** antes de la entrega.
+  - **CORREGIDO 2026-06-14:** HU-011 y HU-015 figuran cerradas en `docs/backlog/backlog.md`.
 
 **Veredicto:** uso de IA **por encima de la media** en estructura y gobernanza; la nota en el curso subirá si la memoria/PRs muestran supervisión, no solo generación.
 
@@ -152,7 +156,7 @@
 | Aspecto | Nota | Comentario breve |
 |--------|------|------------------|
 | **Aseguramiento de calidad (tests)** | **4 / 5** | Backend y frontend con estrategia explícita; E2E sistema (`system-e2e-tests`) bien orientado; falta CI que los ejecute siempre. |
-| **DevOps / automatización** | **3 / 5** | Compose, scripts PowerShell y observabilidad local fuertes; **sin workflows GitHub Actions** visibles — hueco claro para “estándares altos” en entrega integral. |
+| **DevOps / automatización** | **3 / 5** | Compose, scripts PowerShell y observabilidad local fuertes; **sin workflows GitHub Actions** visibles — hueco claro para “estándares altos” en entrega integral. **CORREGIDO 2026-06-14:** workflows `ci.yml`, `e2e-playwright.yml` y `security-dependencies.yml` presentes. |
 | **Experiencia de desarrollo local** | **4,5 / 5** | `.env.example`, puertos documentados, perfiles `dev`, Mailpit, reset Flyway, guías de arranque por flujo. |
 | **Seguridad y privacidad** | **4 / 5** | JWT, roles, rutas públicas acotadas, enmascaramiento en errores de correo; falta endurecer actuator en prod (documentado). |
 

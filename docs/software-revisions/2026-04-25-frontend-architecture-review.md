@@ -92,6 +92,8 @@ Tabla de seguimiento respecto a las secciones numeradas **1–12** de este docum
 ## Importancia alta
 
 ### 6. Restos del scaffold de Vite que no se usan
+> **CORREGIDO 2026-06-14:** no existen `frontend/src/components/HelloWorld.vue` ni `frontend/public/icons.svg`; el scaffold residual ya no está presente.
+
 - **Archivos**:
   - `frontend/src/components/HelloWorld.vue`
   - `frontend/src/assets/vite.svg`, `vue.svg`, `hero.png`
@@ -110,11 +112,15 @@ Tabla de seguimiento respecto a las secciones numeradas **1–12** de este docum
 - **Recomendación**: refactor mínimo para query params, cancelación y omitir `Content-Type` cuando el body sea `FormData`.
 
 ### 8. Sin alias de paths (`@/...`)
+> **CORREGIDO 2026-06-14:** el alias `@/` está configurado y se usa en los imports del frontend.
+
 - **Archivos**: todos los imports son relativos (`'../../types/api'`).
 - **Riesgo**: fragilidad creciente en cuanto se añadan más vistas/composables. Refactors costosos.
 - **Recomendación**: configurar `@` → `src/` en `tsconfig.app.json` y `vite.config.ts`.
 
 ### 9. CSS global con muchas reglas a nivel de elemento
+> **CORREGIDO 2026-06-14:** la parte principal de estilos globales por elemento está resuelta; predominan clases y estilos por componente/página. Queda como mejora separada crear componentes de formulario reutilizables.
+
 - **Archivo**: `frontend/src/style.css`
 - **Síntoma**: estilos sobre `input`, `select`, `textarea`, `label` a nivel global. Funciona para una vista, pero colisiona con cualquier librería de UI futura.
 - **Recomendación**:
@@ -126,12 +132,16 @@ Tabla de seguimiento respecto a las secciones numeradas **1–12** de este docum
 - **Recomendación**: introducir Pinia ahora, antes del listado/mapa.
 
 ### 11. Sin tests frontend
+> **CORREGIDO 2026-06-14:** existe cobertura Vitest amplia en servicios, composables, router, vistas y componentes.
+
 - Cero tests; el formulario ya concentra validación + mapeo + i18n.
 - **Recomendación**: añadir Vitest + dos tests mínimos:
   - `useCreateTreeForm` (validación)
   - `apiClient` (mapeo de Problem Details)
 
 ### 12. i18n: tipado y carga
+> **CORREGIDO PARCIALMENTE 2026-06-14:** el tipado de mensajes está implementado con `MessageSchema` y `createI18n<[MessageSchema], Locale>`. Sigue pendiente lazy loading real para un segundo idioma.
+
 - **Archivo**: `frontend/src/i18n/index.ts`
 - **Carencias**:
   - sin tipado fuerte de claves (riesgo de typos sin error en build)

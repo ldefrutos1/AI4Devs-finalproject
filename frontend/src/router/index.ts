@@ -1,19 +1,20 @@
 ﻿import { createRouter, createWebHistory } from 'vue-router'
-import AuthCallbackView from '@/views/AuthCallbackView.vue'
-import AuthGuardErrorView from '@/views/AuthGuardErrorView.vue'
-import CreateTreeView from '@/views/CreateTreeView.vue'
-import HomeView from '@/views/HomeView.vue'
-import LoginView from '@/views/LoginView.vue'
-import AdminSubscriptionsView from '@/views/AdminSubscriptionsView.vue'
-import AdminMastersView from '@/views/AdminMastersView.vue'
-import SubscribeByEmailView from '@/views/SubscribeByEmailView.vue'
-import TreeDetailView from '@/views/TreeDetailView.vue'
-import EditTreeView from '@/views/EditTreeView.vue'
-import MyTreesListView from '@/views/MyTreesListView.vue'
-import TreesListView from '@/views/TreesListView.vue'
 import { authService } from '@/services/auth/oidc'
 import type { AppRole } from '@/types/auth'
 import { userHasAnyAppRole } from '@/utils/jwtRoles'
+
+const AuthCallbackView = () => import('@/views/AuthCallbackView.vue')
+const AuthGuardErrorView = () => import('@/views/AuthGuardErrorView.vue')
+const CreateTreeView = () => import('@/views/CreateTreeView.vue')
+const HomeView = () => import('@/views/HomeView.vue')
+const LoginView = () => import('@/views/LoginView.vue')
+const AdminSubscriptionsView = () => import('@/views/AdminSubscriptionsView.vue')
+const AdminMastersView = () => import('@/views/AdminMastersView.vue')
+const SubscribeByEmailView = () => import('@/views/SubscribeByEmailView.vue')
+const TreeDetailView = () => import('@/views/TreeDetailView.vue')
+const EditTreeView = () => import('@/views/EditTreeView.vue')
+const MyTreesListView = () => import('@/views/MyTreesListView.vue')
+const TreesListView = () => import('@/views/TreesListView.vue')
 
 async function trySilentRefreshWithTimeout(timeoutMs = 800) {
   const timeoutPromise = new Promise<null>((resolve) => {

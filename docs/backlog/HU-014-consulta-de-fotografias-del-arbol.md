@@ -21,8 +21,8 @@ Como visitante o usuario autenticado quiero ver las fotografías almacenadas en 
 #### Incluye
 
 - Endpoints acordados en [docs/api/openapi.yaml](../api/openapi.yaml) bajo `/api/media` para **listar metadatos visibles por árbol** y obtener URL de lectura para visualización en cliente.
-- El endpoint de galería por árbol devuelve, como mínimo, los campos `id`, `url`, `esPrincipal`, `orden`, `mimeType`, `ancho`, `alto` y `categoria`.
-- El campo `categoria` se expresa en contrato como literal de negocio (`PUBLIC` | `PRIVATE`).
+- El endpoint de galería por árbol devuelve, como mínimo, los campos `id`, `url`, `isPrimary`, `order`, `mimeType`, `width`, `height` y `category`.
+- El campo `category` se expresa en contrato como literal de negocio (`PUBLIC` | `PRIVATE`).
 - Aplicación de reglas **R4–R5** y matriz de [docs/data-model/data-model.md](../data-model/data-model.md): público anónimo solo ve **PUBLIC**; usuario autenticado ve **PUBLIC + PRIVATE** según permisos de negocio.
 - **JWT** donde las rutas de lectura lo exijan; respuestas coherentes con **404** u omisión de recursos no autorizados (sin filtrar existencia de fotos privadas a terceros, según decisión de endurecimiento documentada en contrato).
 - En **listado público** (HU-002), cada tarjeta muestra la **fotografía principal** en el hueco izquierdo; si no existe imagen disponible, se muestra **imagen por defecto**.
@@ -103,7 +103,7 @@ Objetivo: dejar trazada en documentación lo ya construido frente a la HU comple
 
 | Pieza | Estado | Notas |
 |-------|--------|--------|
-| **Contrato galería** `GET /api/media/trees/{treeId}/photos` | Hecho | [docs/api/openapi.yaml](../api/openapi.yaml): `200` con lista (vacía cuando aplica), campos mínimos `id/url/esPrincipal/orden/mimeType/ancho/alto/categoria`, `categoria` literal `PUBLIC`/`PRIVATE`. |
+| **Contrato galería** `GET /api/media/trees/{treeId}/photos` | Hecho | [docs/api/openapi.yaml](../api/openapi.yaml): `200` con lista (vacía cuando aplica), campos mínimos `id/url/isPrimary/order/mimeType/width/height/category`, `category` literal `PUBLIC`/`PRIVATE`. |
 | **Contrato foto principal binaria** `GET /api/media/public/trees/{treeId}/primary-photo` | Hecho | Se mantiene para miniatura/listado público; respuestas binaria `image/*` y `404/502` según contrato. |
 | **Visibilidad por rol en backend** | Hecho | Público anónimo recibe solo `PUBLIC`; autenticado recibe `PUBLIC + PRIVATE` según permisos de negocio; orden estable principal+ascendente. |
 | **Lectura segura de objetos** | Hecho | URLs de galería emitidas como lectura firmada (evita acceso directo no autorizado al bucket privado). |

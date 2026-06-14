@@ -210,8 +210,6 @@ Checklist minimo al crear o alinear un servicio MVC:
 
 ## 5. Enfoque por historias de usuario
 
-Los puntos **5 en adelante** del roadmap (dominio, Kafka, media, IA, front, CI, etc.) se irán desarrollando **historia a historia**; este README puede ampliarse cuando cerréis el primer flujo extremo a extremo (JWT + catálogo + notificación, etc.).
-
 **Subida de fotografías al árbol (HU-006):** flujo **presign → PUT en MinIO → confirmación** en `media-service`, propiedades `mtl.media.upload.*` / `mtl.media.storage.*` / `mtl.media.presign.*`, criterio de **foto principal** (primera confirmación en servidor; orden en cliente) y **EXIF** solo en la SPA. Guía técnica: [docs/engineering/media-upload-hu006.md](../docs/engineering/media-upload-hu006.md). Arranque local: gateway **8080**, **media-service** **8082**, MinIO **9000** (véase [infra/compose/README.md](../infra/compose/README.md)).
 
 **Edición y baja de fichas (HU-008, UC-04):**

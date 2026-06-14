@@ -31,7 +31,7 @@
 | Tests `arbol*` en identificadores | **C** | Renombrados a `ejemplar*` |
 | `services/README.md` Kafka | **C** | Clave `ejemplar-evento-topic` |
 | Backlog HU (contratos HTTP citados) | **C** | HU-002/003 actualizadas; resto coherente o solo lenguaje producto |
-| MongoDB | **C** | Diseño `mongo.md` conforme; sin `@Document` aún; skill alineada; ver [mongo audit](2026-05-30-mongo-naming-audit.md) |
+| MongoDB | **C** | Diseño `mongo.md` conforme; sin `@Document` aún; skill alineada; ver [mongo audit](2026-05-30-mongo-naming-audit.md). **CORREGIDO 2026-06-14:** HU-015 implementa documentos `@Document`, repositorios e índices. |
 
 ---
 

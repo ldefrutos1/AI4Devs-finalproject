@@ -86,8 +86,10 @@ Esto encaja con las buenas prácticas actuales de **context engineering**: acota
 | Área | Observación |
 |------|-------------|
 | **Trazabilidad PR** | El playbook pide HU → TASK → cambios, pero la plantilla de PR no exige IDs de HU/ticket ni enlace al breakdown. |
+| **CORREGIDO 2026-06-14** | `.github/pull_request_template.md` exige HU, ticket(s) y enlace al breakdown. |
 | **`prompts.md` incompleto** | Secciones vacías (§2.2–2.4, API §4, parte de tests): debilita la evidencia del curso. |
 | **Sincronización backlog** | Estados «Pendiente» vs tickets «Hecho» sugieren falta de paso humano de cierre tras trabajo asistido por IA. |
+| **CORREGIDO 2026-06-14** | HU-011 y HU-015 figuran cerradas en `docs/backlog/backlog.md`; HU-015 tiene 14/14 tickets **Hecho**. |
 | **Supervisión explícita** | Hay guardrails de generación, pero poca evidencia documentada de *rechazos* o correcciones humanas al output del agente. |
 | **Skills vs reglas** | Bien diferenciados; conviene usar siempre `encargo-mtl` en implementación (no está enforced). |
 

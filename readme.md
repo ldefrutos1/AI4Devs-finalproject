@@ -933,7 +933,7 @@ flowchart LR
 - **Backend:** repositorios y endpoints por capa (Testcontainers: PostGIS/Mongo/Kafka).
 
 **Test E2E en tres niveles:**
-- **Contenedores de prueba (CI):** stack efímero autocontenido en Docker, ejecutado en cada PR.
+- **Contenedores de prueba (manual):** stack efímero autocontenido en Docker, lanzado bajo demanda por el coste de levantar contenedores en cada PR.
 - **Docker Compose (entorno levantado):**
   - **UI front + back (Playwright):** flujo de usuario completo por el navegador.
   - **REST del back (`system-e2e-tests`):** contrato HTTP/JWT por el gateway, sin navegador.

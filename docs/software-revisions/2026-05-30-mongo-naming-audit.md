@@ -5,6 +5,7 @@
 | **Fecha** | 2026-05-30 |
 | **Norma** | [mongo.md](../data-model/mongo.md), [ADR-0006](../adr/0006-ejemplar-aggregate-http-kafka-naming.md), [ADR-0007](../adr/0007-english-http-spanish-persistence.md), [naming-conventions.md](../engineering/naming-conventions.md) §3 |
 | **Alcance** | Diseño documentado, skill Cursor, stubs en `catalog-service`; sin `@Document` en código aún (HU-015 pendiente) |
+| **Seguimiento** | **CORREGIDO 2026-06-14:** HU-015 cerrada; existen documentos Spring Data Mongo, repositorios, índices y endpoints de enriquecimiento. |
 
 ## Resumen ejecutivo
 
@@ -14,10 +15,10 @@
 | Nombres de colección | ✅ | Canónico: `especie_detalle`, `ejemplar_detalle` ([mongo.md](../data-model/mongo.md)) |
 | Campos de negocio | ✅ | Español `snake_case`; enlaces `especie_pg_id`, `ejemplar_pg_id` |
 | `_id` | ✅ | Entero = PK PostgreSQL (no `ObjectId` ni prefijos `esp_`/`eje_`) |
-| Código Java Mongo | ⚠️ | Solo placeholders + `NoOpEjemplarEnrichmentDeletionPort` (HU-015) |
-| Contrato HTTP sobre Mongo | — | Sin endpoints en OpenAPI; futuro: JSON inglés ↔ documento español (ADR-0007) |
+| Código Java Mongo | ⚠️ | Solo placeholders + `NoOpEjemplarEnrichmentDeletionPort` (HU-015). **CORREGIDO 2026-06-14:** implementación Mongo real en `catalog-service`. |
+| Contrato HTTP sobre Mongo | — | Sin endpoints en OpenAPI; futuro: JSON inglés ↔ documento español (ADR-0007). **CORREGIDO 2026-06-14:** rutas `/enrichment` documentadas en OpenAPI. |
 | Skill `db-mongo-mtl` | ❌→✅ | Desalineada con `mongo.md`; **corregida** en esta revisión |
-| Infra Compose | ⚠️ | Mongo 7 sin init de colecciones/índices (aceptable hasta HU-015) |
+| Infra Compose | ⚠️ | Mongo 7 sin init de colecciones/índices (aceptable hasta HU-015). **CORREGIDO 2026-06-14:** índices cubiertos por `CatalogMongoIndexInitializer`. |
 
 **Conclusión:** el **diseño** en `mongo.md` cumple N2.1/N2.2 y ADR-0007 (persistencia en español). No hay documentos ni repositorios productivos que contradigan la norma. La deuda es **implementación** (HU-015/HU-016), no renombrado de colecciones.
 
@@ -50,10 +51,10 @@ No se detectan campos de negocio en inglés en los ejemplos normativos de `mongo
 
 | Ubicación | Estado |
 |-----------|--------|
-| `infrastructure/persistence/mongo/{document,repository,config}/.gitkeep` | Estructura preparada; sin clases |
-| `EjemplarEnrichmentDeletionPort` + `NoOpEjemplarEnrichmentDeletionPort` | Stub HU-015-01; log coherente (`treeId`) |
-| `pom.xml` / dependencia Mongo en BOM | Presente en árbol efectivo; **sin** `spring-boot-starter-data-mongodb` activo en módulo según corte actual |
-| OpenAPI | Sin rutas que lean/escriban Mongo directamente |
+| `infrastructure/persistence/mongo/{document,repository,config}/.gitkeep` | Estructura preparada; sin clases. **CORREGIDO 2026-06-14:** existen documentos y repositorios Mongo reales. |
+| `EjemplarEnrichmentDeletionPort` + `NoOpEjemplarEnrichmentDeletionPort` | Stub HU-015-01; log coherente (`treeId`). **CORREGIDO 2026-06-14:** `MongoEjemplarEnrichmentDeletionPort` implementa borrado real con Mongo activo. |
+| `pom.xml` / dependencia Mongo en BOM | Presente en árbol efectivo; **sin** `spring-boot-starter-data-mongodb` activo en módulo según corte actual. **CORREGIDO 2026-06-14:** `catalog-service` incluye `spring-boot-starter-data-mongodb`. |
+| OpenAPI | Sin rutas que lean/escriban Mongo directamente. **CORREGIDO 2026-06-14:** OpenAPI incluye endpoints de enriquecimiento de especie/ejemplar. |
 
 **Criterio HU-015 al implementar:**
 
@@ -70,7 +71,7 @@ No se detectan campos de negocio en inglés en los ejemplos normativos de `mongo
 |----|-----------|----------|--------|
 | M-1 | ❌ | Skill `db-mongo-mtl` citaba `enriquecimientos_especie` / `enriquecimientos_ejemplar` y `_id` string `esp_`/`eje_`+ULID | Actualizar skill → `especie_detalle` / `ejemplar_detalle` y `_id` numérico |
 | M-2 | ⚠️ | Skill §5 decía “no duplicar nombres de especie” sin matizar | Ajustar: permitir `nombre_cientifico` / `nombre_comun` desnormalizados según `mongo.md` |
-| M-3 | ⚠️ | Sin scripts de índices en `infra/` | Dejar para HU-015 (índices en `mongo.md` §4) |
+| M-3 | ⚠️ | Sin scripts de índices en `infra/` | Dejar para HU-015 (índices en `mongo.md` §4). **CORREGIDO 2026-06-14:** `CatalogMongoIndexInitializer`. |
 
 ---
 

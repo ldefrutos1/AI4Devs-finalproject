@@ -55,7 +55,7 @@ flowchart LR
 
 | ID | Título | Descripción breve | Estado |
 |----|--------|-------------------|--------|
-| **TASK-HU-014-01** | Cerrar contrato OpenAPI de galería por árbol | Definir en [openapi.yaml](../api/openapi.yaml) endpoint de lectura de galería por árbol y payload mínimo por elemento: `id`, `url`, `esPrincipal`, `orden`, `mimeType`, `ancho`, `alto`, `categoria` con enum literal `PUBLIC`/`PRIVATE`. Acordar respuesta sin fotos: **200** con lista vacía. | Hecho |
+| **TASK-HU-014-01** | Cerrar contrato OpenAPI de galería por árbol | Definir en [openapi.yaml](../api/openapi.yaml) endpoint de lectura de galería por árbol y payload mínimo por elemento: `id`, `url`, `isPrimary`, `order`, `mimeType`, `width`, `height`, `category` con enum literal `PUBLIC`/`PRIVATE`. Acordar respuesta sin fotos: **200** con lista vacía. | Hecho |
 | **TASK-HU-014-02** | Alinear modelo y repositorio para visibilidad por foto | Completar en `media-service` el soporte de categoría/visibilidad por fotografía para aplicar reglas R4-R5 por rol (anónimo solo `PUBLIC`; autenticado según permisos para `PRIVATE`). Si falta columna o restricción, crear migración Flyway nueva. | Hecho |
 | **TASK-HU-014-03** | Servicio de aplicación para listado ordenado | Implementar caso de uso de consulta por `treeId` con orden: foto principal primero y resto en orden ascendente. Aplicar filtro por rol y contexto sin fuga de privadas. | Hecho |
 | **TASK-HU-014-04** | Endpoint operativo de galería y seguridad | Exponer endpoint en gateway/media-service con JWT opcional según ruta: anónimo recibe públicas; autenticado recibe públicas+privadas permitidas. Mantener semántica de lista vacía sin fotos y manejo de errores consistente con `Problem`. | Hecho |
@@ -74,7 +74,7 @@ flowchart LR
 
 | ID | Título | Descripción breve | Estado |
 |----|--------|-------------------|--------|
-| **TASK-HU-014-10** | Documentación final y trazabilidad HU | Actualizar documentación afectada (OpenAPI y docs de backlog) con decisiones cerradas de HU-014, incluyendo visibilidad por rol y contrato de `categoria` literal. Verificar coherencia cruzada con HU-002/HU-003/HU-006. | Hecho |
+| **TASK-HU-014-10** | Documentación final y trazabilidad HU | Actualizar documentación afectada (OpenAPI y docs de backlog) con decisiones cerradas de HU-014, incluyendo visibilidad por rol y contrato de `category` literal. Verificar coherencia cruzada con HU-002/HU-003/HU-006. | Hecho |
 
 ---
 

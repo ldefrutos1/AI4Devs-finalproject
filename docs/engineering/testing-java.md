@@ -40,15 +40,15 @@ No hay **umbral de cobertura %** obligatorio en CI; sí estas reglas **baratas d
 
 #### 2.1.1. Reparto de pruebas — back aislado del front (referencia HU-001)
 
-**Objetivo:** cubrir la **cadena back real** (Keycloak → gateway → microservicio → BD) con el mínimo de **Cypress/Playwright**; el UI E2E solo donde el contrato es del navegador (OIDC, router, UX de sesión).
+**Objetivo:** cubrir la **cadena back real** (Keycloak → gateway → microservicio → BD) con el mínimo de **Playwright**; el UI E2E solo donde el contrato es del navegador (OIDC, router, UX de sesión).
 
-| Escenario (aceptación) | Responsabilidad principal | Herramienta | Cypress / UI E2E (solo si aplica) |
+| Escenario (aceptación) | Responsabilidad principal | Herramienta | Playwright / UI E2E (solo si aplica) |
 |------------------------|---------------------------|-------------|-------------------------------------|
 | **1** Login OIDC, callback, silent renew, logout | Flujo SPA y almacenamiento de sesión | Vitest (router/guards) + **1** flujo UI E2E | Sí: PKCE, redirect, renovación |
 | **2** API protegida con JWT y rol permitido | Cadena HTTP auténtica vía gateway | **`system-e2e-tests`** (`Hu001Scenario02…`) | No repetir listados API en navegador |
 | **3** Sin token / token inválido → **401** | Contrato API sin Bearer | **`system-e2e-tests`** (`Hu001Scenario03…`) + `CatalogSecurityIT` / gateway IT | Solo redirect/`/auth/error?reason=session` |
 | **4** COLABORADOR → recurso **ADMIN** → **403** | Autorización API por rol | **`system-e2e-tests`** (`Hu001Scenario04…`) + `CatalogSecurityIT` | Solo guardas router (`reason=forbidden`) |
-| **HU-013** Navegación y guardas SPA (esc. 1–3) | Router, menú, placeholders **sin** API en esta HU | **Vitest** (`frontend/src/router/index.test.ts`) + **Cypress** mínimo | No duplicar en `system-e2e-tests`; contrato API ya en HU-001 esc. 2–4 |
+| **HU-013** Navegación y guardas SPA (esc. 1–3) | Router, menú, placeholders **sin** API en esta HU | **Vitest** (`frontend/src/router/index.test.ts`) + **Playwright** mínimo | No duplicar en `system-e2e-tests`; contrato API ya en HU-001 esc. 2–4 |
 
 **Qué demuestra cada capa (evitar duplicar el mismo assert):**
 
@@ -58,7 +58,7 @@ No hay **umbral de cobertura %** obligatorio en CI; sí estas reglas **baratas d
 | **`CatalogSecurityIT`**, gateway IT + **WireMock** | Seguridad y rutas **autocontenidas**, Problem HTTP | `iss` real, relay multi-salto, datos Flyway |
 | **`system-e2e-tests`** | **JWT real**, gateway :8080, upstream y BD sembrada | Login PKCE ni CORS del navegador |
 | **Contrato OpenAPI** (cuando exista en CI) | Forma de request/response | Comportamiento con Keycloak vivo |
-| **Cypress / Playwright** | OIDC y UX de sesión en SPA | 401/403 de API ni paginación de catálogo |
+| **Playwright** | OIDC y UX de sesión en SPA | 401/403 de API ni paginación de catálogo |
 
 **CI (MVP):** [.github/workflows/ci.yml](../../.github/workflows/ci.yml) — en cada PR: `mvn test`, frontend (`lint`, `typecheck`, Vitest) y Gitleaks. Dependencias (npm audit + OWASP): workflow manual — [devsecops-ci.md](devsecops-ci.md). Sin E2E obligatorio; Playwright manual: [e2e-playwright.yml](../../.github/workflows/e2e-playwright.yml), [testing-e2e.md](testing-e2e.md) §4.
 
