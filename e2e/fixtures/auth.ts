@@ -1,13 +1,27 @@
 import { expect, type Page } from '@playwright/test'
 
+export type E2eCredentials = {
+  username: string
+  password: string
+}
+
 /**
  * Credenciales del colaborador de prueba.
  * Se leen de entorno (E2E_USER / E2E_PASS) con valores por defecto
  * alineados al realm local `mtl` (usuario `colaborador`).
  */
-export const collaborator = {
+export const collaborator: E2eCredentials = {
   username: process.env.E2E_USER ?? 'colaborador',
   password: process.env.E2E_PASS ?? 'colaborador_dev',
+}
+
+/**
+ * Credenciales del administrador de prueba (maestros taxonomicos).
+ * Realm local `mtl`: `admin_mtl` / `admin_mtl_dev`.
+ */
+export const admin: E2eCredentials = {
+  username: process.env.E2E_ADMIN_USER ?? 'admin_mtl',
+  password: process.env.E2E_ADMIN_PASS ?? 'admin_mtl_dev',
 }
 
 /**
@@ -19,19 +33,25 @@ export const collaborator = {
  * Los selectores `#username`, `#password` y `#kc-login` son los ids estables
  * del tema de login de Keycloak.
  */
-export async function loginAsCollaborator(page: Page): Promise<void> {
+export async function loginAs(page: Page, creds: E2eCredentials): Promise<void> {
   await page.goto('/')
 
-  // El boton de login aparece cuando la sesion OIDC esta inicializada (auth.isReady).
   const loginButton = page.getByTestId('nav-login')
   await loginButton.click()
 
   await page.locator('#username').waitFor({ state: 'visible' })
-  await page.locator('#username').fill(collaborator.username)
-  await page.locator('#password').fill(collaborator.password)
+  await page.locator('#username').fill(creds.username)
+  await page.locator('#password').fill(creds.password)
   await page.locator('#kc-login').click()
 
-  // De vuelta en la SPA (la home), ya autenticado: el boton de login desaparece.
   await expect(page).toHaveURL(/\/(?:$|\?)/)
   await expect(loginButton).toHaveCount(0)
+}
+
+export async function loginAsCollaborator(page: Page): Promise<void> {
+  await loginAs(page, collaborator)
+}
+
+export async function loginAsAdmin(page: Page): Promise<void> {
+  await loginAs(page, admin)
 }

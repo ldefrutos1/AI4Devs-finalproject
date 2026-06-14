@@ -72,6 +72,22 @@
         }
       ],
       "realmRoles": ["COLABORADOR"]
+    },
+    {
+      "username": "admin_mtl",
+      "enabled": true,
+      "emailVerified": true,
+      "email": "admin_mtl@mtl.test",
+      "firstName": "E2E",
+      "lastName": "Administrador",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin_mtl_dev",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ADMIN", "COLABORADOR"]
     }
   ]
 }

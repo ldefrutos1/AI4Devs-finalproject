@@ -351,17 +351,23 @@ onMounted(async () => {
     <p v-else-if="errorMessage" class="error" role="alert">{{ errorMessage }}</p>
 
     <section v-else-if="isSuccess" class="catalog-results">
-      <p class="catalog-results-count muted">
+      <p class="catalog-results-count muted" data-testid="public-trees-results-count">
         {{ t('treesList.resultsCount', { count: totalResults }) }}
       </p>
 
-      <div v-if="!hasResults" class="mtl-empty-state">
+      <div v-if="!hasResults" class="mtl-empty-state" data-testid="public-trees-empty">
         <p class="mtl-empty-state__title">{{ t('treesList.emptyTitle') }}</p>
         <p class="mtl-empty-state__text">{{ t('treesList.empty') }}</p>
       </div>
 
       <div v-else class="catalog-grid">
-        <article v-for="tree in trees" :key="tree.treeId" class="catalog-card">
+        <article
+          v-for="tree in trees"
+          :key="tree.treeId"
+          class="catalog-card"
+          data-testid="public-trees-card"
+          :data-tree-id="tree.treeId"
+        >
           <RouterLink class="catalog-card__thumb-link" :to="`/ejemplares/${tree.treeId}`">
             <img
               class="catalog-card__thumb"
@@ -374,11 +380,17 @@ onMounted(async () => {
           </RouterLink>
           <div class="catalog-card__body">
             <h2 class="catalog-card__title">
-              <RouterLink class="catalog-card__title-link" :to="`/ejemplares/${tree.treeId}`">
+              <RouterLink
+                class="catalog-card__title-link"
+                data-testid="public-trees-card-title"
+                :to="`/ejemplares/${tree.treeId}`"
+              >
                 {{ formatSpeciesTitle(tree) }}
               </RouterLink>
             </h2>
-            <p class="catalog-card__location">{{ locationLine(tree) }}</p>
+            <p class="catalog-card__location" data-testid="public-trees-card-location">
+              {{ locationLine(tree) }}
+            </p>
             <div class="catalog-card__badges">
               <span :class="publicationStateBadgeClass(tree.publicationState)">{{
                 publicationStateLabel(tree.publicationState)
@@ -387,7 +399,11 @@ onMounted(async () => {
                 mapVisibilityLabel(tree.publicMapVisibility)
               }}</span>
             </div>
-            <RouterLink class="catalog-card__detail-link" :to="`/ejemplares/${tree.treeId}`">
+            <RouterLink
+              class="catalog-card__detail-link"
+              data-testid="public-trees-card-detail-link"
+              :to="`/ejemplares/${tree.treeId}`"
+            >
               {{ t('treesList.viewDetail') }}
             </RouterLink>
           </div>
