@@ -15,7 +15,7 @@
 
 Como colaborador autenticado, quiero modificar o eliminar únicamente los árboles que di de alta yo, para mantener actualizada mi documentación sin afectar el trabajo de otros.
 
-- **Entregable de la historia:** Flujo vertical en **catalog-service**, **media-service** (borrado masivo de fotos por árbol) y **frontend** que permite al colaborador **listar y filtrar** sus fichas, **abrir una ficha en modo edición**, **persistir cambios** (**PUT**) y **eliminar físicamente** fichas propias (**DELETE** con cascada media → SQL → hook Mongo), respetando **R1**, **R2** y la **propiedad** (`usuario_app_id`; **ADMIN** sobre cualquier ficha). Si **media-service** falla al borrar fotos, el árbol **no** se elimina en PostgreSQL. **Rollback compensatorio** tras fotos borradas: **no** implementado en MVP (deuda documentada). **AUDITORIA_CATALOGO** (**R3**, [ADR-0004](../adr/0004-catalog-rest-write-and-audit.md)). Sin **`EJEMPLAR_CREADO`** ni notificación en edición/baja (**R7**). Rutas: **`/mis-ejemplares`**, **`/ejemplares/:id/edit`** (**HU-013**). Galería en edición: **[TASK-HU-006-14](HU-006-ticket-breakdown.md)** (**HU-006** cerrada). Desglose: **[HU-008-ticket-breakdown.md](HU-008-ticket-breakdown.md)**.
+- **Entregable de la historia:** Flujo vertical en **catalog-service**, **media-service** (borrado masivo de fotos por árbol) y **frontend** que permite al colaborador **listar y filtrar** sus fichas, **abrir una ficha en modo edición**, **persistir cambios** (**PUT**) y **eliminar físicamente** fichas propias (**DELETE** con cascada media → SQL → hook Mongo), respetando **R1**, **R2** y la **propiedad** (`usuario_app_id`; **ADMIN** sobre cualquier ficha). Si **media-service** falla al borrar fotos, el árbol **no** se elimina en PostgreSQL. **Rollback compensatorio** tras fotos borradas: **no** implementado en MVP (deuda documentada). **AUDITORIA_CATALOGO** (**R3**, [ADR-0004](../adr/0004-catalog-rest-write-and-audit.md)). Sin **`EJEMPLAR_CREADO`** ni notificación en edición/baja (**R7**). Rutas: **`/mis-ejemplares`**, **`/ejemplares/:id/edit`** (**HU-013**). Galería en edición: **[TASK-HU-006-14](HU-006-ticket-breakdown.md)** (**HU-006** cerrada). Desglose: **[HU-008-ticket-breakdown.md](HU-008-ticket-breakdown.md)**. *Nota post-cierre:* el paso Mongo pasó de stub a borrado real con **[TASK-HU-015-01](HU-015-ticket-breakdown.md)** (**Hecho**) cuando `mtl.catalog.mongo.enabled=true`.
 
 ### Alcance
 
@@ -31,7 +31,7 @@ Como colaborador autenticado, quiero modificar o eliminar únicamente los árbol
 - **Baja de ficha:** **`DELETE /api/catalog/trees/{treeId}`** con **borrado físico** de la fila `ejemplar` en PostgreSQL; misma regla de propiedad que la edición; confirmación en UI. **Orquestación en catalog-service** (sin saga en MVP):
   1. Si el árbol **tiene fotografías**, invocar **`DELETE /api/media/trees/{treeId}/photos`**; si **media-service** responde con error → **detener** el proceso (no se borra el árbol en PostgreSQL).
   2. Si no hay fotos, o tras borrado correcto de todas las fotos → **eliminar el árbol** en PostgreSQL (transacción catálogo).
-  3. Invocar borrado Mongo — **[TASK-HU-015-01](HU-015-ticket-breakdown.md)** (**Hecho** en **HU-015**): con `mtl.catalog.mongo.enabled=true`, `MongoEjemplarEnrichmentDeletionPort` elimina físicamente `ejemplar_detalle`; con Mongo desactivado, `NoOpEjemplarEnrichmentDeletionPort`.
+  3. Invocar borrado Mongo — **[TASK-HU-015-01](HU-015-ticket-breakdown.md)** (**Hecho**): `MongoEjemplarEnrichmentDeletionPort` con Mongo activo; `NoOpEjemplarEnrichmentDeletionPort` si `mtl.catalog.mongo.enabled=false`.
   - Si falla el paso **2** o **3** tras haber borrado fotos en el paso **1** → en refinamiento se acordó **rollback**; en el **MVP entregado** no hay compensación automática (deuda; ver [services/README.md](../../services/README.md) apartado HU-008).
 - **Autorización:** **`COLABORADOR`** solo puede leer, actualizar o eliminar árboles propios; **`ADMIN`** puede operar sobre cualquier ficha. Ficha ajena para colaborador → **403**; identificador inexistente → **404**. JWT y roles según [api-security.mdc](../../.cursor/rules/api-security.mdc).
 - **Auditoría de catálogo** para modificación y baja (**R3**), con resumen técnico de ids (sin PII en `datos_*`), coherente con el patrón de alta documentado en ADR-0004.
@@ -57,7 +57,7 @@ Como colaborador autenticado, quiero modificar o eliminar únicamente los árbol
 - **Maestros** en formulario: **especie** (mantenimiento **HU-011**) y **provincia** (solo lectura, catálogo sembrado); consumo en formulario como en el alta.
 - **API Gateway** enrutando `/api/catalog` con validación de JWT hacia **catalog-service**.
 - **HU-006** / **[TASK-HU-006-14](HU-006-ticket-breakdown.md):** **cerrada** — galería en `/ejemplares/:id/edit`.
-- **HU-015** / **[TASK-HU-015-01](HU-015-ticket-breakdown.md):** borrado Mongo real **entregado** (**HU-015** cerrada); requiere Mongo activo en **catalog-service**.
+- **HU-015** / **[TASK-HU-015-01](HU-015-ticket-breakdown.md):** borrado Mongo real **Hecho** (condicionado a Mongo activo); la HU **HU-008** permanece **Cerrada** con el hook entregado en su corte.
 
 ### Decisiones de refinamiento (registro)
 
@@ -65,7 +65,7 @@ Como colaborador autenticado, quiero modificar o eliminar únicamente los árbol
 |------|----------|
 | **Eliminación de ficha** | **Borrado físico** en PostgreSQL (`DELETE` del registro **ejemplar** en `catalog.ejemplar`). |
 | **Fotografías** | Path fijo: **`DELETE /api/media/trees/{treeId}/photos`**. Si hay fotos, se invoca **antes** del borrado SQL; error en media → **parar** (no borrar árbol). Sin fotos → paso omitido. |
-| **Mongo** | Al borrar el árbol se eliminan los documentos de enriquecimiento del ejemplar (**TASK-HU-015-01**, **HU-015** cerrada): `MongoEjemplarEnrichmentDeletionPort` con Mongo activo; `NoOpEjemplarEnrichmentDeletionPort` si `mtl.catalog.mongo.enabled=false`. |
+| **Mongo** | Al borrar el árbol se eliminan los documentos de enriquecimiento del ejemplar vía **`EjemplarEnrichmentDeletionPort`**. En el corte **HU-008** se entregó el hook con stub; **[TASK-HU-015-01](HU-015-ticket-breakdown.md)** (**Hecho**) activa borrado real con `MongoEjemplarEnrichmentDeletionPort` cuando Mongo está habilitado. |
 | **Rol ADMIN** | **`COLABORADOR`:** solo fichas propias (`usuario_app_id`). **`ADMIN`:** puede editar y eliminar **cualquier** ficha (alineado con permisos de fotos en **HU-006** y readme de alta/edición para administrador). La historia en formato “Como colaborador…” sigue describiendo el caso principal. |
 | **Verbo HTTP de actualización** | MVP: solo **`PUT`** (reemplazo completo del cuerpo, esquema **`UpdateEjemplarRequest`** simétrico a **`CreateEjemplarRequest`**). **`PATCH`** queda fuera del primer corte. |
 | **Campos inmutables** | **`usuario_app_id` / creador** no cambian en edición. Resto de campos del DTO de alta son editables, incluido `speciesId` y estado de publicación (sin bloqueo extra tras publicar en MVP). |
@@ -85,8 +85,8 @@ Ver [HU-008-ticket-breakdown.md](HU-008-ticket-breakdown.md) (`TASK-HU-008-01` �
 | Riesgo | Mitigación acordada |
 |--------|---------------------|
 | **Contrato HTTP abierto** en `PUT` (`type: object`) | Cerrar **`UpdateEjemplarRequest`** y **`DELETE`** en OpenAPI en el mismo corte que la implementación. |
-| **Borrado distribuido** (media + SQL + Mongo) | Orquestación en **catalog-service**; aborto si falla media; borrado Mongo real con **HU-015**; tests unitarios/WebMvc; **TASK-HU-008-11** (IT catalog↔media) **rechazado**; verificación manual en [frontend/README.md](../../frontend/README.md). |
-| **Mongo desactivado en dev** | Sin `mtl.catalog.mongo.enabled=true`, el paso 3 es no-op; para probar cascada Mongo, Compose + perfil `dev` de **catalog-service**. |
+| **Borrado distribuido** (media + SQL + Mongo stub) | Orquestación en **catalog-service**; aborto si falla media; tests unitarios/WebMvc; **TASK-HU-008-11** (IT catalog↔media) **rechazado**; verificación manual en [frontend/README.md](../../frontend/README.md). |
+| **TASK-HU-015-01 pendiente** | ~~Stub/no-op~~ — **Hecho** en **HU-015**; borrado real con Mongo activo; stub solo si Mongo desactivado. |
 | **Filtros de fechas** | Parámetros tipo **`date`** en **UTC**; validar `createdFrom` ≤ `createdTo` con **400**. |
 | **PUBLICADO → consulta pública** | Comportamiento esperado (**R7** sin correo en edición/baja); copy de confirmación en UI si se pasa a publicado o se elimina ficha visible. |
 | **Concurrencia** (dos pestañas) | MVP: última escritura gana; sin bloqueo optimista. |

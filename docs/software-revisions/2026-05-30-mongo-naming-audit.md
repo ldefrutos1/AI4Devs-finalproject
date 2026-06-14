@@ -87,9 +87,9 @@ No se detectan campos de negocio en inglés en los ejemplos normativos de `mongo
 
 ## 5. Pendiente de implementación (no de nomenclatura)
 
-1. **HU-015** — Documentos Spring Data, proyección SQL→Mongo, borrado real en `EjemplarEnrichmentDeletionPort`.
-2. **HU-016** — Escritura/lectura `especie_detalle` vía ai-assistant; contrato HTTP en inglés con mapeo.
-3. **Infra** — Opcional: job init con índices de `mongo.md` §4 al desplegar entorno dev.
+1. ~~**HU-015** — Documentos Spring Data, proyección SQL→Mongo, borrado real en `EjemplarEnrichmentDeletionPort`, UI frontend y docs E2E.~~ **Cerrada** (2026-06; 14/14 tickets, merge PR #11).
+2. **HU-016** — Flujo IA en `/admin/masters`: validación JSON en **ai-assistant-service**; persistencia vía **frontend** → **catalog-service** (no ai-service → Mongo).
+3. ~~**Infra** — Índices Mongo al arranque.~~ Cubierto por `CatalogMongoIndexInitializer` en **catalog-service** (**TASK-02**).
 
 ---
 

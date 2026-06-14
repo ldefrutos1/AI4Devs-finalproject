@@ -147,3 +147,13 @@ Con estas acciones, la nota del SDLC podría acercarse cómodamente a **4,5 / 5*
 ### Mensaje para el evaluador del curso
 
 MyTreeLibrary es un **buen ejemplo de gobernanza de IA en el desarrollo**: reglas por capa, skills operativos, mapa de fuentes canónicas y verificación automatizada (CI). La evaluación debe distinguir entre **infraestructura de desarrollo asistido** (madura) y **evidencia de supervisión humana de punta a punta** (mejorable vía PRs, `prompts.md` y sincronización del backlog).
+
+---
+
+### Seguimiento (2026-06-13, post-revisión)
+
+| Acción recomendada | Estado |
+|--------------------|--------|
+| 1. Trazabilidad HU/TASK en plantilla de PR | **Hecho** (`.github/pull_request_template.md`, playbook y branching) |
+| 2. Completar `prompts.md` | **Pendiente** |
+| 3. Ritual de cierre backlog ↔ breakdown | **Hecho** — **HU-015** **Cerrada** (14/14 tickets; merge PR #11); convención en `docs/backlog/README.md` |
