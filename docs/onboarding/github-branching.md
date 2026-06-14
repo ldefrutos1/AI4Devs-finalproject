@@ -45,13 +45,16 @@ Atajos: comando Cursor [.cursor/commands/git-new-branch.md](../../.cursor/comman
 | `fix/` | Corrección |
 | `chore/` | Tooling, deps, docs, refactor sin cambio funcional claro |
 
-Opcional con issue: `feature/123-descripcion`. Norma ampliada: [naming-conventions.md](../engineering/naming-conventions.md) §10.
+Opcional con issue: `feature/123-descripcion`. Con HU/ticket: `feature/hu-015-task-04-enrichment-api`. Norma ampliada: [naming-conventions.md](../engineering/naming-conventions.md) §10.
 
 ## Pull requests
 
 - **Base:** `main` (salvo acuerdo explícito del equipo).
-- **Un PR = un tema revisable** (HU, fix, refactor acotado, bloque de docs). No mezclar temas no relacionados.
-- **Commits:** mensaje con el *por qué*; el cuerpo del PR resume para el revisor.
+- **Un PR = un tema revisable** (idealmente un **TASK**). No mezclar HUs ni tickets no relacionados.
+- **Título:** `tipo(HU-xxx): TASK-HU-xxx-nn — resumen breve` (p. ej. `feat(HU-015): TASK-HU-015-04 — API enrichment especie`).
+- **Trazabilidad:** rellenar la sección obligatoria de la [plantilla](../../.github/pull_request_template.md) (HU, TASK, enlace al breakdown).
+- **Commits:** mensaje con el *por qué*; incluir `TASK-HU-xxx-nn` en el cuerpo ([git-commit.md](../../.cursor/commands/git-commit.md)).
+- **Tras merge:** ticket → **Hecho** en el breakdown; HU → **En curso** o **Cerrada** en `backlog.md` §3 ([playbook IA](ai-development-playbook.md)).
 - **Plan de pruebas:** marca solo lo ejecutado de verdad.
 
 **Web:** tras el primer push, **Compare & pull request** → base `main`, compare tu rama. Rellena la [plantilla del repo](../../.github/pull_request_template.md) (GitHub la carga sola).

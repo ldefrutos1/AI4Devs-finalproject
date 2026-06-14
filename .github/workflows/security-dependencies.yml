@@ -1,0 +1,84 @@
+name: Security — dependencias (manual)
+
+# Análisis advisory de dependencias front (npm audit) y back (OWASP DC).
+# No se enlaza a PRs; lanzar desde Actions → Run workflow.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  frontend-deps:
+    name: npm audit (frontend)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js + cache npm
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: frontend
+        run: npm ci
+
+      - name: npm audit (advisory, high+)
+        working-directory: frontend
+        continue-on-error: true
+        run: |
+          npm audit --audit-level=high 2>&1 | tee "${GITHUB_WORKSPACE}/npm-audit.txt"
+          echo "Informe advisory: no bloquea merges ni CI de PR."
+
+      - name: Publicar informe npm
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: npm-audit.txt
+          if-no-files-found: warn
+
+  backend-deps:
+    name: OWASP Dependency-Check (Maven)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 21 (Temurin) + cache Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Cache datos NVD (OWASP)
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/owasp/dependency-check-data
+          key: owasp-nvd-${{ runner.os }}-${{ hashFiles('services/pom.xml') }}
+          restore-keys: |
+            owasp-nvd-${{ runner.os }}-
+
+      - name: OWASP aggregate scan (advisory)
+        continue-on-error: true
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+        run: |
+          mvn -f services/pom.xml -Psecurity-check org.owasp:dependency-check-maven:aggregate -B -DskipTests
+          echo "Informe advisory: failBuildOnCVSS=0; no bloquea merges ni CI de PR."
+
+      - name: Publicar informe OWASP
+        uses: actions/upload-artifact@v4
+        with:
+          name: owasp-dependency-check-report
+          path: services/target/dependency-check-report/
+          if-no-files-found: warn
