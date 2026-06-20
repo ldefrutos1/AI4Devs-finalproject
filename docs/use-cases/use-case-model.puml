@@ -54,6 +54,14 @@ end note
 Admin --> UC7
 Admin --> UC8
 
+UC7 ..> ProvIA : <<extend>>\nConsulta orientativa\nenriquecimiento especie\n(MVP HU-016)
+
+note right of UC7
+  Maestros **familia**, **género**, **especie**.
+  MVP incluye consulta IA orientativa
+  de enriquecimiento de especie (HU-016).
+end note
+
 note bottom of Colaborador
   **Restricción:** todos los casos
   propios del Colaborador
@@ -84,5 +92,16 @@ UC9 --> SMTP
 
 UC5 --> ProvIA
 UC6 --> ProvIA
+
+note right of UC5
+  **Próxima versión** (HU-009):
+  identificación orientativa
+  por imagen.
+end note
+
+note right of UC6
+  **Próxima versión** (HU-010):
+  chat asistido.
+end note
 
 @enduml

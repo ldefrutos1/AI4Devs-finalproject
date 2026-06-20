@@ -21,6 +21,7 @@
    - [4.2 Diagrama de entidad-relación (implementación física)](#42-diagrama-de-entidad-relación-implementación-física)
 5. 🔌 [Especificación de la API](#5-especificación-de-la-api)
 6. 📖 [Historias de usuario](#6-historias-de-usuario)
+   - [Desarrollo asistido por IA](#desarrollo-asistido-por-ia-gobierno-del-proceso)
 7. 🎫 [Tickets de trabajo](#7-tickets-de-trabajo)
 8. 🔀 [Pull requests](#8-pull-requests)
   
@@ -98,7 +99,7 @@ flowchart TB
 
     KC["🔐 Keycloak<br>Autenticación"]:::soporte
     SMTP["📧 Servidor SMTP<br>Notificaciones"]:::soporte
-    PIA["🧠 Proveedor IA<br>Identificación"]:::externo
+    PIA["🧠 Proveedor IA<br>Enriquecimiento especie (MVP)<br>Identificación y chat (futuro)"]:::externo
     MAP["🗺️ OpenStreetMap<br>Geolocalización"]:::externo
 
     U -->|Usa la aplicación| S
@@ -117,15 +118,17 @@ A continuación se incluye el diagrama de casos de uso del sistema.
 
 | ID | Nombre | Actor principal |
 | --- | --- | --- |
-| UC-01 | Consultar árboles publicados y su ubicación | Público |
+| UC-01 | Consultar árboles publicados y mapa | Público |
 | UC-02 | Registrarse para recibir notificaciones | Público |
 | UC-03 | Registrar árbol | Colaborador |
-| UC-04 | Modificar y eliminar árboles | Colaborador |
+| UC-04 | Modificar y eliminar árboles del colaborador | Colaborador |
 | UC-05 | Identificar árbol asistido por IA (imagen) | Colaborador |
 | UC-06 | Consultar asistente IA (chat) | Colaborador |
-| UC-07 | Gestionar tablas de catálogo (maestros taxonómicos) | ADMIN |
+| UC-07 | Gestionar tablas de catálogo (maestros taxonómicos; incl. consulta IA enriquecimiento especie en MVP) | ADMIN |
 | UC-08 | Gestionar solicitudes de notificación | ADMIN |
 | UC-09 | Notificar por correo a suscriptores | Sistema |
+
+\* UC-05 y UC-06: fuera del MVP (HU-009, HU-010 — próxima versión en [backlog.md](docs/backlog/backlog.md) §3). Consulta IA de enriquecimiento de especie en maestros: [HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md) (**Cerrada**).
 
 *El Modelo completo se puede consultar en:* [resumen de casos de uso](docs/use-cases/use-case-summary.md) · [modelo PlantUML](docs/use-cases/use-case-model.puml)
 
@@ -322,7 +325,6 @@ flowchart TB
     NOT -->|Consume| K
     
     AIS --> PG
-    AIS --> CAT
 ```
 
 ### **3.2. Descripción de componentes principales**
@@ -413,12 +415,12 @@ flowchart TB
         AuthStore["💾 Auth Store"]:::component
         Oidc["🔐 OIDC Service"]:::component
         Http["📡 API Client Interceptor"]:::component
-        CatalogSvc["📂 Catalog Service"]:::component
+        ApiSvc["🔌 Servicios API (frontend)"]:::component
 
         %% Relaciones internas
         Views --> AuthStore
-        Views --> CatalogSvc
-        CatalogSvc --> Http
+        Views --> ApiSvc
+        ApiSvc --> Http
         Http --> Oidc
         Router --> Oidc
         AuthStore --> Oidc
@@ -444,6 +446,8 @@ Responsabilidades clave:
 
 Simplificaciones del diagrama C3 (no aparecen como cajas o flechas):
 
+- **Servicios API (frontend)** agrupa módulos como `catalogService.ts`, `treeGalleryService.ts`, etc.; todos los autenticados pasan por `apiFetch`.
+- **`publicApiFetch`** (mismo `apiClient.ts`): rutas públicas del gateway **sin** Bearer ni reintento OIDC (p. ej. suscripción por correo, enriquecimiento público).
 - **API Client Interceptor** es la lógica de token y reintento en `apiFetch`, no un módulo aparte con ese nombre.
 - El intercambio de código tras el redirect de Keycloak lo ejecuta la vista `AuthCallbackView`, no el guard ni el store en el primer paso.
 
@@ -542,7 +546,7 @@ flowchart TB
         EjemplarReg["⚙️ EjemplarRegistrationService"]:::service
         EjemplarCre["🏗️ EjemplarCreationService"]:::service
         CatAud["📝 CatalogAuditService"]:::service
-        AfterCommit["⏱️ AfterCommitRegistrar"]:::service
+        AfterCommit["⏱️ AfterCommitTaskRegistrar"]:::service
         KafkaPub["📢 EjemplarCreadoEventPublisher"]:::service
         EventoSeq["🔢 Secuencia evento_id"]:::service
         JpaRepos["💾 Repositorios JPA"]:::repo
@@ -602,7 +606,7 @@ flowchart TB
 
 #### Flujo completo (Alta de ejemplar → correo)
 
-Tras login en Keycloak, la SPA desdde la pantalla de alta de ejemplar invoca a través del API Gateway a **catalog-service**. Cuando se persiste la ficha este microservicio publica el evento en Kafka; **notification-service** consume el evento de Kafka y envía un correo al suscriptor (SMTP; Mailpit en desarrollo).
+Tras login en Keycloak, la SPA desde la pantalla de alta de ejemplar invoca a través del API Gateway a **catalog-service**. Cuando se persiste la ficha este microservicio publica el evento en Kafka; **notification-service** consume el evento de Kafka y envía un correo al suscriptor (SMTP; Mailpit en desarrollo).
 
 ```mermaid
 sequenceDiagram
@@ -633,6 +637,7 @@ Si Kafka falla en ese paso posterior, el alta **no se revierte**; el fallo queda
 sequenceDiagram
   participant Client as Cliente_SPA_o_GW
   participant Ctrl as CatalogEjemplaresController
+  participant Write as CollaboratorEjemplarWriteService
   participant Reg as EjemplarRegistrationService
   participant Cre as EjemplarCreationService
   participant Aud as CatalogAuditService
@@ -643,7 +648,8 @@ sequenceDiagram
   participant KB as Kafka
 
   Client->>Ctrl: POST_trees_Bearer_JWT
-  Ctrl->>Reg: register
+  Ctrl->>Write: registerEjemplar
+  Write->>Reg: register
   Reg->>Cre: create
   Cre->>PG: persistir_EJEMPLAR_y_usuario
   Cre-->>Reg: CreatedEjemplarResult
@@ -651,7 +657,8 @@ sequenceDiagram
   Aud->>PG: insertar_AUDITORIA_CATALOGO
   Reg->>Tx: runAfterCommit_publicar
   Tx-->>Reg: sincronizacion_registrada
-  Reg-->>Ctrl: CreatedEjemplarResult
+  Reg-->>Write: CreatedEjemplarResult
+  Write-->>Ctrl: RegisteredEjemplarOutcome
   Ctrl-->>Client: 201_CreatedEjemplarResponse
 
   Note over Reg,PG: commit_transaccion
@@ -742,6 +749,8 @@ sequenceDiagram
   loop Por cada fotografía
     SPA->>GW: POST /api/media/uploads/presign
     GW->>MS: proxy JWT
+    MS->>CAT: GET media-submission-permission
+    CAT-->>MS: actorUsuarioAppId
     MS->>MS: validar MIME tamano cupo permiso
     MS-->>SPA: uploadUrl objectKey
 
@@ -750,7 +759,9 @@ sequenceDiagram
 
     SPA->>GW: POST /api/media/photos/confirm
     GW->>MS: proxy JWT
-    MS->>MS: INSERT media.fotografia
+    MS->>CAT: GET media-submission-permission
+    CAT-->>MS: actorUsuarioAppId
+    MS->>MS: validar e INSERT media.fotografia
     MS-->>SPA: 201 metadatos
   end
 ```
@@ -766,19 +777,34 @@ En el MVP solo se ha implementado la consulta de características de especie res
 <details>
 <summary><strong>Desplegar</strong> — Secuencia de consulta IA (MVP)</summary>
 
-**Flujo de consulta IA (MVP; consulta y precarga en pantalla — sin persistencia en esta historia):**
+**Flujo de consulta IA (MVP; precarga en popup — sin persistir enriquecimiento en catálogo/Mongo; sí trazabilidad `auditoria_uso_ia` en PostgreSQL del servicio IA):**
 
 ```mermaid
 sequenceDiagram
-  participant SPA as SPA_Vue3
+  autonumber
+  actor U as Usuario_ADMIN
+  participant SPA as SPA
   participant KC as Keycloak
-  participant GW as api_gateway
+  participant GW as API_Gateway
   participant AIS as ai_assistant_service
-  SPA->>KC: Registro_o_login_PKCE
-  SPA->>GW: Solicitar_enriquecimiento_IA
-  GW->>AIS: Proxy_JWT
-  AIS-->>SPA: JSON_validado_orientativo
-  SPA-->>SPA: Precargar_campos_edicion
+  participant Prov as Proveedor_IA_stub_u_OpenAI
+  participant PG as PostgreSQL_ai
+
+  U->>SPA: Solicitar sugerencia IA en popup
+  SPA->>KC: OIDC login PKCE
+  KC-->>SPA: JWT role ADMIN
+
+  SPA->>GW: POST /api/ai/species/enrichment-suggestions
+  GW->>AIS: proxy JWT
+  AIS->>AIS: verificar rol ADMIN
+  AIS->>AIS: construir prompt
+  AIS->>Prov: solicitar JSON orientativo
+  Prov-->>AIS: raw JSON
+  AIS->>AIS: validar estructura mongo 6.3
+  AIS->>PG: INSERT auditoria_uso_ia
+  AIS-->>GW: DTO orientativo
+  GW-->>SPA: 200 JSON
+  SPA->>SPA: precargar campos edicion sin PUT catalog
 ```
 
 
@@ -835,42 +861,58 @@ Detalle de servicios, puertos y arranque en Compose: [infra/compose/README.md](i
 **Decisiones documentadas:** el descubrimiento de servicios y configuración de los microservicios se hace **sin Eureka ni Spring Cloud Config** (asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md).
 
 ```mermaid
-flowchart LR
+flowchart TB
     %% --- Estilos (Consistentes con toda la documentación) ---
     classDef orch fill:#2D71A8,stroke:#1E4B73,stroke-width:2px,color:#FFFFFF,font-weight:bold;
+    classDef web fill:#D1E7FF,stroke:#2D71A8,stroke-width:2px,color:#1E4B73,font-weight:bold;
     classDef service fill:#E1F5EE,stroke:#0F6E56,stroke-width:1px,color:#085041;
     classDef db fill:#F5F5F5,stroke:#616161,stroke-width:1px,color:#424242,stroke-dasharray: 5 5;
 
     subgraph dev [Entorno de Desarrollo]
         direction TB
-        DC["🐳 Docker Compose"]:::orch
-        
-        %% Servicios
-        KCd["🔐 Keycloak"]:::service
-        Kd["⚡ Kafka"]:::service
-        MPd["📧 Mailpit"]:::service
-        PRd["📊 Prometheus"]:::service
-        GRd["📈 Grafana"]:::service
-        
-        %% Almacenamiento
-        PGd[("🐘 Postgres + PostGIS")]:::db
-        MGd[("🍃 MongoDB")]:::db
-        Rd[("🚀 Redis")]:::db
-        S3d[("📦 MinIO")]:::db
-    end
 
-    %% --- Relaciones ---
-    DC --> PGd
-    DC --> MGd
-    DC --> Rd
-    DC --> S3d
-    DC --> Kd
-    DC --> KCd
-    DC --> MPd
-    DC --> PRd
-    DC --> GRd
-    PRd --> GRd
+        subgraph host [Host dev habitual - IDE / mvn spring-boot:run]
+            direction TB
+            SPAh["🌐 SPA Vue3 Vite"]:::web
+            GWh["⚙️ API Gateway :8080"]:::web
+            MSh["Microservicios Spring Boot :8081-8084"]:::service
+            SPAh --> GWh
+            GWh --> MSh
+        end
+
+        subgraph compose [Docker Compose - infra de apoyo]
+            direction TB
+            DC["🐳 Docker Compose"]:::orch
+
+            KCd["🔐 Keycloak"]:::service
+            Kd["⚡ Kafka"]:::service
+            MPd["📧 Mailpit"]:::service
+            PRd["📊 Prometheus"]:::service
+            GRd["📈 Grafana"]:::service
+
+            PGd[("🐘 Postgres + PostGIS")]:::db
+            MGd[("🍃 MongoDB")]:::db
+            Rd[("🚀 Redis")]:::db
+            S3d[("📦 MinIO")]:::db
+        end
+
+        DC --> PGd
+        DC --> MGd
+        DC --> Rd
+        DC --> S3d
+        DC --> Kd
+        DC --> KCd
+        DC --> MPd
+        DC --> PRd
+        DC --> GRd
+        KCd --> PGd
+        PRd --> GRd
+        PRd -.->|scrape Actuator host.docker.internal| GWh
+        PRd -.-> MSh
+    end
 ```
+
+*Compose = infra de apoyo; microservicios y SPA suelen ejecutarse en el host.*
 
 
 
@@ -1277,6 +1319,14 @@ Además de la API REST, algunos flujos usan mensajes en Kafka. Hoy el caso princ
 
 ## 6. 📖 Historias de usuario
 
+### **Desarrollo asistido por IA (gobierno del proceso)**
+
+El desarrollo no se apoya en prompts sueltos, sino en **artefactos repetibles** y reglas del repositorio. Flujo habitual: **reglas Cursor** ([`.cursor/rules/`](.cursor/rules/)) → refinamiento de HU con [hu-refinement-mtl](.cursor/skills/hu-refinement-mtl/SKILL.md) → desglose en tickets con [hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md) (incluye **Reglas aplicables por capa** en el breakdown) → implementación por TASK con [encargo-mtl](.cursor/skills/encargo-mtl/SKILL.md) → **validación explícita** de que el cambio cumple esas reglas y [devsecops-ci.md](docs/engineering/devsecops-ci.md) → PR con trazabilidad (plantilla en [`.github/pull_request_template.md`](.github/pull_request_template.md)) → cierre en breakdown y [backlog.md](docs/backlog/backlog.md) §3. Detalle del paso de validación: [ai-development-playbook.md](docs/onboarding/ai-development-playbook.md) § «Validación contra reglas del proyecto»; contexto del monorepo: [AGENTS.md](AGENTS.md).
+
+La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada `docs/backlog/HU-*.md`, redactar y revisar la especificación de cada TASK antes de implementar, pedir al agente una **revisión explícita** tras cada TASK (contra las reglas citadas en el breakdown), y confirmar tests y PR antes del merge. En §6–§8 y en [prompts.md](prompts.md) hay **ejemplos históricos** de mensajes al agente (evidencia del curso); la fuente de verdad de cada historia es su fichero en `docs/backlog/` y su breakdown.
+
+En esos ejemplos suelen mezclarse dos cosas distintas: un **comando corto** que invoca una skill (p. ej. `/hu-breakdown-mtl HU-016`, sin modificar la plantilla de la skill) y, al implementar un ticket, un **texto largo** con objetivo, alcance y definición de hecho de **ese TASK concreto**, redactado siguiendo la estructura de [encargo-mtl](.cursor/skills/encargo-mtl/SKILL.md) — no la plantilla vacía, sino el encargo ya rellenado para la tarea.
+
 Backlog generado a partir de los casos de uso (§2.2.2) y del modelo de datos. Documentación completa (historias, criterios y tickets): [backlog.md](docs/backlog/backlog.md) · convención de desgloses: [backlog/README.md](docs/backlog/README.md) · casos de uso: [use-case-summary.md](docs/use-cases/use-case-summary.md).
 
 | ID | Título | Estado |
@@ -1298,11 +1348,11 @@ Backlog generado a partir de los casos de uso (§2.2.2) y del modelo de datos. D
 | HU-015 | Proyección y enriquecimiento Mongo | Cerrada |
 | HU-016 | Consulta IA características de especie (ADMIN) | Cerrada |
 
-La definición y refinamiento de cada historia, y sus tickets de trabajo, se realizó con los skills Cursor [hu-refinement-mtl](.cursor/skills/hu-refinement-mtl/SKILL.md) y [hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md). Proceso seguido:
-- 1.- Generación de la Historia de Usuario a partir del backlog con `hu-refinement-mtl/SKILL.md`
+Detalle del refinamiento y desglose de cada HU:
+- 1.- Generación de la Historia de Usuario a partir del backlog con `hu-refinement-mtl`
 - 2.- Análisis del documento generado
 - 3.- Aclaración, definición y/o corrección de los puntos detectados en los apartados de Riesgos y Aclaraciones pendientes (refinamiento)
-- 4.- Generación de los tickets de trabajo con `hu-breakdown-mtl/SKILL.md`
+- 4.- Generación de los tickets de trabajo con `hu-breakdown-mtl`
 
 Por operativa práctica, al comienzo de la historia se hacen unas comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.
 
@@ -1371,7 +1421,7 @@ el contrado exacto JSON se cerrará al implementar los ticker, por ahora simplem
 
 ## 7. 🎫 Tickets de trabajo
 
-Como se ha comentado en el punto anterior, para mantener formato homogéneo se usa un prompt genérico que se ha almacenado como skill `.cursor/skills/hu-breakdown-mtl/SKILL.md` (desglose en tickets). Este prompt genera el correspondiente archivo md dentro de la carpeta backlog.
+Como se ha comentado en el punto anterior, para mantener formato homogéneo se usa la skill [hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md) (desglose en tickets). Lo habitual es invocarla con un mensaje breve; la skill genera el fichero `HU-*-ticket-breakdown.md` en `docs/backlog/`. Al implementar cada TASK, el mensaje al agente suele ser más detallado (estructura [encargo-mtl](.cursor/skills/encargo-mtl/SKILL.md) rellena para ese ticket).
 
 En la generación de tickets de trabajo se incluye explícitamente una sección con las reglas de Cursor que debe aplicar el agente de IA al implementarlos.
 
@@ -1403,16 +1453,17 @@ así está bien, implementa el endpoint del Listado de TASK-HU-008-02, si tienes
 
 > *Registro histórico:* los prompts siguientes documentan el desglose de HU-016 en su momento; el contenido puede no reflejar el breakdown final ([HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md)).
 
-**Ejemplo del proceso: Ticket 1 y 2 — HU-0168**
+**Ejemplo del proceso: desglose e implementación — HU-016**
 
-**Prompt 1:**
+**Prompt 1** (invocación de skill; no modifica la plantilla):
+
 /hu-breakdown-mtl HU-016.
 
-**Prompt 2:**
+**Prompt 2** (arranque de implementación):
+
 ok empieza con TASK-HU-016-01, si tienes alguna duda preguntame
 
-**Prompt 3:**
-para con TASK-HU-016-02 se empleó:
+**Encargo TASK-HU-016-02** (especificación enviada al agente para implementar ese ticket; estructura `encargo-mtl`, rellena para esta tarea):
 
 ## Objetivo
 Integrar **OpenAI Responses API** en `ai-assistant-service` para HU-016 (enriquecimiento orientativo de especie por ADMIN), sustituyendo el adaptador HTTP genérico actual, manteniendo el modo `stub` para local/tests y dejando una base reutilizable para HU-009 (visión) y HU-010 (chat).
