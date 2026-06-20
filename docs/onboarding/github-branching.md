@@ -1,15 +1,28 @@
 # Git, ramas y pull requests
 
-Estrategia sencilla: **rama corta por tarea**, integración a **`main` solo por PR**. No usamos GitFlow completo.
+Estrategia sencilla: **rama corta por tarea**, integración a **`main` solo por PR**. No usamos GitFlow completo y por tanto no se emplean ramas develop, release/* y hotfix/*.
+
+## Mapa de lectura
+
+| Quiero… | Documento |
+|---------|-----------|
+| Abrir rama o PR, títulos, convención de commits | Este documento |
+| Comandos exactos antes del PR (paridad con CI) | [devsecops-ci.md](../engineering/devsecops-ci.md) |
+| Qué testear en backend / frontend | [testing-java.md](../engineering/testing-java.md) · [testing-frontend.md](../engineering/testing-frontend.md) |
+| E2E Playwright (local o manual en Actions) | [testing-e2e.md](../engineering/testing-e2e.md) |
+| Atajos PowerShell | [scripts/README.md](../../scripts/README.md) |
+
+**GitHub Actions:** 
+- [ci.yml](../../.github/workflows/ci.yml) corre **en cada PR y push a `main`** (tests Java, lint/typecheck/Vitest en frontend y Gitleaks; bloquea el merge si falla). 
+- [e2e-playwright.yml](../../.github/workflows/e2e-playwright.yml): Action disponible en GitHub (**Actions → Run workflow**); solo se lanza **cuando tú lo pidas** (no en cada PR), por el coste de levantar contenedores.
+- [security-dependencies.yml](../../.github/workflows/security-dependencies.yml): igual, **manual** desde Actions. Detalle: [devsecops-ci.md](../engineering/devsecops-ci.md).
 
 ## Flujo habitual
 
-La rama **no** se crea primero en GitHub. Orden:
-
-1. Actualizar `main` local y crear la rama **en local**.
+1. Actualizar `main` local y crear la nueva rama **en local**.
 2. Commitear en esa rama.
-3. Primer `push` → la rama aparece en `origin` y queda enlazada.
-4. Abrir PR hacia `main` en GitHub.
+3. Primer `push` → la nueva rama aparece en `origin` y queda enlazada.
+4. Abrir PR en GitHub desde la nueva rama en `origin` hacia `main` .
 5. Tras el merge: `git checkout main`, `git pull`, borrar rama local/remota si ya no la necesitas.
 
 ```bash
@@ -51,9 +64,9 @@ Opcional con issue: `feature/123-descripcion`. Con HU/ticket: `feature/hu-015-ta
 
 - **Base:** `main` (salvo acuerdo explícito del equipo).
 - **Un PR = un tema revisable** (idealmente un **TASK**). No mezclar HUs ni tickets no relacionados.
-- **Título:** `tipo(HU-xxx): TASK-HU-xxx-nn — resumen breve` (p. ej. `feat(HU-015): TASK-HU-015-04 — API enrichment especie`).
-- **Trazabilidad:** rellenar la sección obligatoria de la [plantilla](../../.github/pull_request_template.md) (HU, TASK, enlace al breakdown).
-- **Commits:** mensaje con el *por qué*; incluir `TASK-HU-xxx-nn` en el cuerpo ([git-commit.md](../../.cursor/commands/git-commit.md)).
+- **Título:** en trabajo de backlog (`feature/`): `tipo(HU-xxx): TASK-HU-xxx-nn — resumen breve` (p. ej. `feat(HU-015): TASK-HU-015-04 — API enrichment especie`). En **`fix/`** y **`chore/`**: `fix: resumen` o `chore: resumen` (sin HU ni TASK).
+- **Trazabilidad:** rellenar la [plantilla](../../.github/pull_request_template.md); HU/TASK obligatorios en PRs de **feature**; en **fix/chore** puedes indicar «N/A» o dejar la sección vacía si no aplica.
+- **Commits:** mensaje con el *por qué*; `TASK-HU-xxx-nn` en el cuerpo **opcional** (recomendado en backlog; en fix/chore suele omitirse) — [git-commit.md](../../.cursor/commands/git-commit.md).
 - **Tras merge:** ticket → **Hecho** en el breakdown; HU → **En curso** o **Cerrada** en `backlog.md` §3 ([playbook IA](ai-development-playbook.md)).
 - **Plan de pruebas:** marca solo lo ejecutado de verdad.
 
@@ -65,16 +78,13 @@ Opcional con issue: `feature/123-descripcion`. Con HU/ticket: `feature/hu-015-ta
 gh pr create --base main --title "fix: descripcion corta" --body-file .github/pull_request_template.md
 ```
 
-Comandos habituales para el plan de pruebas:
+**Antes del PR** — ejecuta y marca en el plan de pruebas solo lo que hayas corrido de verdad:
 
-| Ámbito | Comando |
-|--------|---------|
-| Frontend | `cd frontend` → `npm run build`, `npm run test` |
-| Backend | `cd services` → `mvn verify` |
-| Un servicio | `cd services` → `mvn -pl catalog-service verify` |
-| Manual | [services/README.md](../../services/README.md), [infra/compose/README.md](../../infra/compose/README.md) |
+- [ ] Frontend: `lint`, `typecheck`, `test` (Vitest)
+- [ ] Backend: `mvn test` en `services/`
+- [ ] (Opcional local) `mvn verify`, `npm run build`, E2E Playwright
 
-Más detalle: [testing-java.md](../engineering/testing-java.md), [testing-frontend.md](../engineering/testing-frontend.md), [vue-development-guide.md](vue-development-guide.md) §16. Si tocas contrato HTTP, OpenAPI o Kafka: [openapi.yaml](../api/openapi.yaml), [canonical-sources.md](../engineering/canonical-sources.md).
+**Comandos copy-paste y atajos:** [devsecops-ci.md](../engineering/devsecops-ci.md) (sección «Lo mismo que el CI de PR»). Tests por capa o un solo módulo Maven: [testing-java.md](../engineering/testing-java.md), [testing-frontend.md](../engineering/testing-frontend.md).
 
 **Plantilla ER** (solo diagramas ER en `readme.md`): añade al PR el checklist de [pull_request_er_doc_template.md](../../.github/pull_request_er_doc_template.md); no sustituye la plantilla principal.
 

@@ -1,4 +1,6 @@
-## Trazabilidad (obligatorio)
+## Trazabilidad
+
+En PRs **feature/**: HU, TASK y breakdown obligatorios. En **fix/chore**: «N/A» o vacío.
 
 | Campo | Valor |
 |-------|--------|
@@ -43,7 +45,7 @@
 
 ## Plan de pruebas
 
-<!-- Checklist de validación ejecutada -->
+<!-- Checklist de validación ejecutada. Comandos copy-paste: docs/engineering/devsecops-ci.md -->
 
 - [ ] `frontend`: `npm run lint` y `npm run typecheck`
 - [ ] `frontend`: `npm run test` (si aplica)
@@ -85,7 +87,7 @@
 
 - 
 
-## Cierre de trazabilidad (autor, antes de merge)
+## Cierre de trazabilidad (autor, antes de merge; solo si aplica HU/TASK)
 
 - [ ] Ticket(s) → **Hecho** en el breakdown
 - [ ] Si era el último ticket: **Estado** de la HU en [backlog.md](docs/backlog/backlog.md) §3 → **Cerrada**

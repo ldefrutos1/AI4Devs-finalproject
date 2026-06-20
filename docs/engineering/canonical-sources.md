@@ -9,6 +9,8 @@ Documento estable: **dónde vive la norma detallada** frente a **recordatorios e
 
 Al **encargar trabajo** suele bastar con la regla que hace de índice (p. ej. [backend-generation-standard.mdc](../../.cursor/rules/backend-generation-standard.mdc)); en cambios de contrato, seguridad o tests conviene citar **también** el canónico concreto (tabla siguiente).
 
+**Flujo pull request:** si buscas *cómo* abrir una rama o un PR, empieza por [github-branching.md](../onboarding/github-branching.md). Si buscas *qué ejecutar* antes del PR (paridad con CI), usa [devsecops-ci.md](devsecops-ci.md). Qué testear por capa: [testing-java.md](testing-java.md) / [testing-frontend.md](testing-frontend.md); E2E Playwright: [testing-e2e.md](testing-e2e.md).
+
 ## Tabla: tema → canónico → regla corta típica
 
 | Tema | Canónico (detalle) | Regla corta / índice |
@@ -19,9 +21,11 @@ Al **encargar trabajo** suele bastar con la regla que hace de índice (p. ej. [b
 | Capas Maven, `com.mtl.*`, JPA/Mongo, auditoría JPA | [.cursor/rules/spring-boot-4-backend.mdc](../../.cursor/rules/spring-boot-4-backend.mdc) | Única descripción amplia de paquetes |
 | Alta REST catálogo (`POST /api/catalog/trees`), `usuario_app`, auditoría R3 | [docs/adr/0004-catalog-rest-write-and-audit.md](../adr/0004-catalog-rest-write-and-audit.md) | Enlace en `spring-boot-4-backend` y `backend-generation-standard` |
 | Híbrido SQL + Mongo (catálogo) | [docs/data-model/mongo.md](../data-model/mongo.md) y [.cursor/rules/mongo-hybrid.mdc](../../.cursor/rules/mongo-hybrid.mdc) | Negocio del híbrido; paquetes → `spring-boot-4-backend` |
-| Tests backend por capa, Surefire/Failsafe | [testing-java.md](testing-java.md) | [quality-and-testing.mdc](../../.cursor/rules/quality-and-testing.mdc) |
+| Ramas, pull requests, títulos y convención de commits | [docs/onboarding/github-branching.md](../onboarding/github-branching.md) | [naming-conventions.md](naming-conventions.md) (N10.1); atajos: [git-commit.md](../../.cursor/commands/git-commit.md), [git-new-branch.md](../../.cursor/commands/git-new-branch.md) |
+| Comandos pre-PR, workflows CI, Gitleaks, dependencias (paridad local ↔ Actions) | [devsecops-ci.md](devsecops-ci.md) | [quality-and-testing.mdc](../../.cursor/rules/quality-and-testing.mdc) |
+| Tests backend por capa, Surefire/Failsafe, cuándo usar `verify`/IT | [testing-java.md](testing-java.md) | [quality-and-testing.mdc](../../.cursor/rules/quality-and-testing.mdc) |
 | Tests frontend por capa, Vitest (Vue 3) | [testing-frontend.md](testing-frontend.md) | [frontend-security.mdc](../../.cursor/rules/frontend-security.mdc) y [quality-and-testing.mdc](../../.cursor/rules/quality-and-testing.mdc) |
-| DevSecOps / CI (lint, Gitleaks, dependencias manual) | [devsecops-ci.md](devsecops-ci.md) | [quality-and-testing.mdc](../../.cursor/rules/quality-and-testing.mdc) |
+| E2E Playwright (local, manual en Actions; no bloquea PR) | [testing-e2e.md](testing-e2e.md) | [quality-and-testing.mdc](../../.cursor/rules/quality-and-testing.mdc) |
 | Subida de fotos (presign, MinIO, confirm, principal, EXIF cliente, props `mtl.media.*`) | [docs/engineering/media-upload-hu006.md](media-upload-hu006.md) y [docs/api/openapi.yaml](../api/openapi.yaml) | [.cursor/rules/api-security.mdc](../../.cursor/rules/api-security.mdc) (JWT/objeto privado) |
 | Eventos Kafka (topics, payload, idempotencia) | [docs/events/kafka-events.md](../events/kafka-events.md) | [.cursor/rules/kafka-events.mdc](../../.cursor/rules/kafka-events.mdc) |
 | Agregado *ejemplar* (PG/Mongo/Kafka en español; HTTP `/trees` + `treeId`) | [docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md](../adr/0006-ejemplar-aggregate-http-kafka-naming.md) | [openapi.yaml](../api/openapi.yaml), [mongo.md](../data-model/mongo.md) |

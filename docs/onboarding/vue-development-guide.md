@@ -322,7 +322,7 @@ Detalle: regla [frontend-security.mdc](../../.cursor/rules/frontend-security.mdc
 
 ## 14. Tests (Vitest)
 
-- Comando: **`npm run test`** en `frontend/`.
+- Comando: **`npm run test`** en `frontend/`. Qué testear por capa y paridad con CI: [testing-frontend.md](../engineering/testing-frontend.md) · [devsecops-ci.md](../engineering/devsecops-ci.md).
 - Tests junto al código: `*.test.ts` (p. ej. validación pura, `apiClient` con `fetch` mockeado).
 - **No** llames a Keycloak ni al gateway real en unit tests; usa mocks.
 
@@ -346,14 +346,14 @@ Proxy local: rutas **`/api/*`** → gateway (ver `frontend/README.md`).
 
 ## 16. Checklist antes de abrir PR (frontend)
 
-Flujo global (rama, plantilla GitHub, `mvn verify`): [github-branching.md](github-branching.md).
+Flujo global (rama, plantilla GitHub): [github-branching.md](github-branching.md). Comandos pre-PR (paridad CI): [devsecops-ci.md](../engineering/devsecops-ci.md).
 
 - [ ] Sin `fetch` directo en componentes para API del producto.
 - [ ] Textos nuevos en **`i18n/locales`**, no hardcodeados.
 - [ ] Imports con **`@/`**.
 - [ ] Composables **acotados**; validación pura separada si aplica.
 - [ ] Estados **loading / error / success** donde haya API.
-- [ ] `npm run build` y **`npm run test`** pasan.
+- [ ] `npm run lint`, `npm run typecheck`, `npm run test` y `npm run build` pasan (build recomendado local; ver devsecops-ci).
 
 ---
 

@@ -1,6 +1,6 @@
 # DevSecOps y calidad en CI (MyTreeLibrary)
 
-Qué corre en cada PR, qué lanzar a mano y **comandos en local**. Reglas: [api-security.mdc](../../.cursor/rules/api-security.mdc), [frontend-security.mdc](../../.cursor/rules/frontend-security.mdc). Tests: [testing-java.md](testing-java.md), [testing-frontend.md](testing-frontend.md).
+Qué corre en cada PR, qué lanzar a mano y **comandos en local** (fuente canónica para paridad con CI). Mapa general: [canonical-sources.md](canonical-sources.md). Reglas: [api-security.mdc](../../.cursor/rules/api-security.mdc), [frontend-security.mdc](../../.cursor/rules/frontend-security.mdc). Tests por capa: [testing-java.md](testing-java.md), [testing-frontend.md](testing-frontend.md).
 
 ## Resumen
 
@@ -9,9 +9,10 @@ Qué corre en cada PR, qué lanzar a mano y **comandos en local**. Reglas: [api-
 | Tests Java | [ci.yml](../../.github/workflows/ci.yml) → `java` | Sí | Sí (si fallan tests) |
 | Lint + typecheck + Vitest | [ci.yml](../../.github/workflows/ci.yml) → `frontend` | Sí | Sí |
 | Gitleaks (secretos en diff) | [ci.yml](../../.github/workflows/ci.yml) → `gitleaks` | Sí | Sí |
+| E2E Playwright (UI, Docker) | [e2e-playwright.yml](../../.github/workflows/e2e-playwright.yml) | No — **Actions → Run workflow** | No |
 | npm audit + OWASP | [security-dependencies.yml](../../.github/workflows/security-dependencies.yml) | No (manual) | No (advisory) |
 
-**CI** se dispara en PR o push a `main` / `develop`. Los tres jobs de [ci.yml](../../.github/workflows/ci.yml) van en paralelo.
+**CI** se dispara en PR o push a `main`. Los tres jobs de [ci.yml](../../.github/workflows/ci.yml) van en paralelo.
 
 **Pendiente:** Dependabot, cron de audit, bloqueo por CVE high/critical (fase 2).
 
@@ -43,6 +44,27 @@ npm ci; npm run lint; npm run typecheck; npm run test
 Set-Location ..
 ```
 
+### Qué no corre en CI (pero conviene en local)
+
+| Control | En CI | Recomendación local |
+|---------|-------|---------------------|
+| **`mvn verify`** (Failsafe / `*IT`) | No — solo `mvn test` (Surefire) | Opcional antes del PR si tocaste integración o repositorios; ver [testing-java.md](testing-java.md) §1 y §2 |
+| **`npm run build`** (frontend) | No | Recomendado si cambiaste Vue/TS; detecta errores de compilación que lint/typecheck pueden no cubrir |
+| **E2E Playwright** (UI) | No — workflow manual | Local o Actions bajo demanda; ver [testing-e2e.md](testing-e2e.md) §5 |
+| **Gitleaks** | Sí (en CI) | Opcional en local (sección siguiente) |
+| **npm audit / OWASP** | No — workflow manual | Periódico o antes de releases; sección «Dependencias» más abajo |
+
+### Atajos PowerShell ([scripts/README.md](../../scripts/README.md))
+
+| Script | Equivalente CI |
+|--------|----------------|
+| `.\scripts\dev\test-backend.ps1 -Quick` | Sí — `mvn test` |
+| `.\scripts\dev\test-backend.ps1` (sin `-Quick`) | No — `mvn verify` (unitarios + IT) |
+| `.\scripts\dev\test-frontend.ps1` | Parcial — solo `npm ci` + `npm test`; añade `lint` y `typecheck` con los comandos de arriba |
+| `.\scripts\dev\test-e2e.ps1` | No — E2E local; en CI solo vía workflow manual |
+
+Flujo Git y checklist de PR: [github-branching.md](../onboarding/github-branching.md).
+
 ### Dependencias (CVE high/critical) — equivalente al workflow manual
 
 Muestra vulnerabilidades **high** y **critical**; no sustituye el informe HTML de OWASP.
@@ -71,7 +93,7 @@ gitleaks detect --source . --config .gitleaks.toml --redact --verbose
 
 ### CI automático ([ci.yml](../../.github/workflows/ci.yml))
 
-Sin acción del usuario: cada PR hacia `main` o `develop` ejecuta tests, lint, typecheck y escaneo de secretos en el **diff**.
+Sin acción del usuario: cada PR hacia `main` ejecuta tests, lint, typecheck y escaneo de secretos en el **diff**.
 
 ### Dependencias manual ([security-dependencies.yml](../../.github/workflows/security-dependencies.yml))
 
@@ -82,6 +104,10 @@ Sin acción del usuario: cada PR hacia `main` o `develop` ejecuta tests, lint, t
 - Modo **advisory:** el workflow termina aunque haya hallazgos; revisar log y artifacts.
 
 Opcional en el repo: secret `NVD_API_KEY` (acelera OWASP en CI).
+
+### E2E Playwright manual ([e2e-playwright.yml](../../.github/workflows/e2e-playwright.yml))
+
+**Actions → «E2E Playwright (alta de ejemplar)» → Run workflow.** Stack Docker completo; no bloquea el merge salvo acuerdo del equipo. Guía: [testing-e2e.md](testing-e2e.md).
 
 ## Pull requests
 

@@ -28,13 +28,13 @@ Invoca este comando (p. ej. `/git-commit`) o menciona `@.cursor/commands/git-com
 ```
 tipo(ámbito opcional): resumen en una línea (máx. ~72 caracteres)
 
-TASK-HU-xxx-nn
+TASK-HU-xxx-nn   ← opcional
 
 - Bullet con cambio concreto 1
 - Bullet con cambio concreto 2
 ```
 
-La línea `TASK-HU-xxx-nn` es opcional en fixes puntuales; recomendada en trabajo de backlog.
+La línea `TASK-HU-xxx-nn` es **opcional**: recomendada en trabajo de backlog (`feature/`); en **`fix`**, **`chore`** y cambios puntuales puede omitirse.
 
 | `tipo` | Cuándo |
 |--------|--------|
@@ -106,7 +106,7 @@ git commit -m "fix(media): resumen" -m "- detalle 1`n- detalle 2"
 
 - [ ] El mensaje refleja el **diff**, no trabajo no incluido en el commit.
 - [ ] No se añaden `.env`, credenciales ni `target/`, `node_modules/`, etc.
-- [ ] Si tocaste lógica: tests del módulo afectado (`mvn -pl … test`, `npm test` en `frontend/`).
+- [ ] Si tocaste lógica: tests del módulo afectado. Comandos completos pre-PR (paridad CI): [devsecops-ci.md](../../docs/engineering/devsecops-ci.md).
 
 ---
 

@@ -20,6 +20,10 @@ Ejemplos futuros: `HU-004-ticket-breakdown.md`, `HU-010-ticket-breakdown.md`.
 - Lista de tickets con **ID estable** recomendado: **`TASK-HU-<id>-<nn>`** (dos dígitos, p. ej. `TASK-HU-001-01`), para trazabilidad en commits, PRs y tableros.
 - Criterios de aceptación o notas por ticket cuando aporte valor.
 - Orden o dependencias entre bloques de tickets, si aplica.
+- **Checks transversales:** enlace a [devsecops-ci.md](../engineering/devsecops-ci.md) (no copiar comandos CI en cada HU).
+- **Checks específicos de la HU:** módulos, flujos manuales y criterios funcionales propios del corte.
+
+Plantilla de desglose: skill [.cursor/skills/hu-breakdown-mtl/SKILL.md](../../.cursor/skills/hu-breakdown-mtl/SKILL.md).
 
 ## Sincronización de estados
 

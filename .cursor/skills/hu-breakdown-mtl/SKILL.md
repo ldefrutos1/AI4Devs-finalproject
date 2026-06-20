@@ -52,7 +52,9 @@ Actúa como Product Owner técnico + Tech Lead full-stack y define el desglose d
 - La propuesta debe ser pragmática para MVP, evitando sobreingeniería.
 - Si ya existe un `HU-XXX-ticket-breakdown.md`, actualizarlo de forma coherente en lugar de crear formatos alternativos.
 - Incluir siempre en el breakdown una sección breve de **“Reglas aplicables por capa (referencia rápida)”** con enlaces a reglas frontend/backend/API/testing que correspondan a la HU.
-- Incluir siempre una sección breve de **“Checks mínimos para cerrar tickets”** con comandos/validaciones básicas por capa.
+- **No repetir** comandos transversales de CI (`npm run lint`, `typecheck`, `mvn test`, etc.) en el breakdown: remitir a [devsecops-ci.md](../../docs/engineering/devsecops-ci.md). Incluir dos subsecciones (ver plantilla más abajo):
+  - **Checks transversales (igual que CI / pre-PR):** enlace a `devsecops-ci.md`.
+  - **Checks específicos de esta HU:** módulos Maven (`-pl`), flujos manuales, criterios funcionales propios de la HU; mencionar `verify`/IT solo si la HU los introduce.
 
 ### Regla de formato canónico (obligatoria)
 
@@ -66,6 +68,7 @@ Esto implica incluir, como mínimo:
 - Convención de IDs de ticket
 - Contexto de equipo
 - Objetivo del desglose
+- **Reglas aplicables por capa** y **checks** (transversales → enlace; específicos → bullets de la HU)
 - Sección `## Orden sugerido (dependencias)` con diagrama mermaid simple
 - Sección `## Tickets` agrupada por bloques funcionales
 - Tabla por bloque con columnas: `ID | Título | Descripción breve | Estado`
@@ -75,6 +78,22 @@ Esto implica incluir, como mínimo:
 
 No omitir secciones obligatorias; si una sección no aplica, indicar:
 `Pendiente de definición en refinamiento`.
+
+### Plantilla: checks (sustituye bloques genéricos de comandos)
+
+Tras **Reglas aplicables por capa**, usar este bloque (adaptar solo la lista **específica**):
+
+```markdown
+**Checks transversales (igual que CI / pre-PR):** [devsecops-ci.md](../engineering/devsecops-ci.md) — `lint`, `typecheck`, `npm test`, `mvn test`; opcional local: `verify`, `npm run build`.
+
+**Checks específicos de esta HU:**
+
+- Módulos / servicios tocados: … (p. ej. `catalog-service`, `frontend/src/views/…`)
+- Validación funcional del corte: … (escenarios manuales o E2E si aplica)
+- Si añades `*IT`: `mvn -f services/pom.xml -pl <módulo> verify` — ver [testing-java.md](../engineering/testing-java.md) §1
+```
+
+Mapa de fuentes: [canonical-sources.md](../engineering/canonical-sources.md).
 
 ### Cobertura mínima esperada de tickets
 

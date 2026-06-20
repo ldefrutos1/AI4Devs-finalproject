@@ -60,7 +60,7 @@ No hay **umbral de cobertura %** obligatorio en CI; sí estas reglas **baratas d
 | **Contrato OpenAPI** (cuando exista en CI) | Forma de request/response | Comportamiento con Keycloak vivo |
 | **Playwright** | OIDC y UX de sesión en SPA | 401/403 de API ni paginación de catálogo |
 
-**CI (MVP):** [.github/workflows/ci.yml](../../.github/workflows/ci.yml) — en cada PR: `mvn test`, frontend (`lint`, `typecheck`, Vitest) y Gitleaks. Dependencias (npm audit + OWASP): workflow manual — [devsecops-ci.md](devsecops-ci.md). Sin E2E obligatorio; Playwright manual: [e2e-playwright.yml](../../.github/workflows/e2e-playwright.yml), [testing-e2e.md](testing-e2e.md) §4.
+**CI:** en PR, GitHub Actions ejecuta `mvn test` (Surefire). Comandos, workflows y qué no corre en CI: [devsecops-ci.md](devsecops-ci.md). E2E Playwright (manual): [testing-e2e.md](testing-e2e.md) §4–5.
 
 #### 2.1.2. Diseño del módulo `system-e2e-tests`
 

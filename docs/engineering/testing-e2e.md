@@ -22,9 +22,9 @@ La URL del SPA se toma de `BASE_URL` (ver [e2e/playwright.config.ts](../../e2e/p
 
 El test **no** levanta infraestructura: asume el stack arriba (infra + microservicios en perfil `dev` + `npm run dev` del frontend) y solo ejecuta Playwright contra `http://localhost:5173`. Usuario del realm `mtl`: `colaborador` / `colaborador_dev`. Es la vía barata para iterar y depurar specs.
 
-### Variante B — Self-contained en Docker (la que corre en CI/PR)
+### Variante B — Self-contained en Docker (Actions manual o `test-e2e.ps1`)
 
-Construye y arranca un **stack mínimo y efímero** y ejecuta Playwright como contenedor en la red `mtl`. Definición: [infra/compose/docker-compose.e2e.yml](../../infra/compose/docker-compose.e2e.yml). Claves de diseño:
+Construye y arranca un **stack mínimo y efímero** y ejecuta Playwright como contenedor en la red `mtl`. Es la orquestación que usa [e2e-playwright.yml](../../.github/workflows/e2e-playwright.yml) al lanzarla **manualmente** desde GitHub Actions, y `scripts/dev/test-e2e.ps1` en local. Definición: [infra/compose/docker-compose.e2e.yml](../../infra/compose/docker-compose.e2e.yml). Claves de diseño:
 
 - **DB efímeras:** Postgres/Mongo/Kafka en `tmpfs` (RAM) y Keycloak con **H2 en memoria** (importa el realm [mtl-e2e](../../infra/compose/init/keycloak-e2e/mtl-e2e-realm.json)). Cada ejecución parte de cero.
 - **Coherencia de issuer:** el navegador (contenedor Playwright) y los backends usan el **mismo** `http://keycloak:8080/realms/mtl-e2e`, evitando el problema de doble hostname de Keycloak.
@@ -38,9 +38,7 @@ Construye y arranca un **stack mínimo y efímero** y ejecuta Playwright como co
 
 ## 4. Integración continua
 
-- **Por defecto (cada PR/push a `main`/`develop`):** [.github/workflows/ci.yml](../../.github/workflows/ci.yml) — `mvn test` en `services/` y `npm test` en `frontend/` (sin Docker).
-- **E2E Playwright (opcional, pesado):** [.github/workflows/e2e-playwright.yml](../../.github/workflows/e2e-playwright.yml) — solo **`workflow_dispatch`** (manual desde Actions). Compila jars, levanta el stack e2e (`--abort-on-container-exit --exit-code-from playwright`), publica `playwright-report` y hace `down -v`.
-- **Bloqueo de merge:** marcar como **required** las verificaciones de **CI** (Java + frontend). El E2E Playwright solo si el equipo decide exigirlo de forma explícita.
+Resumen de workflows y comandos pre-PR: [devsecops-ci.md](devsecops-ci.md). El E2E Playwright **no** se dispara en cada PR; lanzarlo en local (§5) o manualmente en Actions (*E2E Playwright* → *Run workflow*).
 
 ## 5. Ejecutar
 
