@@ -2,12 +2,19 @@
 
 1. [Ficha del proyecto](#1-ficha-del-proyecto)
 2. [Descripción general del producto](#2-descripción-general-del-producto)
+   - [2.4 Instalación](#24-instrucciones-de-instalación) · [2.2.2 Casos de uso](#222-diagrama-de-casos-de-uso-del-sistema)
 3. [Arquitectura del sistema](#3-arquitectura-del-sistema)
+   - [3.1 Diagramas](#31-diagrama-de-arquitectura) · [3.3 Estructura del repo](#33-descripción-de-alto-nivel-del-proyecto-y-estructura-de-ficheros) · [3.6 Tests](#36-tests)
 4. [Modelo de datos](#4-modelo-de-datos)
+   - [4.1 Modelo lógico](#41-modelo-lógico-del-sistema-completo) · [4.2 Persistencia](#42-diagrama-de-persistencia-implementación)
 5. [Especificación de la API](#5-especificación-de-la-api)
+   - [OpenAPI](docs/api/openapi.yaml) · [naming-conventions](docs/engineering/naming-conventions.md)
 6. [Historias de usuario](#6-historias-de-usuario)
+   - [backlog.md](docs/backlog/backlog.md) · [use-case-summary.md](docs/use-cases/use-case-summary.md)
 7. [Tickets de trabajo](#7-tickets-de-trabajo)
+   - [backlog/README.md](docs/backlog/README.md) · skill `hu-breakdown-mtl`
 8. [Pull requests](#8-pull-requests)
+   - [github-branching.md](docs/onboarding/github-branching.md) · [devsecops-ci.md](docs/engineering/devsecops-ci.md) · [plantilla PR](.github/pull_request_template.md)
 
 ---
 
@@ -57,6 +64,8 @@ Además, la plataforma incorpora inteligencia artificial como apoyo a la consult
 La solución está dirigida a aficionados a la naturaleza en general y puede resultar de especial utilidad para docentes y monitores de tiempo libre.
 
 ### **2.2. Características y funcionalidades principales:**
+
+Bloques de esta subsección: [Registro y publicación](#registro-y-publicación-de-árboles) · [Consulta pública](#consulta-pública-y-visualización-geográfica) · [Notificaciones](#notificaciones) · [Integración con IA](#integración-con-ia) · [Diagrama C1](#221-diagrama-de-contexto-del-sistema-c1) · [Casos de uso](#222-diagrama-de-casos-de-uso-del-sistema).
 
 #### Registro y publicación de árboles
 
@@ -304,6 +313,8 @@ Además del init de Postgres/Keycloak en Compose, **catalog-service** aplica sem
 ---
 
 ## 3. Arquitectura del sistema
+
+En esta sección: [3.1 Diagrama](#31-diagrama-de-arquitectura) · [3.2 Componentes](#32-descripción-de-componentes-principales) · [3.3 Estructura del repo](#33-descripción-de-alto-nivel-del-proyecto-y-estructura-de-ficheros) · [3.4 Infraestructura](#34-infraestructura-y-despliegue) · [3.5 Seguridad](#35-seguridad) · [3.6 Tests](#36-tests).
 
 ### **3.1. Diagrama de arquitectura:**
 
@@ -951,6 +962,8 @@ flowchart LR
 
 **Documentación relacionada:** [Notas de negocio y reglas](docs/data-model/data-model.md) · [Modelo técnico MongoDB (colecciones, validación, índices)](docs/data-model/mongo.md) · [Eventos Kafka](docs/events/kafka-events.md)
 
+En esta sección: [4.1 Modelo lógico](#41-modelo-lógico-del-sistema-completo) · [4.2 Persistencia](#42-diagrama-de-persistencia-implementación) · [4.3 Entidades principales](#43-descripción-de-entidades-principales-orientación-física).
+
 ### **4.1. Modelo lógico del sistema completo**
 
 Vista unificada de las entidades principales del sistema y sus relaciones, independientemente del almacén o microservicio (§4.2). Las referencias entre dominios se expresan como **FK lógicas** sin una implementación de una restricción física real entre los distintos esquemas.
@@ -1302,6 +1315,12 @@ Las entidades físicas se reparten por servicio y almacén como se indica en §3
 
 A partir del Modelo de análisis (actores, casos de uso, diagrama PlantUML): [docs/use-cases/use-case-summary.md](docs/use-cases/use-case-summary.md) y de la definición del sistema (archivo actual) se ha generado el backlog con la relación de las historias de usuario a implementar [docs/backlog/backlog.md](docs/backlog/backlog.md).
 
+| Documento | Contenido |
+|-----------|-----------|
+| [use-case-summary.md](docs/use-cases/use-case-summary.md) | Actores, tabla UC-01…UC-09, reglas |
+| [backlog.md](docs/backlog/backlog.md) §3 | Historias HU-001…HU-016 y estado |
+| [backlog/README.md](docs/backlog/README.md) | Convención de desgloses y sincronización |
+
 La definición y refinamiento de cada una de las historias de usuario incluidas en el backlog, y sus correspondientes tickets de trabajo, se ha realizado mediante los siguientes prompts genéricos que se han guardado como skills de Cursor: `.cursor/skills/hu-refinement-mtl/SKILL.md` (generación/refinamiento de historias) y `.cursor/skills/hu-breakdown-mtl/SKILL.md` (desglose en tickets). Estos prompts generan el correspondiente archivo dentro de la carpeta backlog.
 
 El proceso seguido es:
@@ -1310,7 +1329,10 @@ El proceso seguido es:
 - 3.- Aclaración, definición y/o corrección de los puntos detectados en los apartados de Riesgos y Aclaraciones pendientes (refinamiento)
 - 4.- Generación de los tickets de trabajo con `hu-breakdown-mtl/SKILL.md`
 
-Por operativa práctica, al comienzo de la historia se hacen unas comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.   
+Por operativa práctica, al comienzo de la historia se hacen unas comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.
+
+<details>
+<summary>Ejemplo histórico HU-008 (prompts de refinamiento)</summary>
 
 > *Registro histórico:* los prompts siguientes reproducen el diálogo de refinamiento de HU-008 tal como ocurrió; pueden reflejar decisiones intermedias que no coinciden con el diseño final. Fuente de verdad: [HU-008-edicion-de-mis-arboles.md](docs/backlog/HU-008-edicion-de-mis-arboles.md) y [HU-008-ticket-breakdown.md](docs/backlog/HU-008-ticket-breakdown.md).
 
@@ -1339,6 +1361,8 @@ Respecto al riesgo de Listado sin filtros vamos a añadir en la historia el filt
 - 1.- Path de borrado: `DELETE /api/media/trees/{treeId}/photos` 
 - 2.- Si un ejemplar tiene fotografías primero se invoca al servicio de borrado de todas las fotografías; si el servicio da error se para el proceso; si se han borrado todas las fotografías se elimina el ejemplar en PostgreSQL 3.- Fechas en formato date a ser posible en UTC 4.- Para ADMIN se añade un filtro más para poder seleccionar los ejemplares dados de alta por un usuario determinado
 
+</details>
+
 
 ---
 
@@ -1347,6 +1371,9 @@ Respecto al riesgo de Listado sin filtros vamos a añadir en la historia el filt
 Como se ha comentado en el punto anterior, para mantener formato homogéneo se usa un prompt genérico que se ha almacenado como skill `.cursor/skills/hu-breakdown-mtl/SKILL.md` (desglose en tickets). Este prompt genera el correspondiente archivo md dentro de la carpeta backlog.
 
 En la generación de tickets de trabajo se incluye explícitamente una sección con las reglas de Cursor que debe aplicar el agente de IA al implementarlos.
+
+<details>
+<summary>Ejemplo histórico HU-008 (prompts de desglose en tickets)</summary>
 
 > *Registro histórico:* los prompts siguientes documentan el desglose de HU-008 en su momento; el contenido puede no reflejar el breakdown final ([HU-008-ticket-breakdown.md](docs/backlog/HU-008-ticket-breakdown.md)).
 
@@ -1364,6 +1391,8 @@ Vamos con TASK-HU-008-01, Cierre OpenAPI catálogo y media (HU-008). Además de 
 
 así está bien, implementa el endpoint del Listado de TASK-HU-008-02, si tienes alguna duda preguntame antes; recuerda las reglas que se deben seguir ya indicadas en @docs/backlog/HU-008-ticket-breakdown.md para la parte back
 
+</details>
+
 
 ---
 
@@ -1376,12 +1405,14 @@ En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), cali
 
 > *Registro histórico:* los ejemplos de pull request siguientes muestran cómo se documentó el trabajo en su momento (resumen, plan de pruebas, notas técnicas). Pueden no coincidir con el diseño final ni con la plantilla o CI actuales; norma vigente en [github-branching.md](docs/onboarding/github-branching.md) y [devsecops-ci.md](docs/engineering/devsecops-ci.md).
 
-**Pull Request 1**
-## Resumen
+<details>
+<summary>Pull Request 1 (histórico — HU-004)</summary>
+
+### Resumen
 
 Implementa la **HU-004**: alta de suscripción por correo sin cuenta de colaborador, con API en **notification-service**, exposición vía **gateway**, contrato en **OpenAPI**, pantalla y flujo en **frontend** (formulario, validación, i18n, tests), y documentación de backlog / modelo de datos / onboarding Git.
 
-## Cambios principales
+### Cambios principales
 
 - **Backend (`notification-service`)**: registro de suscriptores, tabla `suscriptor` en Flyway `V1__baseline.sql`, seguridad Keycloak, controlador REST de altas públicas, manejo de errores tipo Problem Details, tests (servicio + WebMvc).
 - **Gateway**: filtro global ante errores de conexión a downstream y utilidades asociadas (con tests).
@@ -1389,38 +1420,41 @@ Implementa la **HU-004**: alta de suscripción por correo sin cuenta de colabora
 - **Contrato y configuración**: `docs/api/openapi.yaml`, `frontend/.env.example` y README donde aplique.
 - **Documentación**: HU-004 en backlog (historia + desglose de tickets), actualización de `backlog.md`, `data-model.md`, guía de ramas GitHub, revisión de enlaces a reglas (`frontend-vue3.mdc`, etc.).
 
-## Cómo probar (orientativo)
+### Cómo probar (orientativo)
 
 1. **Backend**: arrancar stack local según `services/README.md`; verificar migración y endpoint de alta de suscripción público según OpenAPI.
 2. **Frontend**: `npm run build` / tests en `frontend/`; flujo manual en `/subscriptions/new` con correo válido y casos de error (409/conflicto si aplica).
 3. **Gateway**: comprobar que las peticiones al notification-service y respuestas de error se propagan de forma coherente.
 
-## Referencias
+### Referencias
 
 - Historia / desglose: `docs/backlog/HU-004-suscripcion-por-correo-sin-cuenta-colaborador.md`, `docs/backlog/HU-004-ticket-breakdown.md`
 
-## Notas
+### Notas
 
 - Renombrado de regla Cursor `fronted-vue3.mdc` → `frontend-vue3.mdc` y actualización de enlaces en docs y `AGENTS.md`.
 - Commit: `a0ba685` — *Implementación HU-004 Alta suscripción*.
 
-**Pull Request 2**
+</details>
 
-## Resumen
+<details>
+<summary>Pull Request 2 (histórico — HU-008)</summary>
+
+### Resumen
 
 Cierra **HU-008** (UC-04): el colaborador puede **listar y filtrar** sus fichas, **editarlas** (`PUT`) y **eliminarlas** (`DELETE`) con cascada en media; **ADMIN** opera sobre cualquier ficha. Incluye galería en edición (**HU-006-14**) y cierre documental de la historia.
 
 - Vertical completo: **catalog-service** + **media-service** + **frontend** (`/mis-ejemplares`, `/ejemplares/:id/edit`). Rutas y API actualizadas según [ADR-0006](docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md).
 - Sin notificación ni Kafka en edición/baja (**R7**).
 
-## Alcance
+### Alcance
 
 - [x] Frontend
 - [x] Backend
 - [ ] Infraestructura
 - [x] Documentación
 
-## Cambios realizados
+### Cambios realizados
 
 **Backend — catalog-service**
 - `GET /api/catalog/trees` (filtros, paginación, scope COLABORADOR/ADMIN).
@@ -1443,18 +1477,18 @@ Cierra **HU-008** (UC-04): el colaborador puede **listar y filtrar** sus fichas,
 - HU-008 **cerrada** en backlog, historia, tickets, UC-04, [readme.md](readme.md), [services/README.md](services/README.md), checklist E2E en [frontend/README.md](frontend/README.md).
 - **TASK-HU-008-11** (IT catalog↔media): **rechazado**; cobertura con tests unitarios/WebMvc + manual.
 
-## Evidencias (opcional)
+### Evidencias (opcional)
 
 - _(Añadir capturas de Mis árboles, edición y diálogo de baja si el revisor lo pide.)_
 
-## Plan de pruebas
+### Plan de pruebas
 
 - [ ] `frontend`: `npm run build`
 - [ ] `frontend`: `npm run test`
 - [ ] `services`: `mvn -f services/pom.xml -pl catalog-service,media-service test`
 - [ ] Prueba manual en local ([frontend/README.md](frontend/README.md) § HU-008): listado/filtros, PUT, galería, DELETE con/sin fotos, media caído → árbol no borrado
 
-## Checklist único de calidad (front/back)
+### Checklist único de calidad (front/back)
 
 - [x] No se rompe lógica de negocio ni navegación existente
 - [x] Se mantienen nombres claros y responsabilidad única
@@ -1466,7 +1500,7 @@ Cierra **HU-008** (UC-04): el colaborador puede **listar y filtrar** sus fichas,
 - [x] **Frontend:** textos en `i18n`, flujos con confirmación en baja/borrado de foto
 - [x] **Backend:** validaciones R1/R2, auditoría, tests por capa
 
-## Riesgos / impacto
+### Riesgos / impacto
 
 - **Riesgo:** borrado distribuido sin **rollback compensatorio** si falla SQL tras borrar fotos en media.
 - **Mitigación:** documentado en HU-008 y `services/README.md`; aborto si falla media **antes** del SQL; mejora futura sin saga.
@@ -1477,10 +1511,12 @@ Cierra **HU-008** (UC-04): el colaborador puede **listar y filtrar** sus fichas,
 - **Riesgo:** requiere **catalog** (8081) y **media** (8082) en `dev` para DELETE con fotos.
 - **Mitigación:** `mtl.media.base-url` en `application-dev.properties`; checklist E2E documentada.
 
-## Notas para review
+### Notas para review
 
 - Revisar orden de cascada en `TreeDeletionService` (media → `commitPhysicalDelete`).
 - Confirmar que **PUT**/**DELETE** no publican en Kafka (solo alta).
 - **TASK-HU-008-11** rechazado a propósito; no esperar IT Failsafe catalog↔media en este PR.
 - Rama: `feature/actualizacion` → `main`.
+
+</details>
 
