@@ -6,6 +6,7 @@ import SpeciesReferencesFieldEditor from '@/components/enrichment/SpeciesReferen
 import {
   buildSpeciesEnrichmentReplaceRequest,
   speciesEnrichmentToFormDraft,
+  speciesReplaceRequestToFormDraft,
   type SpeciesEnrichmentFormDraft,
 } from '@/composables/enrichmentFormDraft'
 import {
@@ -24,6 +25,10 @@ const props = withDefaults(
     saving?: boolean
     error?: string
     validationError?: string
+    canRequestAiSuggestion?: boolean
+    isLoadingAiSuggestion?: boolean
+    aiSuggestionError?: string
+    aiSuggestionPayload?: SpeciesEnrichmentReplaceRequest | null
   }>(),
   {
     triggerDisabled: false,
@@ -33,12 +38,17 @@ const props = withDefaults(
     saving: false,
     error: '',
     validationError: '',
+    canRequestAiSuggestion: false,
+    isLoadingAiSuggestion: false,
+    aiSuggestionError: '',
+    aiSuggestionPayload: null,
   },
 )
 
 const emit = defineEmits<{
   open: []
   save: [payload: SpeciesEnrichmentReplaceRequest]
+  'request-ai-suggestion': []
 }>()
 
 const open = defineModel<boolean>('open', { default: false })
@@ -49,9 +59,14 @@ const titleId = useId()
 const errorId = useId()
 const draft = ref<SpeciesEnrichmentFormDraft>(speciesEnrichmentToFormDraft(null))
 const localValidationError = ref('')
+const aiSuggestionSuccess = ref(false)
 
 const displayError = computed(
-  () => props.validationError || localValidationError.value || props.error,
+  () =>
+    props.validationError ||
+    localValidationError.value ||
+    props.error ||
+    props.aiSuggestionError,
 )
 
 const speciesContentStatus = computed(() =>
@@ -75,6 +90,7 @@ const speciesContentBadge = computed(() => {
 function syncDraftFromProps(): void {
   draft.value = speciesEnrichmentToFormDraft(props.enrichment)
   localValidationError.value = ''
+  aiSuggestionSuccess.value = false
 }
 
 function syncDialogToModel(isDialogOpen: boolean): void {
@@ -116,6 +132,23 @@ watch(
     }
   },
 )
+
+watch(
+  () => props.aiSuggestionPayload,
+  (payload) => {
+    if (!payload || props.readonly) {
+      return
+    }
+    draft.value = speciesReplaceRequestToFormDraft(props.enrichment, payload)
+    localValidationError.value = ''
+    aiSuggestionSuccess.value = true
+  },
+)
+
+function onAiSuggestionClick(): void {
+  aiSuggestionSuccess.value = false
+  emit('request-ai-suggestion')
+}
 
 function onTriggerClick(): void {
   if (props.triggerDisabled) {
@@ -210,6 +243,34 @@ onBeforeUnmount(() => {
         <p v-if="readonly" class="mtl-enrichment-dialog-intro">
           {{ t('enrichment.species.readOnlyNotice') }}
         </p>
+
+        <div
+          v-if="!readonly && canRequestAiSuggestion"
+          class="mtl-enrichment-ai-action field-full"
+          data-testid="species-enrichment-ai-section"
+        >
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            data-testid="species-enrichment-ai-request"
+            :disabled="isLoadingAiSuggestion || loading || saving"
+            @click="onAiSuggestionClick"
+          >
+            {{
+              isLoadingAiSuggestion
+                ? t('enrichment.species.ai.loading')
+                : t('enrichment.species.ai.action')
+            }}
+          </button>
+          <output
+            v-if="aiSuggestionSuccess"
+            class="mtl-alert mtl-alert--success status-note"
+            data-testid="species-enrichment-ai-success"
+            aria-live="polite"
+          >
+            {{ t('enrichment.species.ai.success') }}
+          </output>
+        </div>
 
         <p v-if="loading" class="status-note">{{ t('enrichment.species.loading') }}</p>
         <p v-else-if="displayError" :id="errorId" class="error" role="alert">{{ displayError }}</p>

@@ -152,6 +152,9 @@ En **catalog-service**, `application-prod.properties` fija además `spring.datas
 | `MTL_CATALOG_BASE_URL` | media | Permiso de subida vía catálogo |
 | `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `MTL_MEDIA_STORAGE_ENDPOINT` | media | Almacenamiento S3/MinIO |
 | `MTL_NOTIFICATION_MAIL_*` | notification | SMTP saliente |
+| `MTL_AI_PROVIDER_MODE` | ai-assistant | `stub` (local/tests) o `openai` (prod) |
+| `MTL_OPENAI_API_KEY` / `OPENAI_API_KEY` | ai-assistant | Clave OpenAI; **nunca** en Git. Obligatoria si `MTL_AI_PROVIDER_MODE=openai` |
+| `MTL_OPENAI_*` (opc.) | ai-assistant | Base URL, modelo, timeouts y reintentos (ver `application.properties`) |
 
 **Flyway en prod:** `spring.flyway.clean-disabled=true` y `spring.flyway.create-schemas=false` (los esquemas los crea el DBA o el aprovisionamiento inicial). No usar `ddl-auto=update`; solo **`validate`**.
 
@@ -232,6 +235,17 @@ Checklist minimo al crear o alinear un servicio MVC:
 - **API pública:** `GET /api/catalog/public/trees/{treeId}/enrichment` — **404** si el árbol no es publicable; **200** con bloques opcionales `speciesEnrichment` y/o `treeEnrichment` (ausencia de documento Mongo no es 404).
 - **Proyección post-SQL:** tras **POST**/**PUT** exitoso de `/api/catalog/trees`, upsert mínimo en Mongo (IDs y nombres de especie desnormalizados) sin bloquear el commit SQL. Si Mongo falla: respuesta SQL exitosa con campo opcional **`enrichmentWarning`** (string legible para la UI).
 - **Borrado cascada:** tras baja física en PostgreSQL (**HU-008**), eliminación física de `ejemplar_detalle` (no se borra `especie_detalle` compartido).
-- **Límites MVP (fuera de HU-015):** sin sincronización de `especie_detalle` al renombrar/eliminar especie en **HU-011**; sin IA desde estas pantallas (**HU-016**); sin sustituir listado público por lectura solo Mongo.
+- **Límites MVP (fuera de HU-015):** sin sincronización de `especie_detalle` al renombrar/eliminar especie en **HU-011**; la consulta IA y precarga en popup están en **HU-016** (persistencia sigue siendo `PUT` catálogo); sin sustituir listado público por lectura solo Mongo.
 - **Tests automáticos:** `mvn -f services/pom.xml -pl catalog-service test` (unitarios/WebMvc); `mvn -f services/pom.xml -pl catalog-service verify` incluye IT con **Testcontainers Mongo** (`CatalogMongoPersistenceIT`, `CatalogEnrichmentApiIT`) si Docker está disponible.
 - **Verificación manual E2E:** escenarios BDD en [HU-015-proyeccion-y-enriquecimiento-mongo.md](../docs/backlog/HU-015-proyeccion-y-enriquecimiento-mongo.md) §2; pasos operativos en [frontend/README.md](../frontend/README.md) (apartado HU-015).
+
+**Consulta IA de enriquecimiento de especie (HU-016):**
+
+- **Servicio:** **ai-assistant-service** (**8084**), esquema PostgreSQL **`ai`**, tabla **`AUDITORIA_USO_IA`** (R3).
+- **Gateway:** `POST /api/ai/species/enrichment-suggestions` con JWT (proxy a **8084**). Contrato: [openapi.yaml](../docs/api/openapi.yaml).
+- **Seguridad:** solo rol realm **ADMIN** en el microservicio (**403** colaborador). El gateway valida JWT; no expone la clave OpenAI al cliente.
+- **Alcance del servicio:** invoca proveedor IA (OpenAI Responses API en modo `openai`, o **`stub`** en local), valida JSON según [mongo.md](../docs/data-model/mongo.md) §6.3, audita uso OK. **No** accede a Mongo ni llama a **catalog-service**.
+- **Modo local:** por defecto `mtl.ai.provider.mode=stub` (respuesta simulada, sin red ni clave). Para OpenAI real: `MTL_AI_PROVIDER_MODE=openai` y `MTL_OPENAI_API_KEY` en el entorno del proceso (ver comentarios en `application.properties`).
+- **Respuestas de error:** **404** (sin contenido IA utilizable), **422** (JSON no válido tras LLM), **502** (proveedor no disponible); Problem Details con copy orientativo.
+- **Tests automáticos:** `mvn -f services/pom.xml -pl ai-assistant-service test verify`; gateway: `mvn -f services/pom.xml -pl api-gateway verify -Dit.test=GatewayAiProxyJwtIT`.
+- **Verificación manual:** [frontend/README.md](../frontend/README.md) (apartado HU-016); desglose [HU-016-ticket-breakdown.md](../docs/backlog/HU-016-ticket-breakdown.md).

@@ -2,8 +2,11 @@ import { computed, ref, watch, type ComputedRef, type Ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { isAbortError, useAbortableRequest } from '@/composables/useAbortableRequest'
 import type { TreeEnrichmentDraftState } from '@/composables/enrichmentFormDraft'
+import { speciesEnrichmentHasDisplayContent } from '@/composables/enrichmentSummaries'
+import { useAiSuggestionErrorMapper } from '@/composables/useAiSuggestionErrorMapper'
 import { useEnrichmentErrorMapper } from '@/composables/useEnrichmentErrorMapper'
 import { useAuthStore } from '@/stores/auth'
+import { requestSpeciesEnrichmentSuggestion } from '@/services/ai/speciesEnrichmentSuggestionService'
 import {
   fetchSpeciesEnrichment,
   fetchTreeEnrichment,
@@ -30,7 +33,9 @@ export function useTreeFormEnrichment(options: UseTreeFormEnrichmentOptions) {
   const { t } = useI18n()
   const authStore = useAuthStore()
   const { toMessage } = useEnrichmentErrorMapper()
+  const { toMessage: toAiMessage } = useAiSuggestionErrorMapper()
   const { runWithAbort } = useAbortableRequest()
+  const { runWithAbort: runAiWithAbort, cancel: cancelAiSuggestion } = useAbortableRequest()
 
   const isAdmin = computed(() => authStore.hasRole('ADMIN'))
   const canEditSpeciesEnrichment = computed(() => isAdmin.value)
@@ -40,6 +45,22 @@ export function useTreeFormEnrichment(options: UseTreeFormEnrichmentOptions) {
   const isLoadingSpeciesEnrichment = ref(false)
   const speciesEnrichmentError = ref('')
   const isSavingSpeciesEnrichment = ref(false)
+  const isLoadingAiSuggestion = ref(false)
+  const aiSuggestionError = ref('')
+  const speciesAiSuggestionPayload = ref<SpeciesEnrichmentReplaceRequest | null>(null)
+
+  const canRequestSpeciesAiSuggestion = computed(() => {
+    if (!canEditSpeciesEnrichment.value || isLoadingSpeciesEnrichment.value) {
+      return false
+    }
+    const enrichment = speciesEnrichment.value
+    if (!enrichment || speciesEnrichmentHasDisplayContent(enrichment)) {
+      return false
+    }
+    return (
+      Boolean(enrichment.scientificName?.trim()) && Boolean(enrichment.commonName?.trim())
+    )
+  })
 
   const treeEnrichmentDraft = ref<TreeEnrichmentReplaceRequest | null>(null)
   const isLoadingTreeEnrichment = ref(false)
@@ -80,7 +101,46 @@ export function useTreeFormEnrichment(options: UseTreeFormEnrichmentOptions) {
   }
 
   async function onSpeciesPopupOpen(): Promise<void> {
+    aiSuggestionError.value = ''
+    speciesAiSuggestionPayload.value = null
     await loadSpeciesEnrichment()
+  }
+
+  function clearSpeciesAiSuggestionState(): void {
+    cancelAiSuggestion()
+    aiSuggestionError.value = ''
+    speciesAiSuggestionPayload.value = null
+  }
+
+  async function requestSpeciesAiSuggestion(): Promise<void> {
+    const enrichment = speciesEnrichment.value
+    const scientificName = enrichment?.scientificName?.trim() ?? ''
+    const commonName = enrichment?.commonName?.trim() ?? ''
+    if (!canRequestSpeciesAiSuggestion.value || !scientificName || !commonName) {
+      return
+    }
+
+    isLoadingAiSuggestion.value = true
+    aiSuggestionError.value = ''
+    speciesAiSuggestionPayload.value = null
+    try {
+      const response = await runAiWithAbort((signal) =>
+        requestSpeciesEnrichmentSuggestion({ scientificName, commonName }, signal),
+      )
+      speciesAiSuggestionPayload.value = {
+        synonyms: response.synonyms,
+        distribution: response.distribution,
+        ecologicalData: response.ecologicalData,
+        references: response.references,
+      }
+    } catch (error: unknown) {
+      if (isAbortError(error)) {
+        return
+      }
+      aiSuggestionError.value = toAiMessage(error)
+    } finally {
+      isLoadingAiSuggestion.value = false
+    }
   }
 
   async function saveSpeciesEnrichment(
@@ -226,14 +286,26 @@ export function useTreeFormEnrichment(options: UseTreeFormEnrichmentOptions) {
     { immediate: true },
   )
 
+  watch(speciesPopupOpen, (isOpen) => {
+    if (!isOpen) {
+      clearSpeciesAiSuggestionState()
+    }
+  })
+
   return {
     isAdmin,
     canEditSpeciesEnrichment,
+    canRequestSpeciesAiSuggestion,
     speciesPopupOpen,
     speciesEnrichment,
     isLoadingSpeciesEnrichment,
     speciesEnrichmentError,
     isSavingSpeciesEnrichment,
+    isLoadingAiSuggestion,
+    aiSuggestionError,
+    speciesAiSuggestionPayload,
+    requestSpeciesAiSuggestion,
+    clearSpeciesAiSuggestionState,
     treeEnrichmentDraft,
     isLoadingTreeEnrichment,
     treeEnrichmentError,

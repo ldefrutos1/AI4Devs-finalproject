@@ -12,12 +12,23 @@ vi.mock('@/services/catalog/enrichmentService', () => ({
   updateTreeEnrichment: vi.fn(),
 }))
 
+vi.mock('@/services/ai/speciesEnrichmentSuggestionService', () => ({
+  requestSpeciesEnrichmentSuggestion: vi.fn(),
+}))
+
+vi.mock('@/stores/auth', () => ({
+  useAuthStore: () => ({
+    hasRole: (role: string) => role === 'ADMIN',
+  }),
+}))
+
 import {
   fetchSpeciesEnrichment,
   fetchTreeEnrichment,
   updateSpeciesEnrichment,
   updateTreeEnrichment,
 } from '@/services/catalog/enrichmentService'
+import { requestSpeciesEnrichmentSuggestion } from '@/services/ai/speciesEnrichmentSuggestionService'
 
 function mountEnrichment(treeId: number | null, speciesId = '12') {
   let api!: ReturnType<typeof useTreeFormEnrichment>
@@ -51,6 +62,7 @@ describe('useTreeFormEnrichment', () => {
     vi.mocked(fetchSpeciesEnrichment).mockResolvedValue({
       speciesId: 12,
       scientificName: 'Quercus ilex',
+      commonName: 'Encina',
     })
     vi.mocked(updateSpeciesEnrichment).mockResolvedValue({
       speciesId: 12,
@@ -112,5 +124,70 @@ describe('useTreeFormEnrichment', () => {
 
     expect(fetchSpeciesEnrichment).toHaveBeenCalledWith(12, expect.any(AbortSignal))
     expect(api.speciesEnrichment.value?.scientificName).toBe('Quercus ilex')
+  })
+
+  it('canRequestSpeciesAiSuggestion es true para ADMIN sin enriquecimiento previo', async () => {
+    const api = mountEnrichment(null, '12')
+    await nextTick()
+    await vi.waitFor(() => expect(api.speciesEnrichment.value).not.toBeNull())
+
+    expect(api.canRequestSpeciesAiSuggestion.value).toBe(true)
+  })
+
+  it('canRequestSpeciesAiSuggestion es false si ya hay datos ampliados', async () => {
+    vi.mocked(fetchSpeciesEnrichment).mockResolvedValueOnce({
+      speciesId: 12,
+      scientificName: 'Quercus ilex',
+      commonName: 'Encina',
+      synonyms: ['Quercus rotundifolia'],
+    })
+    const api = mountEnrichment(null, '12')
+    await nextTick()
+    await vi.waitFor(() => expect(api.speciesEnrichment.value?.synonyms?.length).toBe(1))
+
+    expect(api.canRequestSpeciesAiSuggestion.value).toBe(false)
+  })
+
+  it('requestSpeciesAiSuggestion precarga payload y no persiste en catálogo', async () => {
+    vi.mocked(requestSpeciesEnrichmentSuggestion).mockResolvedValueOnce({
+      synonyms: ['Encina', 'Quercus ilex'],
+      distribution: { continents: ['Europa'], countries: ['España'] },
+      ecologicalData: { growthRate: 'moderate' },
+    })
+
+    const api = mountEnrichment(null, '12')
+    await nextTick()
+    await vi.waitFor(() => expect(api.canRequestSpeciesAiSuggestion.value).toBe(true))
+
+    await api.requestSpeciesAiSuggestion()
+
+    expect(requestSpeciesEnrichmentSuggestion).toHaveBeenCalledWith(
+      { scientificName: 'Quercus ilex', commonName: 'Encina' },
+      expect.any(AbortSignal),
+    )
+    expect(api.speciesAiSuggestionPayload.value).toMatchObject({
+      synonyms: ['Encina', 'Quercus ilex'],
+    })
+    expect(updateSpeciesEnrichment).not.toHaveBeenCalled()
+  })
+
+  it('requestSpeciesAiSuggestion expone error de IA sin guardar', async () => {
+    const { HttpError } = await import('@/services/http/apiClient')
+    vi.mocked(requestSpeciesEnrichmentSuggestion).mockRejectedValueOnce(
+      new HttpError(422, {
+        title: 'Respuesta IA inválida',
+        status: 422,
+        detail: 'Respuesta IA inválida',
+      }),
+    )
+
+    const api = mountEnrichment(null, '12')
+    await nextTick()
+    await vi.waitFor(() => expect(api.canRequestSpeciesAiSuggestion.value).toBe(true))
+
+    await api.requestSpeciesAiSuggestion()
+
+    expect(api.aiSuggestionError.value).toContain('Respuesta IA inválida')
+    expect(api.speciesAiSuggestionPayload.value).toBeNull()
   })
 })

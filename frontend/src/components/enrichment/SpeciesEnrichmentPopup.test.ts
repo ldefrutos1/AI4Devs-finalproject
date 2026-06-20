@@ -139,4 +139,92 @@ describe('SpeciesEnrichmentPopup', () => {
       synonyms: ['Encina'],
     })
   })
+
+  it('muestra acción IA solo para ADMIN sin enriquecimiento previo', async () => {
+    const wrapper = mountPopup({
+      open: true,
+      readonly: false,
+      canRequestAiSuggestion: true,
+      enrichment: {
+        speciesId: 1,
+        scientificName: 'Quercus ilex',
+        commonName: 'Encina',
+      },
+    })
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="species-enrichment-ai-section"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="species-enrichment-ai-request"]').exists()).toBe(true)
+  })
+
+  it('oculta acción IA cuando canRequestAiSuggestion es false', async () => {
+    const wrapper = mountPopup({
+      open: true,
+      readonly: false,
+      canRequestAiSuggestion: false,
+      enrichment: {
+        speciesId: 1,
+        scientificName: 'Quercus ilex',
+        commonName: 'Encina',
+        synonyms: ['Encina'],
+      },
+    })
+    await flushPromises()
+
+    expect(wrapper.find('[data-testid="species-enrichment-ai-section"]').exists()).toBe(false)
+  })
+
+  it('emite request-ai-suggestion y precarga campos con payload IA', async () => {
+    const wrapper = mountPopup({
+      open: true,
+      readonly: false,
+      canRequestAiSuggestion: true,
+      enrichment: {
+        speciesId: 1,
+        scientificName: 'Quercus ilex',
+        commonName: 'Encina',
+      },
+    })
+    await flushPromises()
+
+    await wrapper.get('[data-testid="species-enrichment-ai-request"]').trigger('click')
+    expect(wrapper.emitted('request-ai-suggestion')).toHaveLength(1)
+
+    await wrapper.setProps({
+      aiSuggestionPayload: {
+        synonyms: ['Encina', 'Quercus ilex'],
+        distribution: { continents: ['Europa'], countries: ['España'] },
+        ecologicalData: { habitat: ['bosque mediterráneo'] },
+      },
+    })
+    await flushPromises()
+
+    expect((wrapper.get('#species-enrichment-synonyms').element as HTMLTextAreaElement).value).toBe(
+      'Encina\nQuercus ilex',
+    )
+    expect((wrapper.get('#species-enrichment-continents').element as HTMLInputElement).value).toBe(
+      'Europa',
+    )
+    expect(wrapper.get('[data-testid="species-enrichment-ai-success"]').text()).toContain(
+      'precargados',
+    )
+  })
+
+  it('muestra error de consulta IA sin precargar', async () => {
+    const wrapper = mountPopup({
+      open: true,
+      readonly: false,
+      canRequestAiSuggestion: true,
+      enrichment: {
+        speciesId: 1,
+        scientificName: 'Quercus ilex',
+        commonName: 'Encina',
+      },
+      aiSuggestionError: 'La respuesta de la IA no superó la validación.',
+    })
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('validación')
+    expect(wrapper.find('[data-testid="species-enrichment-ai-success"]').exists()).toBe(false)
+  })
 })

@@ -427,6 +427,22 @@ export function speciesEnrichmentToFormDraft(
   }
 }
 
+/** Precarga de borrador desde respuesta IA o PUT parcial (HU-016). */
+export function speciesReplaceRequestToFormDraft(
+  enrichment: SpeciesEnrichment | null | undefined,
+  replace: SpeciesEnrichmentReplaceRequest,
+): SpeciesEnrichmentFormDraft {
+  return speciesEnrichmentToFormDraft({
+    speciesId: enrichment?.speciesId ?? 0,
+    scientificName: enrichment?.scientificName,
+    commonName: enrichment?.commonName,
+    synonyms: replace.synonyms,
+    distribution: replace.distribution,
+    ecologicalData: replace.ecologicalData,
+    references: replace.references,
+  })
+}
+
 export type SpeciesEnrichmentDraftBuildResult =
   | { ok: true; payload: SpeciesEnrichmentReplaceRequest }
   | { ok: false; errorKey: 'invalidJson' }

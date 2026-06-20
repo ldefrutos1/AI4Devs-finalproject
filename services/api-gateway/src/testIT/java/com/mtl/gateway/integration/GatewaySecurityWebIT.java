@@ -54,6 +54,7 @@ class GatewaySecurityWebIT {
     registry.add("mtl.catalog.uri", () -> base);
     registry.add("mtl.media.uri", () -> base);
     registry.add("mtl.notification.uri", () -> base);
+    registry.add("mtl.ai.uri", () -> base);
   }
 
   @AfterAll
