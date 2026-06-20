@@ -288,7 +288,7 @@ flowchart TB
     U(("👤 Usuario")):::user
 
     %% --- Límite del Sistema ---
-    subgraph MyTreeLibrary [MyTreeLibrary System C2]
+    subgraph mtl["MyTreeLibrary System C2"]
         direction TB
         
         %% Frontend y Entrada
@@ -382,7 +382,7 @@ flowchart TB
     AIS["🧠 AI Assistant"]:::service
 
     %% --- Subgraph PostgreSQL (La capa de almacenamiento) ---
-    subgraph PG ["🐘 PostgreSQL + PostGIS"]
+    subgraph pg["PostgreSQL + PostGIS"]
         direction LR
         SCH_C["📋 schema: catalog"]:::db
         SCH_M["📸 schema: media"]:::db
@@ -1295,7 +1295,8 @@ A partir del modelo de análisis (actores, casos de uso, diagrama PlantUML) y de
 
 | Documento | Contenido |
 |-----------|-----------|
-| [backlog.md](docs/backlog/backlog.md)| Historias de usuario |
+| [use-case-summary.md](docs/use-cases/use-case-summary.md) | Casos de uso |
+| [backlog.md](docs/backlog/backlog.md) | Backlog con historias de usuario |
 | [backlog/README.md](docs/backlog/README.md) | Convención de desgloses y sincronización |
 
 La definición y refinamiento de cada una de las historias de usuario incluidas en el backlog, y sus correspondientes tickets de trabajo, se ha realizado mediante los siguientes prompts genéricos que se han guardado como skills de Cursor: `.cursor/skills/hu-refinement-mtl/SKILL.md` (generación/refinamiento de historias) y `.cursor/skills/hu-breakdown-mtl/SKILL.md` (desglose en tickets). Estos prompts generan el correspondiente archivo dentro de la carpeta backlog.
