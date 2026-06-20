@@ -112,27 +112,20 @@ El producto se integra con IA para obtener información de las características 
 ### **2.2.1 Diagrama de contexto del sistema (C1)**
 
 ```mermaid
-graph TD
-    %% Definición de estilos (CSS)
-    classDef user fill:#E5F0FF,stroke:#2D71A8,stroke-width:1px,color:#2D71A8;
-    classDef system fill:#2D71A8,stroke:#1E4B73,stroke-width:2px,color:#FFFFFF,font-weight:bold;
-    classDef soporte fill:#E1F5EE,stroke:#0F6E56,stroke-width:1px,color:#085041;
-    classDef externo fill:#FAECE7,stroke:#993C1D,stroke-width:1px,color:#712B13;
+flowchart TB
+    classDef user fill:#E5F0FF,stroke:#2D71A8,stroke-width:1px,color:#2D71A8
+    classDef system fill:#2D71A8,stroke:#1E4B73,stroke-width:2px,color:#FFF,font-weight:bold
+    classDef soporte fill:#E1F5EE,stroke:#0F6E56,stroke-width:1px,color:#085041
+    classDef externo fill:#FAECE7,stroke:#993C1D,stroke-width:1px,color:#712B13
 
-    %% Nodos
     U(("👤 Usuario")):::user
-    S["🖥️ MyTreeLibrary<br/>Sistema principal"]:::system
+    S["🖥️ MyTreeLibrary<br>Sistema principal"]:::system
 
-    %% Agrupación
-    subgraph Dependencias [Sistemas Externos y de Soporte]
-        direction TB
-        KC["🔐 Keycloak<br/>Autenticación"]:::soporte
-        SMTP["📧 Servidor SMTP<br/>Notificaciones"]:::soporte
-        PIA["🧠 Proveedor IA<br/>Identificación"]:::externo
-        MAP["🗺️ OpenStreetMap<br/>Geolocalización"]:::externo
-    end
+    KC["🔐 Keycloak<br>Autenticación"]:::soporte
+    SMTP["📧 Servidor SMTP<br>Notificaciones"]:::soporte
+    PIA["🧠 Proveedor IA<br>Identificación"]:::externo
+    MAP["🗺️ OpenStreetMap<br>Geolocalización"]:::externo
 
-    %% Relaciones
     U -->|Usa la aplicación| S
     S --> KC
     S --> SMTP
@@ -404,7 +397,7 @@ flowchart TB
 
 ### **3.2.1 Autenticación en Front (Vue):**
 
-La SPA usa **OIDC Authorization Code + PKCE** con Keycloak: el router protege rutas y roles, `apiFetch` envía el JWT y renueva la sesión ante un `401`. Normativa completa: [jwt-gateway-strategy.md](docs/security/jwt-gateway-strategy.md) · [vue-development-guide.md](docs/onboarding/vue-development-guide.md).
+La aplicación web inicia sesión con Keycloak (OIDC, Authorization Code + PKCE). Vue Router impide entrar en pantallas sin sesión o sin el rol adecuado. Las peticiones al backend llevan el token JWT; si el servidor responde 401, no autorizado, el cliente intenta renovar la sesión antes de pedir login de nuevo. Más detalle en [jwt-gateway-strategy.md](docs/security/jwt-gateway-strategy.md) y [vue-development-guide.md](docs/onboarding/vue-development-guide.md).
 
 <details>
 <summary>Diagramas C3/C4 y detalle del flujo en cliente</summary>
@@ -539,7 +532,7 @@ Notas del diagrama C4 (no dibujadas): error al leer sesión en el guard → `/au
 
 ### **3.2.2 Kafka:**
 
-En el **MVP**, Kafka desacopla el **alta de un árbol** del **correo a suscriptores** (regla **R7**): **catalog-service** publica en `catalog.ejemplar.evento` y **notification-service** consume. Contrato: [kafka-events.md](docs/events/kafka-events.md).
+Tras el alta de un ejemplar, el aviso por correo a suscriptores se realiza de forma asincrona (regla **R7**). Tras crear la ficha, **catalog-service** publica un evento en Kafka (`catalog.ejemplar.evento`) y **notification-service** lo recibe para enviar los correos. El formato del mensaje está en [kafka-events.md](docs/events/kafka-events.md).
 
 <details>
 <summary>Diagramas C3/C4 productor/consumidor y secuencias</summary>
@@ -724,7 +717,7 @@ sequenceDiagram
 
 ### **3.2.3 Almacenamiento de fotografías:**
 
-Los binarios van a almacén **S3-compatible** (MinIO en local); los metadatos, a PostgreSQL (`media`). La SPA usa **presign → PUT → confirm** sin credenciales de bucket. Detalle: [media-upload-hu006.md](docs/engineering/media-upload-hu006.md) · [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md).
+Los archvios binarios (fotografías) se guaradn en un almacén compatible con S3 (MinIO en local) y los **datos descriptivos** (árbol, orden, tamaño, etc.) quedan en PostgreSQL, en el esquema `media`. Para subir una imagen, la aplicación pide al backend una URL temporal de subida, envía el fichero directamente al almacén —sin exponer las credenciales del bucket en el navegador— y, al terminar, confirma en la API para registrar la foto en base de datos. Detalle en [media-upload-hu006.md](docs/engineering/media-upload-hu006.md) y [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md).
 
 <details>
 <summary>Secuencia presign, subida y confirmación</summary>
@@ -1300,7 +1293,7 @@ A partir del modelo de análisis (actores, casos de uso, diagrama PlantUML) y de
 
 | Documento | Contenido |
 |-----------|-----------|
-| [backlog.md](docs/backlog/backlog.md) §3 | Historias HU-001…HU-016 y estado |
+| [backlog.md](docs/backlog/backlog.md)| Historias de usuario |
 | [backlog/README.md](docs/backlog/README.md) | Convención de desgloses y sincronización |
 
 La definición y refinamiento de cada una de las historias de usuario incluidas en el backlog, y sus correspondientes tickets de trabajo, se ha realizado mediante los siguientes prompts genéricos que se han guardado como skills de Cursor: `.cursor/skills/hu-refinement-mtl/SKILL.md` (generación/refinamiento de historias) y `.cursor/skills/hu-breakdown-mtl/SKILL.md` (desglose en tickets). Estos prompts generan el correspondiente archivo dentro de la carpeta backlog.
