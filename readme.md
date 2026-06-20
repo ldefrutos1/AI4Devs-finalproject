@@ -78,7 +78,7 @@ El producto se integra con IA para obtener información de las características 
 
 ```mermaid
 graph TD
-    %% Definicion de estilos (CSS)
+    %% Definición de estilos (CSS)
     classDef user fill:#E5F0FF,stroke:#2D71A8,stroke-width:1px,color:#2D71A8;
     classDef system fill:#2D71A8,stroke:#1E4B73,stroke-width:2px,color:#FFFFFF,font-weight:bold;
     classDef soporte fill:#E1F5EE,stroke:#0F6E56,stroke-width:1px,color:#085041;
@@ -88,7 +88,7 @@ graph TD
     U(("👤 Usuario")):::user
     S["🖥️ MyTreeLibrary<br/>Sistema principal"]:::system
 
-    %% Agrupacion
+    %% Agrupación
     subgraph Dependencias [Sistemas Externos y de Soporte]
         direction TB
         KC["🔐 Keycloak<br/>Autenticación"]:::soporte
@@ -98,7 +98,7 @@ graph TD
     end
 
     %% Relaciones
-    U -->|Usa la aplicacion| S
+    U -->|Usa la aplicación| S
     S --> KC
     S --> SMTP
     S --> PIA
@@ -117,7 +117,7 @@ A continuación se incluye el diagrama de casos de uso del sistema.
 | UC-01 | Consultar árboles publicados y su ubicación | Público |
 | UC-02 | Registrarse para recibir notificaciones | Público |
 | UC-03 | Registrar árbol | Colaborador |
-| UC-04 | Modificar y eliminar árboles  | Colaborador |
+| UC-04 | Modificar y eliminar árboles | Colaborador |
 | UC-05 | Identificar árbol asistido por IA (imagen) | Colaborador |
 | UC-06 | Consultar asistente IA (chat) | Colaborador |
 | UC-07 | Gestionar tablas de catálogo (maestros taxonómicos) | ADMIN |
@@ -405,7 +405,7 @@ A continuación se detallan los componentes del diagrama C2 (§3.1), desplegados
 
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
-| **catalog-service** | Spring Boot 4, JPA, Flyway, PostgreSQL, MongoDB, Redis ; productor Kafka | Catálogo de ejemplares. |
+| **catalog-service** | Spring Boot 4, JPA, Flyway, PostgreSQL, MongoDB, Redis; productor Kafka | Catálogo de ejemplares. |
 | **media-service** | Spring Boot 4, JPA, Flyway, cliente MinIO (API S3) | Almacenamiento de imágenes. |
 | **notification-service** | Spring Boot 4, JPA, Flyway, Spring Kafka, JavaMail | Notificación de novedades. |
 | **ai-assistant-service** | Spring Boot 4 | Comunicación con LLM. |
@@ -779,7 +779,7 @@ sequenceDiagram
   GW->>CAT: proxy JWT
   CAT-->>SPA: 201 treeId
 
-  loop Por cada fotografia
+  loop Por cada fotografía
     SPA->>GW: POST /api/media/uploads/presign
     GW->>MS: proxy JWT
     MS->>MS: validar MIME tamano cupo permiso
@@ -820,11 +820,12 @@ sequenceDiagram
 
 ### **3.3. Descripción de alto nivel del proyecto y estructura de ficheros**
 
-Estructura de repositorio **prevista** para la fase de implementación (monorepo):
+Estructura de repositorio (monorepo):
 
 ```
 proyecto/
 ├── frontend/                 # SPA Vue 3 (Vite)
+├── e2e/                      # E2E UI (Playwright); ver `docs/engineering/testing-e2e.md`
 ├── services/                 # Gateway + microservicios Spring Boot (un directorio por despliegue)
 │   ├── api-gateway/
 │   ├── catalog-service/
@@ -1145,7 +1146,7 @@ erDiagram
     USUARIO_APP ||--o{ AUDITORIA_CATALOGO : actua
 ```
 
-Para el Alta de ejemplar, los valores admitidos son:
+Para el alta de ejemplar, los valores admitidos son:
 
 - `estado_publicacion`: `BORRADOR` o `PUBLICADO`.
 - `visibilidad_mapa_publico`: `PRIVADO` o `PUBLICO`.
@@ -1216,7 +1217,7 @@ erDiagram
 
 #### **4.2.4 PostgreSQL notification_service:**
 
-Avisos de de nuevas altas en el sistema a los suscriptores.
+Avisos de nuevas altas en el sistema a los suscriptores.
 
 ```mermaid
 erDiagram
@@ -1301,7 +1302,7 @@ Las entidades físicas se reparten por servicio y almacén como se indica en §3
 
 A partir del Modelo de análisis (actores, casos de uso, diagrama PlantUML): [docs/use-cases/use-case-summary.md](docs/use-cases/use-case-summary.md) y de la definición del sistema (archivo actual) se ha generado el backlog con la relación de las historias de usuario a implementar [docs/backlog/backlog.md](docs/backlog/backlog.md).
 
-La definición y refinamiento de cada una de las historias de usuario incluidas en el backlog, y sus correspondientes ticket de trabajo, se ha realizado mediante los siguientes prompts genéricos que se han guardado como skills de Cursor: `.cursor/skills/hu-refinement-mtl/SKILL.md` (generación/refinamiento de historias) y `.cursor/skills/hu-breakdown-mtl/SKILL.md` (desglose en tickets). Estos prompts generan el correspondiente archivo dentro de la carpeta backlog.
+La definición y refinamiento de cada una de las historias de usuario incluidas en el backlog, y sus correspondientes tickets de trabajo, se ha realizado mediante los siguientes prompts genéricos que se han guardado como skills de Cursor: `.cursor/skills/hu-refinement-mtl/SKILL.md` (generación/refinamiento de historias) y `.cursor/skills/hu-breakdown-mtl/SKILL.md` (desglose en tickets). Estos prompts generan el correspondiente archivo dentro de la carpeta backlog.
 
 El proceso seguido es:
 - 1.- Generación de la Historia de Usuario a partir del backlog con `hu-refinement-mtl/SKILL.md`
@@ -1311,6 +1312,8 @@ El proceso seguido es:
 
 Por operativa práctica, al comienzo de la historia se hacen unas comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.   
 
+> *Registro histórico:* los prompts siguientes reproducen el diálogo de refinamiento de HU-008 tal como ocurrió; pueden reflejar decisiones intermedias que no coinciden con el diseño final. Fuente de verdad: [HU-008-edicion-de-mis-arboles.md](docs/backlog/HU-008-edicion-de-mis-arboles.md) y [HU-008-ticket-breakdown.md](docs/backlog/HU-008-ticket-breakdown.md).
+
 **Ejemplo del proceso: Historia de Usuario — HU-008 (Edición y baja de mis árboles)**
 
 **Prompt 1:**
@@ -1319,7 +1322,9 @@ Vamos a desarrollar la historia HU-008@.cursor/skills/hu-refinement-mtl
 
 **Prompt 2:**
 
-Vamos a revisar los puntos que quedan fuera de la historia. 1.- Añade en HU-006 el ticket para incluir la posibilidad de añadir y borrar fotografías desde la pantalla de edición de Mis árboles 2.- Incluye en el Backlog una nueva historia para abordar Proyección o enriquecimiento Mongo 3.- Incluye en la historia que estamos abordando la posibilidad de borrar árboles
+Vamos a revisar los puntos que quedan fuera de la historia. 
+- 1.- Añade en HU-006 el ticket para incluir la posibilidad de añadir y borrar fotografías desde la pantalla de edición de Mis árboles 
+- 2.- Incluye en el Backlog una nueva historia para abordar Proyección o enriquecimiento Mongo 3.- Incluye en la historia que estamos abordando la posibilidad de borrar árboles
 
 **Prompt 3:**
 
@@ -1331,7 +1336,8 @@ Respecto al riesgo de Listado sin filtros vamos a añadir en la historia el filt
 
 **Prompt 5:**
 
-1.- Path de borrado: `DELETE /api/media/trees/{treeId}/photos` 2.- Si un ejemplar tiene fotografías primero se invoca al servicio de borrado de todas las fotografías; si el servicio da error se para el proceso; si se han borrado todas las fotografías se elimina el ejemplar en PostgreSQL 3.- Fechas en formato date a ser posible en UTC 4.- Para ADMIN se añade un filtro más para poder seleccionar los ejemplares dados de alta por un usuario determinado
+- 1.- Path de borrado: `DELETE /api/media/trees/{treeId}/photos` 
+- 2.- Si un ejemplar tiene fotografías primero se invoca al servicio de borrado de todas las fotografías; si el servicio da error se para el proceso; si se han borrado todas las fotografías se elimina el ejemplar en PostgreSQL 3.- Fechas en formato date a ser posible en UTC 4.- Para ADMIN se añade un filtro más para poder seleccionar los ejemplares dados de alta por un usuario determinado
 
 
 ---
@@ -1342,6 +1348,7 @@ Como se ha comentado en el punto anterior, para mantener formato homogéneo se u
 
 En la generación de tickets de trabajo se incluye explícitamente una sección con las reglas de Cursor que debe aplicar el agente de IA al implementarlos.
 
+> *Registro histórico:* los prompts siguientes documentan el desglose de HU-008 en su momento; el contenido puede no reflejar el breakdown final ([HU-008-ticket-breakdown.md](docs/backlog/HU-008-ticket-breakdown.md)).
 
 **Ejemplo del proceso: Ticket 1 — HU-008**
 
@@ -1362,11 +1369,12 @@ así está bien, implementa el endpoint del Listado de TASK-HU-008-02, si tienes
 
 ## 8. Pull requests
 
-**Procedimiento (ramas, plantilla `.github`, pruebas):** [docs/onboarding/github-branching.md](docs/onboarding/github-branching.md).
+Para el trabajo con GitHub se ha definido una estrategia sencilla de ramas — detalle en [docs/onboarding/github-branching.md](docs/onboarding/github-branching.md).
 
 Las pull requests usan la plantilla [`.github/pull_request_template.md`](.github/pull_request_template.md) (GitHub la inserta al crear el PR).
+En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), calidad frontend (`lint`, `typecheck`, Vitest) y escaneo de secretos (Gitleaks) — workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml); E2E Playwright y auditoría de dependencias son **manuales** ([docs/engineering/devsecops-ci.md](docs/engineering/devsecops-ci.md)).  
 
-> Documenta 3 de las Pull Requests realizadas durante la ejecución del proyecto (ejemplos históricos debajo).
+> *Registro histórico:* los ejemplos de pull request siguientes muestran cómo se documentó el trabajo en su momento (resumen, plan de pruebas, notas técnicas). Pueden no coincidir con el diseño final ni con la plantilla o CI actuales; norma vigente en [github-branching.md](docs/onboarding/github-branching.md) y [devsecops-ci.md](docs/engineering/devsecops-ci.md).
 
 **Pull Request 1**
 ## Resumen
@@ -1476,4 +1484,3 @@ Cierra **HU-008** (UC-04): el colaborador puede **listar y filtrar** sus fichas,
 - **TASK-HU-008-11** rechazado a propósito; no esperar IT Failsafe catalog↔media en este PR.
 - Rama: `feature/actualizacion` → `main`.
 
-**Pull Request 3**

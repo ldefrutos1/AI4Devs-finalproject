@@ -96,7 +96,7 @@ Usuario de prueba (Keycloak): `colaborador` / `colaborador_dev` (rol **COLABORAD
 5. **Baja sin fotos:** repetir en ficha sin fotografías → baja correcta sin depender de objetos en MinIO.
 6. **Sin notificación por edición/baja (R7):** tras **PUT** o **DELETE**, no debe generarse correo de “nuevo árbol” a suscriptores (solo el alta dispara **UC-09**).
 
-Checks automáticos previos: `npm run build`, `npm run test` en `frontend/`; `mvn -f services/pom.xml -pl catalog-service,media-service test` en backend.
+Checks automáticos previos: [devsecops-ci.md](../docs/engineering/devsecops-ci.md) (paridad CI). Opcional en local: `npm run build`; backend acotado `mvn -f services/pom.xml -pl catalog-service,media-service test`.
 
 ## Enriquecimiento Mongo (HU-015)
 
@@ -131,4 +131,4 @@ Usuarios de prueba: `colaborador` / `colaborador_dev` (**COLABORADOR**); usuario
 5. **Escenario 5 — Borrado cascada:** en ficha con datos en Mongo, **Eliminar árbol** (**HU-008**). Tras **204**, el documento `ejemplar_detalle` no debe existir; `especie_detalle` permanece si la especie sigue en catálogo.
 6. **Escenario 7 — Validación compartida:** enviar `measurements` con valor no numérico en el panel → **400** Problem legible; colaborador sobre ficha ajena sigue con **403** (**HU-008**).
 
-Checks automáticos previos: `npm run build` y `npm run test` en `frontend/` (suite de enriquecimiento: `npx vitest run enrichment`); `mvn -f services/pom.xml -pl catalog-service verify` en backend (IT Mongo si Docker disponible).
+Checks automáticos previos: [devsecops-ci.md](../docs/engineering/devsecops-ci.md) (paridad CI). Opcional en local: `npx vitest run enrichment`; backend `mvn -f services/pom.xml -pl catalog-service verify` (IT Mongo si Docker disponible).

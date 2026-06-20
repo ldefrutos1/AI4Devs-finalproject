@@ -35,7 +35,7 @@ Guía breve para trabajar con IA en este repo sin perder trazabilidad ni coheren
 ## Checklist mínimo antes de cerrar una tarea
 
 - Reglas aplicables por capa citadas en el breakdown.
-- Checks mínimos ejecutados (`build/test` según capa).
+- Checks mínimos según capa ([devsecops-ci.md](../engineering/devsecops-ci.md)); checks extra del breakdown si los define.
 - Alcance respectado (sin meter trabajo de otra HU).
 - Copy y i18n coherentes si hay cambios frontend.
 - PR con HU + TASK; breakdown y §3 del backlog actualizados tras merge.

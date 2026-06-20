@@ -11,7 +11,7 @@ Reparto de responsabilidades (qué demuestra cada capa, evitando duplicar): [tes
 
 - Carpeta: **`e2e/`** (proyecto Node independiente del SPA; no se mezcla con Vitest). Guía operativa: [e2e/README.md](../../e2e/README.md).
 - Cubre el **flujo del colaborador** de punta a punta por la UI: acceder, **iniciar sesión** (botón "Conectarse" → OIDC en Keycloak), **dar de alta** un ejemplar, **consultar "mis árboles"** y **borrar** el ejemplar.
-- Servicios reales implicados: `catalog-service` (alta/listado/borrado), `media-service` (el borrado llama en cascada a media), `api-gateway`, Keycloak, Postgres (PostGIS), Mongo (dependencia futura del catálogo híbrido) y Kafka (el alta emite `EJEMPLAR_CREADO`; no se verifica el correo, no hay consumidor en el stack).
+- Servicios reales implicados: `catalog-service` (alta/listado/borrado), `media-service` (el borrado llama en cascada a media), `api-gateway`, Keycloak, Postgres (PostGIS), Mongo y Kafka (el alta emite `EJEMPLAR_CREADO`; no se verifica el correo, no hay consumidor en el stack).
 - **Qué NO duplicar aquí:** asserts de contrato API (401/403, paginación) que ya cubren `system-e2e-tests` y los IT; este E2E valida el **camino de usuario** en el navegador (OIDC, router, UX de sesión y CRUD visible).
 
 ## 2. Dos variantes (misma suite, distinta orquestación)

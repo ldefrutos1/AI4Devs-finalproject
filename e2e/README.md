@@ -36,7 +36,7 @@ BASE_URL=http://localhost:5173 npm run e2e
 
 Usuario por defecto: `colaborador` / `colaborador_dev` (realm `mtl`, rol `COLABORADOR`).
 
-## Variante B - Self-contained en Docker (la que corre en CI/PR)
+## Variante B - Self-contained en Docker
 
 Construye y arranca todo el stack y ejecuta Playwright como contenedor en la red
 `mtl`. Las DB son efimeras (se descartan al bajar el stack).

@@ -146,7 +146,7 @@ Ver [HU-008-ticket-breakdown.md](HU-008-ticket-breakdown.md) (`TASK-HU-008-01` �
 ### Escenario 8 — Rollback si falla el borrado SQL tras fotos *(deuda MVP; no implementado)*
 
 - **Dado que** las fotografías del árbol se han borrado correctamente en **media-service**  
-- **Cuando** falla el borrado del árbol en PostgreSQL (o el hook Mongo una vez implementado)  
+- **Cuando** falla el borrado del árbol en PostgreSQL (o el hook Mongo)  
 - **Entonces** *(objetivo de refinamiento)* se aplicaría **rollback** de lo ejecutado, error al cliente y estado consistente. **En el MVP cerrado:** no hay compensación automática; queda como mejora futura (sin saga).
 
 ## 3. Evaluación INVEST (resumen)
