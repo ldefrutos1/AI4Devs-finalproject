@@ -1,11 +1,6 @@
 ## Índice
 
 1. [Ficha del proyecto](#1-ficha-del-proyecto)
-   - [1.1 Tu nombre completo](#11-tu-nombre-completo)
-   - [1.2 Nombre del proyecto](#12-nombre-del-proyecto)
-   - [1.3 Descripción breve del proyecto](#13-descripción-breve-del-proyecto)
-   - [1.4 URL del proyecto](#14-url-del-proyecto)
-   - [1.5 URL o archivo comprimido del repositorio](#15-url-o-archivo-comprimido-del-repositorio)
 2. [Descripción general del producto](#2-descripción-general-del-producto)
    - [2.1 Objetivo](#21-objetivo)
    - [2.2 Características y funcionalidades principales](#22-características-y-funcionalidades-principales)
@@ -27,6 +22,11 @@
 4. [Modelo de datos](#4-modelo-de-datos)
    - [4.1 Modelo lógico del sistema completo](#41-modelo-lógico-del-sistema-completo)
    - [4.2 Diagrama de persistencia (implementación)](#42-diagrama-de-persistencia-implementación)
+   - [4.2.1 PostgreSQL — catalog_service](#421-postgresql-catalog_service)
+   - [4.2.2 MongoDB — enriquecimiento](#422-mongodb-catalog-service-modelo-en-mongomd)
+   - [4.2.3 PostgreSQL — media_service](#423-postgresql-media_service)
+   - [4.2.4 PostgreSQL — notification_service](#424-postgresql-notification_service)
+   - [4.2.5 PostgreSQL — ai_assistant_service](#425-postgresql-ai_assistant_service-esquema-ai)
    - [4.3 Descripción de entidades principales](#43-descripción-de-entidades-principales-orientación-física)
 5. [Especificación de la API](#5-especificación-de-la-api)
    - [OpenAPI (contrato canónico)](docs/api/openapi.yaml)
@@ -931,6 +931,12 @@ flowchart LR
 
 **Documentación relacionada:** [Notas de negocio y reglas](docs/data-model/data-model.md) · [Modelo técnico MongoDB (colecciones, validación, índices)](docs/data-model/mongo.md) · [Eventos Kafka](docs/events/kafka-events.md)
 
+En esta sección:
+
+- [4.1 Modelo lógico del sistema completo](#41-modelo-lógico-del-sistema-completo)
+- [4.2 Diagrama de persistencia (implementación)](#42-diagrama-de-persistencia-implementación)
+- [4.3 Descripción de entidades principales](#43-descripción-de-entidades-principales-orientación-física)
+
 ### **4.1. Modelo lógico del sistema completo**
 
 Vista unificada de las entidades principales del sistema y sus relaciones, independientemente del almacén o microservicio (§4.2). Las referencias entre dominios se expresan como **FK lógicas** sin una implementación de una restricción física real entre los distintos esquemas.
@@ -1039,8 +1045,13 @@ erDiagram
 
 Desglose de §4.1 por almacén: un **PostgreSQL** con esquemas `catalog`, `media`, `notification` y `ai`, más **MongoDB** de enriquecimiento. Reglas de negocio: [data-model.md](docs/data-model/data-model.md).
 
-<details>
-<summary>4.2.1 PostgreSQL — catalog_service</summary>
+En esta subsección:
+
+- [4.2.1 PostgreSQL — catalog_service](#421-postgresql-catalog_service)
+- [4.2.2 MongoDB — enriquecimiento](#422-mongodb-catalog-service-modelo-en-mongomd)
+- [4.2.3 PostgreSQL — media_service](#423-postgresql-media_service)
+- [4.2.4 PostgreSQL — notification_service](#424-postgresql-notification_service)
+- [4.2.5 PostgreSQL — ai_assistant_service](#425-postgresql-ai_assistant_service-esquema-ai)
 
 #### **4.2.1 PostgreSQL: catalog_service:**
 
@@ -1136,11 +1147,6 @@ Para el alta de ejemplar, los valores admitidos son:
 - `estado_publicacion`: `BORRADOR` o `PUBLICADO`.
 - `visibilidad_mapa_publico`: `PRIVADO` o `PUBLICO`.
 
-</details>
-
-<details>
-<summary>4.2.2 MongoDB — enriquecimiento (catalog-service)</summary>
-
 #### **4.2.2 MongoDB (catalog-service; modelo en mongo.md)**
 
 Almacén de **enriquecimiento** (*system of enrichment*): no sustituye a PostgreSQL. Dos colecciones principales — `especie_detalle` (datos ampliados de especie, p. ej. vía LLM en **HU-016**) y `ejemplar_detalle` (medidas, etiquetas y observaciones del ejemplar; `ejemplar_pg_id` = `catalog.ejemplar.ejemplar_id`). Desnormalización controlada de nombres de especie para búsqueda sin join obligatorio con SQL. Diseño, índices y validación: [mongo.md](docs/data-model/mongo.md). Implementado en **catalog-service** y consumido desde el **frontend** (**HU-015**, **Cerrada**).
@@ -1179,11 +1185,6 @@ erDiagram
   EJEMPLAR_DETALLE ||--|{ OBSERVACION : "embebe"
 ```
 
-</details>
-
-<details>
-<summary>4.2.3 PostgreSQL — media_service</summary>
-
 #### **4.2.3 PostgreSQL media_service:**
 
 Metadatos de fotografías en esquema `media`. `ejemplar_id` referencia lógicamente a `catalog.ejemplar` (sin FK entre esquemas).
@@ -1209,11 +1210,6 @@ erDiagram
         bigint subida_por
     }
 ```
-
-</details>
-
-<details>
-<summary>4.2.4 PostgreSQL — notification_service</summary>
 
 #### **4.2.4 PostgreSQL notification_service:**
 
@@ -1261,11 +1257,6 @@ erDiagram
     SUSCRIPTOR ||--o{ ENVIO_NOTIFICACION : recibe
 ```
 
-</details>
-
-<details>
-<summary>4.2.5 PostgreSQL — ai_assistant_service (esquema ai)</summary>
-
 #### **4.2.5 PostgreSQL ai_assistant_service (esquema `ai`):**
 
 Modelo objetivo de **AUDITORIA_USO_IA** (esquema `ai` inicializado; tabla pendiente de migración Flyway). **`subject_oidc`** persiste el claim `sub` del JWT (Keycloak) en el momento de la consulta; **`ejemplar_id`** referencia lógicamente a `catalog.ejemplar`. Sin FK entre esquemas ni dependencia de `catalog.usuario_app`: la trazabilidad del actor se toma directamente del token. Coherente con §4.1 y R3.
@@ -1283,18 +1274,12 @@ erDiagram
     }
 ```
 
-</details>
-
 ### **4.3. Descripción de entidades principales (orientación física)**
 
 Un **PostgreSQL** con cuatro esquemas de aplicación y **MongoDB** de enriquecimiento (colecciones en [mongo.md](docs/data-model/mongo.md)); acceso desde **catalog-service** (**HU-015**). El flujo **HU-016** persiste `especie_detalle` vía SPA → **catalog-service** (orquestación en cliente; **ai-assistant-service** valida JSON LLM).
 
-<details>
-<summary>Usuario de aplicación y trazabilidad OIDC</summary>
-
 **Usuario de aplicación:** La auditoría de la aplicación se implementa en torno al usuario proporcionado por el token generado por Keycloak como proveedor OIDC. Para evitar duplicidades los diversos esquemas almacenan el identificador estable del proveedor (`sub`) que se guarda en el campo **`subject_oidc`**. En el caso de catalog-service este campo se guarda en una tabla USUARIO_APP con unicidad, no como clave primaria; esto permite trazabilidad sin duplicar la información; las FK de los campos de auditoría `creado_por` y `modificado_por` referencian a la clave primaria de esta tabla.
 
-</details>
 ---
 
 ## 5. Especificación de la API
@@ -1315,7 +1300,6 @@ A partir del modelo de análisis (actores, casos de uso, diagrama PlantUML) y de
 
 | Documento | Contenido |
 |-----------|-----------|
-| [use-case-summary.md](docs/use-cases/use-case-summary.md) | Actores, tabla UC-01…UC-09, reglas |
 | [backlog.md](docs/backlog/backlog.md) §3 | Historias HU-001…HU-016 y estado |
 | [backlog/README.md](docs/backlog/README.md) | Convención de desgloses y sincronización |
 
