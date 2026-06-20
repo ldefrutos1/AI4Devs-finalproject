@@ -154,6 +154,34 @@ Tego que incluir testing end to end en el sistema que pruebe el microservicio de
 
 **Prompt 2:**
 
+El proyecto actual usa playwright para test e2e. Actua como ingeniero experto en QA y analiza la estructura actual de de la carpeta e2e comprobando si: 
+1. ¿Estructura de carpetas correcta y coherente con las buenas practicas?
+2. ¿Fixtures reutilizables?
+3. ¿Selectores (`data-testid`) alineados?
+4. ¿SExiste slapamiento con `system-e2e-tests`?
+5. ¿Exxite convención para nombrar specs nuevos? 
+6.- ¿Es coherente con @docs/engineering/testing-e2e.md  6. ¿Sigue las buenas practicas de automatización para este tipo de test? Si tienes alguna duda o ves algún punto más a considerar preguntame
+
+1.- Además del flujo actual de alta de ejemplar; también se implementará - Consulta pública (sin autenticación) - Admin maestros (usuario ADMIN) 
+2.- Por el coste de levantar todos los contenedores; los test e2e se ejecutarán principalmente an variante local (pero es conveniente que también estén preparados para docker) 
+3.- Vamos a mantener el código lo más simple posible, si no ves problema se mantendría helpers en fistures para no complicar el mvp 4.- se necesita ADMIN para el nuevo test de Admin maestros  
+
+adelante con la impementación de consulta-publica.spec.ts
+1.- Ir a /ejemplares sin login.
+2.- Verificar que carga el listado (conteo o al menos una tarjeta de semilla).
+3.- Abrir detalle de un ejemplar publicado y verificar contenido básico (especie/ubicación).
+
+vamos con el test de admin-maestros.spec.ts
+
+1,. loginAsAdmin.
+2.- Ir a /admin/masters.
+3.- Crear especie de prueba (género existente de semilla).
+4.- Verificar que aparece en la tabla.
+5.- Borrarla y verificar ausencia.
+
+revisa que el codigo que has implementado sigue los estandares definidos para este tipo de test
+
+
 **Prompt 3:**
 
 ---
