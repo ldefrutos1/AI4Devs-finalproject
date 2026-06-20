@@ -1,6 +1,6 @@
 # Notas complementarias al modelo de datos
 
-**Contexto:** [readme.md](../../readme.md) (§3 modelo de datos) · [Modelo técnico MongoDB](mongo.md) · [ADR-0002: PK numéricas frente a UUID](../adr/0002-claves-primarias-numericas-frente-a-uuid.md)
+**Contexto:** [readme.md](../../readme.md) (§4 modelo de datos) · [Modelo técnico MongoDB](mongo.md) · [ADR-0002: PK numéricas frente a UUID](../adr/0002-claves-primarias-numericas-frente-a-uuid.md)
 
 ## 1. Reglas de negocio consolidadas
 

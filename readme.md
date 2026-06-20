@@ -220,84 +220,13 @@ La aplicación implementa una navegación simple por roles con una **home de ent
 
 ### **2.4. Instrucciones de instalación:**
 
-#### Infraestructura de apoyo
+**Ruta feliz (entorno local):**
 
-En `[infra/compose/](infra/compose/)` hay un `docker-compose.yml` que levanta la infraestructura de soporte del proyecto:
+1. Copiar `infra/compose/.env.example` a `infra/compose/.env` y ejecutar `docker compose up -d` desde `infra/compose/` (Postgres, Keycloak, Kafka, Redis, MinIO, Mailpit, observabilidad).
+2. Arrancar microservicios con perfil **`dev`** — como mínimo **api-gateway** (8080) y los servicios del flujo que vayas a probar (ver tabla inferior).
+3. Copiar `frontend/.env.example` a `frontend/.env`; desde `frontend/`: `npm install` y `npm run dev` (UI en **http://localhost:5173**; Vite reenvía `/api/*` al gateway).
 
-
-| Servicio                | Detalle                                                         |
-| ----------------------- | --------------------------------------------------------------- |
-| PostgreSQL 16 + PostGIS | BD `mtl` con esquemas `catalog`, `media`, `notification` y `ai` |
-| PostgreSQL / Keycloak   | BD `keycloak`                                                   |
-| MongoDB                 | Versión 7                                                       |
-| Redis                   | Versión 7                                                       |
-| MinIO                   | Almacenamiento de objetos                                       |
-| Kafka                   | Modo KRaft, con topic `catalog.ejemplar.evento`                    |
-| Keycloak                | Versión 26 en modo desarrollo                                   |
-| Mailpit                 | SMTP de prueba (captura correo; UI web); imagen `axllent/mailpit`; puertos en [infra/compose/README.md](infra/compose/README.md) |
-| Prometheus              | Métricas; imagen `prom/prometheus:v3.2.1`; scrape de microservicios en el host (`/actuator/prometheus`); UI en puerto **9090** |
-| Grafana                 | Dashboards; imagen `grafana/grafana:11.5.2`; datasource y dashboard provisionados desde [platform/observability/README.md](platform/observability/README.md); UI en puerto **3000** |
-
-
-> **Nota:** por defecto, Postgres del Compose se expone en el host en el **puerto `5433`**  
-> mediante la variable `POSTGRES_PORT` definida en `.env`, para evitar conflictos con un PostgreSQL local en `5432`.
-
-> **Redis y `catalog-service`:** con perfil **`dev`**, el catálogo usa caché Redis (`spring.cache.type=redis` en `application-dev.properties`). El contenedor **Redis** del Compose debe estar en marcha antes de arrancar **catalog-service** en `dev`.
-
-#### Pasos:
-
-- Copiar `infra/compose/.env.example` a `infra/compose/.env` (en Windows `copy .env.example .env`; en Unix `cp .env.example .env`), 
-- Ejecutar `docker compose up -d` desde `infra/compose/` (incluye Prometheus y Grafana).
-- Opcional, solo observabilidad: `docker compose pull prometheus grafana` y `docker compose up -d prometheus grafana` (requiere microservicios en el host en puertos **8080–8084** con perfil `dev` para que el scrape muestre targets **UP**).
-
-#### Detalle y puertos: [infra/compose/README.md](infra/compose/README.md). Observabilidad: [platform/observability/README.md](platform/observability/README.md) · [ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md).
-
-#### Backend: microservicios y gateway
-
-Los módulos Maven del backend están bajo `[services/](services/)`:
-
-
-| Módulo                 | Descripción                |
-| ---------------------- | -------------------------- |
-| `api-gateway`          | Gateway de entrada         |
-| `catalog-service`      | Servicio de catálogo       |
-| `media-service`        | Servicio de media          |
-| `notification-service` | Servicio de notificaciones |
-| `ai-assistant-service` | Servicio de asistente IA   |
-
-
-El POM agregador está en:
-
-```txt
-services/pom.xml
-```
-
-Puedes ejecutar Maven desde `services/`:
-
-```bash
-mvn ...
-```
-
-O desde la raíz del proyecto:
-
-```bash
-mvn -f services/pom.xml ...
-```
-
-#### Perfil de desarrollo
-
-Tras tener la infraestructura en marcha, arranca cada servicio con el perfil `dev`.
-
-> El perfil `dev` **no está fijado en `application.properties`**.
-
-Puedes activarlo de cualquiera de estas formas:
-
-
-| Método                   | Ejemplo                                                            |
-| ------------------------ | ------------------------------------------------------------------ |
-| Variable de entorno      | `SPRING_PROFILES_ACTIVE=dev`                                       |
-| Argumento de Spring Boot | `--spring.profiles.active=dev`                                     |
-| Maven                    | `-Dspring-boot.run.profiles=dev`                                   |
+> **Redis y catalog-service:** con perfil `dev`, el catálogo usa caché Redis; el contenedor Redis del Compose debe estar en marcha antes de arrancar **catalog-service**.
 
 #### Arranque mínimo por flujo
 
@@ -311,30 +240,9 @@ Tras `docker compose up -d`, levanta **api-gateway** (8080) y, según lo que pru
 | Aviso por correo (Alta de ejemplar) | Kafka, Mailpit | notification |
 | Admin (maestros / suscripciones) | — | catalog; notification (suscripciones) |
 
-Puertos y comandos: [services/README.md](services/README.md).
+**Detalle ampliado:** servicios Compose, puertos y variables — [infra/compose/README.md](infra/compose/README.md). Comandos Maven, perfil `dev`, Flyway y tests backend — [services/README.md](services/README.md). Usuarios Keycloak y flujo OIDC — [frontend/README.md](frontend/README.md). Observabilidad — [platform/observability/README.md](platform/observability/README.md).
 
-#### Más información
-
-Consulta `[services/README.md](services/README.md)` para ver:
-
-- comandos de arranque
-- puertos
-- configuración de Flyway
-- ejecución de tests
-
-#### Frontend
-
-La carpeta `[frontend/](frontend/)` es la SPA Vue 3 (Vite) con OIDC (Keycloak), consulta pública, catálogo colaborador y pantallas de administración.
-
-1. Copiar `frontend/.env.example` a `frontend/.env` (valores por defecto válidos para local).
-2. Tener en marcha la infra de Compose y, como mínimo, **api-gateway** en **8080** (y los microservicios que vayas a usar; ver [services/README.md](services/README.md)).
-3. Desde `frontend/`: `npm install` y `npm run dev` (UI en **http://localhost:5173**; el proxy de Vite reenvía `/api/*` al gateway).
-
-Más detalle (usuarios de prueba Keycloak, flujo OIDC): [frontend/README.md](frontend/README.md). Checklist E2E HU-001: [HU-001-ticket-breakdown.md](docs/backlog/HU-001-ticket-breakdown.md) (**TASK-HU-001-14**).
-
-#### Datos iniciales en catálogo
-
-Además del init de Postgres/Keycloak en Compose, **catalog-service** aplica semillas de maestros (familia, género, especie, provincia) mediante migraciones Flyway (`V2__seed_maestros_inicial.sql`, etc.); el esquema relacional está en `V1__baseline.sql`. El mantenimiento en aplicación por **ADMIN** (**HU-011**, UC-07) cubre solo la **taxonomía** (familia, género, especie); el catálogo de **provincias** permanece en semillas, sin pantalla de administración en el MVP.
+**Datos iniciales:** **catalog-service** aplica semillas de maestros (familia, género, especie, provincia) con Flyway; el mantenimiento en aplicación por **ADMIN** (**HU-011**, UC-07) cubre solo la taxonomía; las **provincias** permanecen en semillas, sin pantalla admin en el MVP.
 
 ---
 
@@ -496,6 +404,11 @@ flowchart TB
 
 ### **3.2.1 Autenticación en Front (Vue):**
 
+La SPA usa **OIDC Authorization Code + PKCE** con Keycloak: el router protege rutas y roles, `apiFetch` envía el JWT y renueva la sesión ante un `401`. Normativa completa: [jwt-gateway-strategy.md](docs/security/jwt-gateway-strategy.md) · [vue-development-guide.md](docs/onboarding/vue-development-guide.md).
+
+<details>
+<summary>Diagramas C3/C4 y detalle del flujo en cliente</summary>
+
 Descripción del flujo de autenticación para SPA en **Vue 3** con **OIDC Authorization Code + PKCE** (IdP: Keycloak).  
 Objetivo: mantener rutas protegidas con sesión válida, renovar token de forma transparente y centralizar el manejo de `401` en cliente HTTP.
 
@@ -622,7 +535,14 @@ sequenceDiagram
 
 Notas del diagrama C4 (no dibujadas): error al leer sesión en el guard → `/auth/error?reason=session`; renovación proactiva del token (`automaticSilentRenew`) mediante eventos OIDC hacia el Auth Store, además de los `signinSilent` bajo demanda del guard y de `apiFetch`.
 
+</details>
+
 ### **3.2.2 Kafka:**
+
+En el **MVP**, Kafka desacopla el **alta de un árbol** del **correo a suscriptores** (regla **R7**): **catalog-service** publica en `catalog.ejemplar.evento` y **notification-service** consume. Contrato: [kafka-events.md](docs/events/kafka-events.md).
+
+<details>
+<summary>Diagramas C3/C4 productor/consumidor y secuencias</summary>
 
 En el **MVP**, Kafka separa el **alta de un árbol** del **correo a suscriptores** (regla **R7**): solo al crear una ficha con éxito; edición y baja no publican. Un topic (`catalog.ejemplar.evento`): **catalog-service** publica y **notification-service** consume. Contrato del mensaje: [docs/events/kafka-events.md](docs/events/kafka-events.md). Nomenclatura técnica: [ADR-0006](docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md). Configuración local: [services/README.md](services/README.md) (Kafka).
 
@@ -800,7 +720,14 @@ sequenceDiagram
   end
 ```
 
-### **3.2.3 Almacenamiento de fotografías**
+</details>
+
+### **3.2.3 Almacenamiento de fotografías:**
+
+Los binarios van a almacén **S3-compatible** (MinIO en local); los metadatos, a PostgreSQL (`media`). La SPA usa **presign → PUT → confirm** sin credenciales de bucket. Detalle: [media-upload-hu006.md](docs/engineering/media-upload-hu006.md) · [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md).
+
+<details>
+<summary>Secuencia presign, subida y confirmación</summary>
 
 Los **binarios** viven en un almacén **S3-compatible** (**MinIO** en desarrollo, **S3** en producción); los **metadatos** (árbol, clave de objeto, orden, foto principal, etc.) en PostgreSQL, esquema **`media`**, gestionados por **media-service** tras el **API Gateway**. La SPA **nunca** recibe credenciales de bucket: tras crear la ficha del árbol en **catalog-service**, por cada imagen pide una **URL prefirmada** (`POST /api/media/uploads/presign`), sube el fichero con **PUT directo** al almacén y **confirma** (`POST /api/media/photos/confirm`) para registrar la fila en `media`; la primera confirmación del árbol queda como **foto principal**. La visibilidad de cada foto **hereda** la de la ficha. Contrato HTTP: [openapi.yaml](docs/api/openapi.yaml); historia y criterios: [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md); validaciones, propiedades, principal y EXIF en cliente: [media-upload-hu006.md](docs/engineering/media-upload-hu006.md).
 
@@ -839,7 +766,14 @@ sequenceDiagram
   end
 ```
 
+</details>
+
 ### **3.2.4 Uso de IA: características de especie (MVP) e identificación/chat (futuro)**
+
+En el MVP solo aplica la consulta de características de especie por **ADMIN** ([HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md)); identificación por imagen y chat quedan para próxima versión ([HU-009](docs/backlog/backlog.md), [HU-010](docs/backlog/backlog.md)).
+
+<details>
+<summary>Secuencia de consulta IA (MVP)</summary>
 
 En el MVP solo aplica la consulta de características de especie por **ADMIN** ([HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md)); identificación por imagen y chat: [HU-009](docs/backlog/backlog.md) y [HU-010](docs/backlog/backlog.md) (próxima versión). Detalle de historias: [backlog](docs/backlog/backlog.md) §3.
 
@@ -861,6 +795,8 @@ sequenceDiagram
   CAT-->>SPA: especie_detalle_persistido
 ```
 
+
+</details>
 
 ### **3.3. Descripción de alto nivel del proyecto y estructura de ficheros**
 
@@ -1101,6 +1037,11 @@ erDiagram
 - `creado_por` / `modificado_por` = campos usados para auditoría (sin sufijo `FK`). 
 - Tipos PostgreSQL (`bigint`, `varchar`, `text`, `timestamptz`, `numeric`, `integer`, …).
 
+Desglose de §4.1 por almacén: un **PostgreSQL** con esquemas `catalog`, `media`, `notification` y `ai`, más **MongoDB** de enriquecimiento. Reglas de negocio: [data-model.md](docs/data-model/data-model.md).
+
+<details>
+<summary>4.2.1 PostgreSQL — catalog_service</summary>
+
 #### **4.2.1 PostgreSQL: catalog_service:**
 
 Esquema con los datos generales de cada árbol y auditoria del usuario que los registró.
@@ -1195,6 +1136,11 @@ Para el alta de ejemplar, los valores admitidos son:
 - `estado_publicacion`: `BORRADOR` o `PUBLICADO`.
 - `visibilidad_mapa_publico`: `PRIVADO` o `PUBLICO`.
 
+</details>
+
+<details>
+<summary>4.2.2 MongoDB — enriquecimiento (catalog-service)</summary>
+
 #### **4.2.2 MongoDB (catalog-service; modelo en mongo.md)**
 
 Almacén de **enriquecimiento** (*system of enrichment*): no sustituye a PostgreSQL. Dos colecciones principales — `especie_detalle` (datos ampliados de especie, p. ej. vía LLM en **HU-016**) y `ejemplar_detalle` (medidas, etiquetas y observaciones del ejemplar; `ejemplar_pg_id` = `catalog.ejemplar.ejemplar_id`). Desnormalización controlada de nombres de especie para búsqueda sin join obligatorio con SQL. Diseño, índices y validación: [mongo.md](docs/data-model/mongo.md). Implementado en **catalog-service** y consumido desde el **frontend** (**HU-015**, **Cerrada**).
@@ -1233,6 +1179,11 @@ erDiagram
   EJEMPLAR_DETALLE ||--|{ OBSERVACION : "embebe"
 ```
 
+</details>
+
+<details>
+<summary>4.2.3 PostgreSQL — media_service</summary>
+
 #### **4.2.3 PostgreSQL media_service:**
 
 Metadatos de fotografías en esquema `media`. `ejemplar_id` referencia lógicamente a `catalog.ejemplar` (sin FK entre esquemas).
@@ -1258,6 +1209,11 @@ erDiagram
         bigint subida_por
     }
 ```
+
+</details>
+
+<details>
+<summary>4.2.4 PostgreSQL — notification_service</summary>
 
 #### **4.2.4 PostgreSQL notification_service:**
 
@@ -1305,6 +1261,11 @@ erDiagram
     SUSCRIPTOR ||--o{ ENVIO_NOTIFICACION : recibe
 ```
 
+</details>
+
+<details>
+<summary>4.2.5 PostgreSQL — ai_assistant_service (esquema ai)</summary>
+
 #### **4.2.5 PostgreSQL ai_assistant_service (esquema `ai`):**
 
 Modelo objetivo de **AUDITORIA_USO_IA** (esquema `ai` inicializado; tabla pendiente de migración Flyway). **`subject_oidc`** persiste el claim `sub` del JWT (Keycloak) en el momento de la consulta; **`ejemplar_id`** referencia lógicamente a `catalog.ejemplar`. Sin FK entre esquemas ni dependencia de `catalog.usuario_app`: la trazabilidad del actor se toma directamente del token. Coherente con §4.1 y R3.
@@ -1322,29 +1283,35 @@ erDiagram
     }
 ```
 
+</details>
+
 ### **4.3. Descripción de entidades principales (orientación física)**
 
-Las entidades físicas se reparten por servicio y almacén como se indica en §3.2: un servidor **PostgreSQL** con cuatro esquemas `catalog`, `media`, `notification` y `ai`; una base **MongoDB** de enriquecimiento (colecciones en [mongo.md](docs/data-model/mongo.md)), con acceso desde **catalog-service** (**HU-015**, **Cerrada**). El flujo **HU-016** persiste `especie_detalle` vía **frontend** → **catalog-service** (orquestación en la SPA; **ai-assistant-service** valida JSON LLM y no escribe en Mongo).
+Un **PostgreSQL** con cuatro esquemas de aplicación y **MongoDB** de enriquecimiento (colecciones en [mongo.md](docs/data-model/mongo.md)); acceso desde **catalog-service** (**HU-015**). El flujo **HU-016** persiste `especie_detalle` vía SPA → **catalog-service** (orquestación en cliente; **ai-assistant-service** valida JSON LLM).
+
+<details>
+<summary>Usuario de aplicación y trazabilidad OIDC</summary>
 
 **Usuario de aplicación:** La auditoría de la aplicación se implementa en torno al usuario proporcionado por el token generado por Keycloak como proveedor OIDC. Para evitar duplicidades los diversos esquemas almacenan el identificador estable del proveedor (`sub`) que se guarda en el campo **`subject_oidc`**. En el caso de catalog-service este campo se guarda en una tabla USUARIO_APP con unicidad, no como clave primaria; esto permite trazabilidad sin duplicar la información; las FK de los campos de auditoría `creado_por` y `modificado_por` referencian a la clave primaria de esta tabla.
 
+</details>
 ---
 
 ## 5. Especificación de la API
 
-**Contrato canónico (OpenAPI 3):** [docs/api/openapi.yaml](docs/api/openapi.yaml) — rutas bajo el API Gateway (`/api/catalog`, `/api/media`, `/api/notifications`, `/api/ai`), seguridad JWT donde aplica, listados paginados (`page`, `size`) y errores en **RFC 9457** (`application/problem+json`).
+El contrato HTTP del proyecto está en [docs/api/openapi.yaml](docs/api/openapi.yaml) (OpenAPI 3). Desde el cliente se accede a los microservicios a través del API Gateway, con rutas agrupadas en `/api/catalog`, `/api/media`, `/api/notifications` y `/api/ai`. Donde hace falta autenticación, la API exige un JWT válido. Los listados son paginados (`page`, `size`) y las respuestas de error siguen el formato **RFC 9457** (`application/problem+json`).
 
-**Convenciones de diseño:** de cara a homogeneizar el desarrollo, se han definido las siguientes reglas de Cursor `.cursor/rules/api-contract.mdc`, `.cursor/rules/api-design.mdc` y `.cursor/rules/api-security.mdc`.
+Para que todas las APIs sigan el mismo criterio, el proyecto define reglas de desarrollo en Cursor. [api-contract.mdc](.cursor/rules/api-contract.mdc) fija el contrato HTTP y su alineación con OpenAPI. [api-design.mdc](.cursor/rules/api-design.mdc) recoge convenciones de rutas, DTOs y respuestas. [api-security.mdc](.cursor/rules/api-security.mdc) describe autenticación JWT y control de acceso.
 
-**Nomenclatura (BD, API, código, docs):** guía auditable y checklist en [docs/engineering/naming-conventions.md](docs/engineering/naming-conventions.md); decisión HTTP en inglés + persistencia en español en [ADR-0007](docs/adr/0007-english-http-spanish-persistence.md); término `ejemplar` en [ADR-0006](docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md).
+En base de datos, API, código y documentación no se usan los mismos nombres en todas las capas: la guía completa está en [naming-conventions.md](docs/engineering/naming-conventions.md). La API HTTP se expone en inglés y la persistencia se modela en español; la justificación está en [ADR-0007](docs/adr/0007-english-http-spanish-persistence.md). Para la ficha de árbol, el término de dominio *ejemplar* y su traducción a rutas y eventos se fijan en [ADR-0006](docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md).
 
-**Eventos asíncronos:** notificaciones asociadas al alta de un ejemplar: [docs/events/kafka-events.md](docs/events/kafka-events.md).
+Además de la API REST, algunos flujos usan mensajes en Kafka. Hoy el caso principal es el aviso por correo cuando un colaborador da de alta un ejemplar: **catalog-service** publica un evento y **notification-service** lo consume. El formato del topic, el payload y las reglas de publicación están en [kafka-events.md](docs/events/kafka-events.md).
 
 ---
 
 ## 6. Historias de usuario
 
-A partir del Modelo de análisis (actores, casos de uso, diagrama PlantUML): [docs/use-cases/use-case-summary.md](docs/use-cases/use-case-summary.md) y de la definición del sistema (archivo actual) se ha generado el backlog con la relación de las historias de usuario a implementar [docs/backlog/backlog.md](docs/backlog/backlog.md).
+A partir del modelo de análisis (actores, casos de uso, diagrama PlantUML) y de la definición del producto en este archivo, se ha generado el backlog de historias de usuario a implementar.
 
 | Documento | Contenido |
 |-----------|-----------|
