@@ -1,20 +1,48 @@
 ## Índice
 
 1. [Ficha del proyecto](#1-ficha-del-proyecto)
+   - [1.1 Tu nombre completo](#11-tu-nombre-completo)
+   - [1.2 Nombre del proyecto](#12-nombre-del-proyecto)
+   - [1.3 Descripción breve del proyecto](#13-descripción-breve-del-proyecto)
+   - [1.4 URL del proyecto](#14-url-del-proyecto)
+   - [1.5 URL o archivo comprimido del repositorio](#15-url-o-archivo-comprimido-del-repositorio)
 2. [Descripción general del producto](#2-descripción-general-del-producto)
-   - [2.4 Instalación](#24-instrucciones-de-instalación) · [2.2.2 Casos de uso](#222-diagrama-de-casos-de-uso-del-sistema)
+   - [2.1 Objetivo](#21-objetivo)
+   - [2.2 Características y funcionalidades principales](#22-características-y-funcionalidades-principales)
+   - [2.2.1 Diagrama de contexto (C1)](#221-diagrama-de-contexto-del-sistema-c1)
+   - [2.2.2 Diagrama de casos de uso](#222-diagrama-de-casos-de-uso-del-sistema)
+   - [2.3 Diseño y experiencia de usuario](#23-diseño-y-experiencia-de-usuario)
+   - [2.4 Instrucciones de instalación](#24-instrucciones-de-instalación)
 3. [Arquitectura del sistema](#3-arquitectura-del-sistema)
-   - [3.1 Diagramas](#31-diagrama-de-arquitectura) · [3.3 Estructura del repo](#33-descripción-de-alto-nivel-del-proyecto-y-estructura-de-ficheros) · [3.6 Tests](#36-tests)
+   - [3.1 Diagrama de arquitectura](#31-diagrama-de-arquitectura)
+   - [3.2 Descripción de componentes principales](#32-descripción-de-componentes-principales)
+   - [3.2.1 Autenticación en Front (Vue)](#321-autenticación-en-front-vue)
+   - [3.2.2 Kafka](#322-kafka)
+   - [3.2.3 Almacenamiento de fotografías](#323-almacenamiento-de-fotografías)
+   - [3.2.4 Uso de IA](#324-uso-de-ia-características-de-especie-mvp-e-identificaciónchat-futuro)
+   - [3.3 Estructura del proyecto y ficheros](#33-descripción-de-alto-nivel-del-proyecto-y-estructura-de-ficheros)
+   - [3.4 Infraestructura y despliegue](#34-infraestructura-y-despliegue)
+   - [3.5 Seguridad](#35-seguridad)
+   - [3.6 Tests](#36-tests)
 4. [Modelo de datos](#4-modelo-de-datos)
-   - [4.1 Modelo lógico](#41-modelo-lógico-del-sistema-completo) · [4.2 Persistencia](#42-diagrama-de-persistencia-implementación)
+   - [4.1 Modelo lógico del sistema completo](#41-modelo-lógico-del-sistema-completo)
+   - [4.2 Diagrama de persistencia (implementación)](#42-diagrama-de-persistencia-implementación)
+   - [4.3 Descripción de entidades principales](#43-descripción-de-entidades-principales-orientación-física)
 5. [Especificación de la API](#5-especificación-de-la-api)
-   - [OpenAPI](docs/api/openapi.yaml) · [naming-conventions](docs/engineering/naming-conventions.md)
+   - [OpenAPI (contrato canónico)](docs/api/openapi.yaml)
+   - [Convenciones de nomenclatura](docs/engineering/naming-conventions.md)
+   - [Eventos Kafka](docs/events/kafka-events.md)
 6. [Historias de usuario](#6-historias-de-usuario)
-   - [backlog.md](docs/backlog/backlog.md) · [use-case-summary.md](docs/use-cases/use-case-summary.md)
+   - [Resumen de casos de uso](docs/use-cases/use-case-summary.md)
+   - [Backlog HU-001…HU-016](docs/backlog/backlog.md)
+   - [Convención de desgloses](docs/backlog/README.md)
 7. [Tickets de trabajo](#7-tickets-de-trabajo)
-   - [backlog/README.md](docs/backlog/README.md) · skill `hu-breakdown-mtl`
+   - [Skill hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md)
+   - [Convención de desgloses](docs/backlog/README.md)
 8. [Pull requests](#8-pull-requests)
-   - [github-branching.md](docs/onboarding/github-branching.md) · [devsecops-ci.md](docs/engineering/devsecops-ci.md) · [plantilla PR](.github/pull_request_template.md)
+   - [Estrategia de ramas](docs/onboarding/github-branching.md)
+   - [CI y DevSecOps](docs/engineering/devsecops-ci.md)
+   - [Plantilla de PR](.github/pull_request_template.md)
 
 ---
 
@@ -64,8 +92,6 @@ Además, la plataforma incorpora inteligencia artificial como apoyo a la consult
 La solución está dirigida a aficionados a la naturaleza en general y puede resultar de especial utilidad para docentes y monitores de tiempo libre.
 
 ### **2.2. Características y funcionalidades principales:**
-
-Bloques de esta subsección: [Registro y publicación](#registro-y-publicación-de-árboles) · [Consulta pública](#consulta-pública-y-visualización-geográfica) · [Notificaciones](#notificaciones) · [Integración con IA](#integración-con-ia) · [Diagrama C1](#221-diagrama-de-contexto-del-sistema-c1) · [Casos de uso](#222-diagrama-de-casos-de-uso-del-sistema).
 
 #### Registro y publicación de árboles
 
@@ -314,7 +340,14 @@ Además del init de Postgres/Keycloak en Compose, **catalog-service** aplica sem
 
 ## 3. Arquitectura del sistema
 
-En esta sección: [3.1 Diagrama](#31-diagrama-de-arquitectura) · [3.2 Componentes](#32-descripción-de-componentes-principales) · [3.3 Estructura del repo](#33-descripción-de-alto-nivel-del-proyecto-y-estructura-de-ficheros) · [3.4 Infraestructura](#34-infraestructura-y-despliegue) · [3.5 Seguridad](#35-seguridad) · [3.6 Tests](#36-tests).
+En esta sección:
+
+- [3.1 Diagrama de arquitectura](#31-diagrama-de-arquitectura)
+- [3.2 Descripción de componentes principales](#32-descripción-de-componentes-principales)
+- [3.3 Estructura del proyecto y ficheros](#33-descripción-de-alto-nivel-del-proyecto-y-estructura-de-ficheros)
+- [3.4 Infraestructura y despliegue](#34-infraestructura-y-despliegue)
+- [3.5 Seguridad](#35-seguridad)
+- [3.6 Tests](#36-tests)
 
 ### **3.1. Diagrama de arquitectura:**
 
@@ -961,8 +994,6 @@ flowchart LR
 **NOTA:** El idioma en el que se ha realizado el modelo de datos es intencionadamente **el idioma del dominio de negocio** que en este caso es el español. La justificación es que en proyectos que no son internacionales, tiene sentido modelar en un idioma y la jerga del cliente. Esta decisión presenta un reto de coherencia y definición del idioma aplicable a cada capa del sistema.
 
 **Documentación relacionada:** [Notas de negocio y reglas](docs/data-model/data-model.md) · [Modelo técnico MongoDB (colecciones, validación, índices)](docs/data-model/mongo.md) · [Eventos Kafka](docs/events/kafka-events.md)
-
-En esta sección: [4.1 Modelo lógico](#41-modelo-lógico-del-sistema-completo) · [4.2 Persistencia](#42-diagrama-de-persistencia-implementación) · [4.3 Entidades principales](#43-descripción-de-entidades-principales-orientación-física).
 
 ### **4.1. Modelo lógico del sistema completo**
 
