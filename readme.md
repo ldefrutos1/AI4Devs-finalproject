@@ -339,7 +339,7 @@ flowchart TB
 
 A continuación se detallan los componentes del diagrama C2 (§3.1), desplegados o consumidos por la plataforma. No se listan dependencias externas como el proveedor de mapas (**OpenStreetMap** / **Leaflet**) ni el proveedor de IA.
 
-> En **3.2.1–3.2.4**, los diagramas y secuencias técnicas están en bloques **▸ Desplegar** (clic en el título para expandir o contraer).
+> En **3.2.1–3.2.4**, los diagramas y secuencias técnicas están en bloques **Desplegar** (clic en el título para expandir o contraer).
 
 #### Capa de aplicación y entrada
 
@@ -402,7 +402,7 @@ flowchart TB
 La aplicación web inicia sesión con Keycloak (OIDC, Authorization Code + PKCE). Vue Router impide entrar en pantallas sin sesión o sin el rol adecuado. Las peticiones al backend llevan el token JWT; si el servidor responde 401, no autorizado, el cliente intenta renovar la sesión antes de pedir login de nuevo. Más detalle en [jwt-gateway-strategy.md](docs/security/jwt-gateway-strategy.md) y [vue-development-guide.md](docs/onboarding/vue-development-guide.md).
 
 <details>
-<summary><strong>▸ Desplegar</strong> — Diagramas C3/C4 y detalle del flujo en cliente</summary>
+<summary><strong>Desplegar</strong> — Diagramas C3/C4 y detalle del flujo en cliente</summary>
 
 Descripción del flujo de autenticación para SPA en **Vue 3** con **OIDC Authorization Code + PKCE** (IdP: Keycloak).  
 Objetivo: mantener rutas protegidas con sesión válida, renovar token de forma transparente y centralizar el manejo de `401` en cliente HTTP.
@@ -537,7 +537,7 @@ Notas del diagrama C4 (no dibujadas): error al leer sesión en el guard → `/au
 Tras el alta de un ejemplar, el aviso por correo a suscriptores se realiza de forma asincrona (regla **R7**). Tras crear la ficha, **catalog-service** publica un evento en Kafka (`catalog.ejemplar.evento`) y **notification-service** lo recibe para enviar los correos. El formato del mensaje está en [kafka-events.md](docs/events/kafka-events.md).
 
 <details>
-<summary><strong>▸ Desplegar</strong> — Diagramas C3/C4 productor/consumidor y secuencias Kafka</summary>
+<summary><strong>Desplegar</strong> — Diagramas C3/C4 productor/consumidor y secuencias Kafka</summary>
 
 En el **MVP**, Kafka separa el **alta de un árbol** del **correo a suscriptores** (regla **R7**): solo al crear una ficha con éxito; edición y baja no publican. Un topic (`catalog.ejemplar.evento`): **catalog-service** publica y **notification-service** consume. Contrato del mensaje: [docs/events/kafka-events.md](docs/events/kafka-events.md). Nomenclatura técnica: [ADR-0006](docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md). Configuración local: [services/README.md](services/README.md) (Kafka).
 
@@ -722,7 +722,7 @@ sequenceDiagram
 Los archivos binarios (fotografías) se guardan en un almacén compatible con S3 (MinIO en local) y los **datos descriptivos** (árbol, orden, tamaño, etc.) quedan en PostgreSQL, en el esquema `media`. Para subir una imagen, la aplicación pide al backend una URL temporal de subida, envía el fichero directamente al almacén —sin exponer las credenciales del bucket en el navegador— y, al terminar, confirma en la API para registrar la foto en base de datos. Detalle en [media-upload-hu006.md](docs/engineering/media-upload-hu006.md) y [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md).
 
 <details>
-<summary><strong>▸ Desplegar</strong> — Secuencia presign, subida y confirmación</summary>
+<summary><strong>Desplegar</strong> — Secuencia presign, subida y confirmación</summary>
 
 Los **binarios** viven en un almacén **S3-compatible** (**MinIO** en desarrollo, **S3** en producción); los **metadatos** (árbol, clave de objeto, orden, foto principal, etc.) en PostgreSQL, esquema **`media`**, gestionados por **media-service** tras el **API Gateway**. La SPA **nunca** recibe credenciales de bucket: tras crear la ficha del árbol en **catalog-service**, por cada imagen pide una **URL prefirmada** (`POST /api/media/uploads/presign`), sube el fichero con **PUT directo** al almacén y **confirma** (`POST /api/media/photos/confirm`) para registrar la fila en `media`; la primera confirmación del árbol queda como **foto principal**. La visibilidad de cada foto **hereda** la de la ficha. Contrato HTTP: [openapi.yaml](docs/api/openapi.yaml); historia y criterios: [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md); validaciones, propiedades, principal y EXIF en cliente: [media-upload-hu006.md](docs/engineering/media-upload-hu006.md).
 
@@ -768,7 +768,7 @@ sequenceDiagram
 En el MVP solo aplica la consulta de características de especie por **ADMIN** ([HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md)); identificación por imagen y chat quedan para próxima versión ([HU-009](docs/backlog/backlog.md), [HU-010](docs/backlog/backlog.md)).
 
 <details>
-<summary><strong>▸ Desplegar</strong> — Secuencia de consulta IA (MVP)</summary>
+<summary><strong>Desplegar</strong> — Secuencia de consulta IA (MVP)</summary>
 
 En el MVP solo aplica la consulta de características de especie por **ADMIN** ([HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md)); identificación por imagen y chat: [HU-009](docs/backlog/backlog.md) y [HU-010](docs/backlog/backlog.md) (próxima versión). Detalle de historias: [backlog](docs/backlog/backlog.md) §3.
 
@@ -1308,10 +1308,10 @@ El proceso seguido es:
 
 Por operativa práctica, al comienzo de la historia se hacen unas comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.
 
-> El diálogo de refinamiento de HU-008 (evidencia del curso) está en el bloque **▸ Desplegar** siguiente.
+> El diálogo de refinamiento de HU-008 (evidencia del curso) está en el bloque **Desplegar** siguiente.
 
 <details>
-<summary><strong>▸ Desplegar</strong> — Ejemplo histórico HU-008 (prompts de refinamiento)</summary>
+<summary><strong>Desplegar</strong> — Ejemplo histórico HU-008 (prompts de refinamiento)</summary>
 
 > *Registro histórico:* los prompts siguientes reproducen el diálogo de refinamiento de HU-008 tal como ocurrió; pueden reflejar decisiones intermedias que no coinciden con el diseño final. Fuente de verdad: [HU-008-edicion-de-mis-arboles.md](docs/backlog/HU-008-edicion-de-mis-arboles.md) y [HU-008-ticket-breakdown.md](docs/backlog/HU-008-ticket-breakdown.md).
 
@@ -1351,10 +1351,10 @@ Como se ha comentado en el punto anterior, para mantener formato homogéneo se u
 
 En la generación de tickets de trabajo se incluye explícitamente una sección con las reglas de Cursor que debe aplicar el agente de IA al implementarlos.
 
-> El desglose en tickets de HU-008 (evidencia del curso) está en el bloque **▸ Desplegar** siguiente.
+> El desglose en tickets de HU-008 (evidencia del curso) está en el bloque **Desplegar** siguiente.
 
 <details>
-<summary><strong>▸ Desplegar</strong> — Ejemplo histórico HU-008 (prompts de desglose en tickets)</summary>
+<summary><strong>Desplegar</strong> — Ejemplo histórico HU-008 (prompts de desglose en tickets)</summary>
 
 > *Registro histórico:* los prompts siguientes documentan el desglose de HU-008 en su momento; el contenido puede no reflejar el breakdown final ([HU-008-ticket-breakdown.md](docs/backlog/HU-008-ticket-breakdown.md)).
 
@@ -1384,10 +1384,10 @@ Para el trabajo con GitHub se ha definido una estrategia sencilla de ramas — d
 Las pull requests usan la plantilla [`.github/pull_request_template.md`](.github/pull_request_template.md) (GitHub la inserta al crear el PR).
 En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), calidad frontend (`lint`, `typecheck`, Vitest) y escaneo de secretos (Gitleaks) — workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml); E2E Playwright y auditoría de dependencias son **manuales** ([docs/engineering/devsecops-ci.md](docs/engineering/devsecops-ci.md)).  
 
-> *Registro histórico:* los ejemplos de pull request siguientes muestran cómo se documentó el trabajo en su momento (resumen, plan de pruebas, notas técnicas). Pueden no coincidir con el diseño final ni con la plantilla o CI actuales; norma vigente en [github-branching.md](docs/onboarding/github-branching.md) y [devsecops-ci.md](docs/engineering/devsecops-ci.md). **Clic en ▸ Desplegar** para ver cada PR de ejemplo.
+> *Registro histórico:* los ejemplos de pull request siguientes muestran cómo se documentó el trabajo en su momento (resumen, plan de pruebas, notas técnicas). Pueden no coincidir con el diseño final ni con la plantilla o CI actuales; norma vigente en [github-branching.md](docs/onboarding/github-branching.md) y [devsecops-ci.md](docs/engineering/devsecops-ci.md). **Clic en Desplegar** para ver cada PR de ejemplo.
 
 <details>
-<summary><strong>▸ Desplegar</strong> — Pull Request 1 (histórico — HU-004)</summary>
+<summary><strong>Desplegar</strong> — Pull Request 1 (histórico — HU-004)</summary>
 
 ### Resumen
 
@@ -1419,7 +1419,7 @@ Implementa la **HU-004**: alta de suscripción por correo sin cuenta de colabora
 </details>
 
 <details>
-<summary><strong>▸ Desplegar</strong> — Pull Request 2 (histórico — HU-008)</summary>
+<summary><strong>Desplegar</strong> — Pull Request 2 (histórico — HU-008)</summary>
 
 ### Resumen
 
