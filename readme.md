@@ -78,9 +78,6 @@ MyTreeLibrary es una solución digital para crear y gestionar tu colección pers
 
 Desarrollar una plataforma web que permita registrar, organizar y consultar fotografías, ubicaciones y datos relevantes de árboles de tu ciudad, facilitando al usuario la creación de una biblioteca personal digital y la posibilidad de compartir esa información de forma pública.
 
-**NOTA IMPORTANTE:** Se ha seleccionado una arquitectura de microservicios en Java con Spring y Vue con un **propósito didáctico**, con el fin de aprender estas tecnologías.
-
-
 #### Valor aportado (qué soluciona)
 
 La solución combina la catalogación personal con la posibilidad de compartir y crear comunidad en torno a una afición compartida.
@@ -241,6 +238,8 @@ Tras `docker compose up -d`, levanta **api-gateway** (8080) y, según lo que pru
 
 ## 3. Arquitectura del sistema
 
+**NOTA:** La elección de una arquitectura de microservicios en Java con Spring y Vue tiene un **propósito didáctico**, con el fin de aprender estas tecnologías.
+
 En esta sección:
 
 - [3.1 Diagrama de arquitectura](#31-diagrama-de-arquitectura)
@@ -355,7 +354,7 @@ A continuación se detallan los componentes del diagrama C2 (§3.1), desplegados
 | **catalog-service** | Spring Boot 4, JPA, Flyway, PostgreSQL, MongoDB, Redis; productor Kafka | Catálogo de ejemplares. |
 | **media-service** | Spring Boot 4, JPA, Flyway, cliente MinIO (API S3) | Almacenamiento de imágenes. |
 | **notification-service** | Spring Boot 4, JPA, Flyway, Spring Kafka, JavaMail | Notificación de novedades. |
-| **ai-assistant-service** | Spring Boot 4 | Comunicación con LLM. |
+| **ai-assistant-service** | Spring Boot 4 | Comunicación con proveedor IA. |
 
 #### Observabilidad y herramientas de desarrollo local
 
@@ -399,12 +398,11 @@ flowchart TB
 
 ### **3.2.1 Autenticación en Front (Vue):**
 
-La aplicación web inicia sesión con Keycloak (OIDC, Authorization Code + PKCE). Vue Router impide entrar en pantallas sin sesión o sin el rol adecuado. Las peticiones al backend llevan el token JWT; si el servidor responde 401, no autorizado, el cliente intenta renovar la sesión antes de pedir login de nuevo. Más detalle en [jwt-gateway-strategy.md](docs/security/jwt-gateway-strategy.md) y [vue-development-guide.md](docs/onboarding/vue-development-guide.md).
+En las pantallas que exigen identificarse, la SPA controla que se inicie sesión con **Keycloak** (OIDC, flujo *Authorization Code + PKCE*); por su parte **Vue Router** impide acceder a rutas protegidas si no hay sesión válida o si el usuario no tiene el rol necesario. Cada petición al backend lleva el **JWT** en la cabecera `Authorization`. Si el servidor responde **401** "No autorizado", el cliente intenta **renovar el token en silencio**; solo si esa renovación falla redirige al login. Más detalle en [jwt-gateway-strategy.md](docs/security/jwt-gateway-strategy.md) y [vue-development-guide.md](docs/onboarding/vue-development-guide.md).
 
 <details>
-<summary><strong>Desplegar</strong> — Diagramas C3/C4 y detalle del flujo en cliente</summary>
+<summary><strong>Desplegar</strong> — Diagramas C3/C4 del flujo de autenticación</summary>
 
-Descripción del flujo de autenticación para SPA en **Vue 3** con **OIDC Authorization Code + PKCE** (IdP: Keycloak).  
 Objetivo: mantener rutas protegidas con sesión válida, renovar token de forma transparente y centralizar el manejo de `401` en cliente HTTP.
 
 #### C3 — Componentes (nivel 3): autenticación en el contenedor SPA Vue
@@ -446,8 +444,6 @@ flowchart TB
     GW --> Services
 ```
 
-
-
 Responsabilidades clave:
 
 - **Router Guards**: bloquean rutas con `requiresAuth` y comprueban `requiredRoles` (p. ej. `ADMIN` en `/admin/*`); consultan **directamente** el servicio OIDC (`getUser`, `signinSilent`, `login`), no el Auth Store.
@@ -457,9 +453,7 @@ Responsabilidades clave:
 
 Simplificaciones del diagrama C3 (no aparecen como cajas o flechas):
 
-- **Catalog Service** representa la capa `services/*` (catálogo, media, notificaciones, etc.); el patrón es el mismo en todos.
 - **API Client Interceptor** es la lógica de token y reintento en `apiFetch`, no un módulo aparte con ese nombre.
-- Rutas **públicas** del contrato OpenAPI usan `publicApiFetch` hacia el gateway **sin** Bearer ni OIDC; el diagrama solo modela el camino autenticado (`Http` → `Oidc`).
 - El intercambio de código tras el redirect de Keycloak lo ejecuta la vista `AuthCallbackView`, no el guard ni el store en el primer paso.
 
 #### C4 — Comportamiento (dinámico): secuencia de autenticación y acceso protegido
@@ -528,22 +522,20 @@ sequenceDiagram
   end
 ```
 
-Notas del diagrama C4 (no dibujadas): error al leer sesión en el guard → `/auth/error?reason=session`; renovación proactiva del token (`automaticSilentRenew`) mediante eventos OIDC hacia el Auth Store, además de los `signinSilent` bajo demanda del guard y de `apiFetch`.
-
 </details>
 
 ### **3.2.2 Kafka:**
 
-Tras el alta de un ejemplar, el aviso por correo a suscriptores se realiza de forma asincrona (regla **R7**). Tras crear la ficha, **catalog-service** publica un evento en Kafka (`catalog.ejemplar.evento`) y **notification-service** lo recibe para enviar los correos. El formato del mensaje está en [kafka-events.md](docs/events/kafka-events.md).
+Tras el alta de un ejemplar, la notificación por correo a suscriptores se realiza de forma asincrona (regla **R7**). Después de crear la ficha del ejemplar, **catalog-service** publica un evento en Kafka (`catalog.ejemplar.evento`) y **notification-service** lo recibe para enviar los correos. El formato del mensaje está en [kafka-events.md](docs/events/kafka-events.md).
 
 <details>
 <summary><strong>Desplegar</strong> — Diagramas C3/C4 productor/consumidor y secuencias Kafka</summary>
 
-En el **MVP**, Kafka separa el **alta de un árbol** del **correo a suscriptores** (regla **R7**): solo al crear una ficha con éxito; edición y baja no publican. Un topic (`catalog.ejemplar.evento`): **catalog-service** publica y **notification-service** consume. Contrato del mensaje: [docs/events/kafka-events.md](docs/events/kafka-events.md). Nomenclatura técnica: [ADR-0006](docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md). Configuración local: [services/README.md](services/README.md) (Kafka).
+ Contrato del mensaje: [docs/events/kafka-events.md](docs/events/kafka-events.md). Nomenclatura técnica: [ADR-0006](docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md). Configuración local: [services/README.md](services/README.md) (Kafka).
 
 #### C3 — Productor: **catalog-service**
 
-Componentes de **catalog-service** frente a PostgreSQL (esquema `catalog`) y **Kafka** (infra compartida, fuera del servicio). El alta depende de la interfaz `EjemplarCreadoEventPublisher`; la publicación real es `KafkaEjemplarCreadoEventPublisher` (capa de infraestructura). Con `mtl.catalog.kafka.enabled=false` (por defecto o tests), `NoOpEjemplarCreadoEventPublisher` no envía mensajes.
+Tras un alta exitosa, el dominio notifica el evento mediante la interfaz `EjemplarCreadoEventPublisher` (puerto de aplicación). En entorno con Kafka activo, la implementación concreta es `KafkaEjemplarCreadoEventPublisher`, que publica en el topic. Si Kafka está desactivado (`mtl.catalog.kafka.enabled=false`, valor habitual en tests o arranque sin broker), entra `NoOpEjemplarCreadoEventPublisher`: el alta en PostgreSQL sigue funcionando, pero **no se envía ningún mensaje**.
 
 ```mermaid
 flowchart TB
@@ -580,7 +572,14 @@ flowchart TB
 
 #### C3 — Consumidor: **notification-service**
 
-Componentes de **notification-service** frente a **Kafka** (externo) y PostgreSQL (esquema `notification`). El listener recibe el JSON; la ingestión valida y solo admite `EJEMPLAR_CREADO`; el consumo guarda `evento_catalogo` por `evento_id` (una reentrega no repite el trabajo); el procesador crea notificaciones y envía correo SMTP a suscriptores **ACTIVA**. Con `mtl.notification.kafka.enabled=false` no se arranca el listener.
+**notification-service** escucha el topic que publica **catalog-service**, persiste su propio registro en PostgreSQL (esquema `notification`) y envía los correos. El flujo, en orden:
+
+1. Un **listener** de Kafka recibe el mensaje JSON del alta de ejemplar.
+2. La **ingestión** comprueba que el evento sea válido y de tipo `EJEMPLAR_CREADO`; cualquier otro tipo se descarta.
+3. El **consumo** guarda el evento en `evento_catalogo`, identificado por `evento_id`. Si Kafka reenvía el mismo mensaje, ese id evita procesarlo dos veces.
+4. El **procesador** genera las notificaciones y envía correo SMTP solo a suscriptores en estado **ACTIVA**.
+
+Si Kafka está desactivado (`mtl.notification.kafka.enabled=false`, habitual en tests o sin broker), **no se arranca el listener** y el servicio no consume eventos (el resto del microservicio puede seguir operativo para otras APIs).
 
 ```mermaid
 flowchart TB
@@ -610,9 +609,9 @@ flowchart TB
     KafkaBroker --> Listener
 ```
 
-#### Flujo de punta a punta (Alta de ejemplar → correo)
+#### Flujo completo (Alta de ejemplar → correo)
 
-Tras login en Keycloak, la SPA da de alta el árbol por el API Gateway; **catalog-service** persiste la ficha y publica en Kafka; **notification-service** consume y envía correo (SMTP; Mailpit en desarrollo).
+Tras login en Keycloak, la SPA desdde la pantalla de alta de ejemplar invoca a través del API Gateway a **catalog-service**. Cuando se persiste la ficha este microservicio publica el evento en Kafka; **notification-service** consume el evento de Kafka y envía un correo al suscriptor (SMTP; Mailpit en desarrollo).
 
 ```mermaid
 sequenceDiagram
@@ -633,7 +632,7 @@ sequenceDiagram
 
 #### C4 — Secuencia de publicación (**EJEMPLAR_CREADO**)
 
-En una transacción se validan y guardan el ejemplar y la auditoría (**R3**); **tras el commit** se asigna `evento_id` y se publica en `catalog.ejemplar.evento` (formato en [kafka-events.md](docs/events/kafka-events.md)). La API responde **201** antes de Kafka; si la publicación falla, solo queda en logs — el consumidor debe ignorar mensajes duplicados (mismo `evento_id`).
+Durante el alta de un nuevo ejemplar; en la misma transacción se validan y guardan el ejemplar y la auditoría (**R3**); **tras el commit** se asigna `evento_id` y se publica en `catalog.ejemplar.evento` (formato en [kafka-events.md](docs/events/kafka-events.md)). La API responde **201** (elemento creado) antes de la publicación en Kafka; si la publicación falla, solo queda en logs — el consumidor debe ignorar mensajes duplicados (mismo `evento_id`).
 
 ```mermaid
 sequenceDiagram
@@ -671,7 +670,7 @@ sequenceDiagram
 
 #### C4 — Secuencia de consumo (**EJEMPLAR_CREADO**)
 
-El listener pasa el JSON a la ingestión; solo sigue si `tipo_evento` es `EJEMPLAR_CREADO` ([kafka-events.md](docs/events/kafka-events.md)). La primera vez se inserta `evento_catalogo` por `evento_id`; si ya existe, no se repite. El procesador guarda notificación y envíos en `notification`, manda correo a suscriptores **ACTIVA** y deja el evento en **PROCESADO**.
+El listener pasa la información recibida en JSON a la ingestión ([kafka-events.md](docs/events/kafka-events.md)). La primera vez se inserta `evento_catalogo` por `evento_id`; en caso de que ya exista, no se repite. El procesador guarda notificación y envíos en `notification`, manda correo a suscriptores con suscripción **ACTIVA** y deja el evento en estado **PROCESADO**.
 
 ```mermaid
 sequenceDiagram
@@ -719,12 +718,12 @@ sequenceDiagram
 
 ### **3.2.3 Almacenamiento de fotografías:**
 
-Los archivos binarios (fotografías) se guardan en un almacén compatible con S3 (MinIO en local) y los **datos descriptivos** (árbol, orden, tamaño, etc.) quedan en PostgreSQL, en el esquema `media`. Para subir una imagen, la aplicación pide al backend una URL temporal de subida, envía el fichero directamente al almacén —sin exponer las credenciales del bucket en el navegador— y, al terminar, confirma en la API para registrar la foto en base de datos. Detalle en [media-upload-hu006.md](docs/engineering/media-upload-hu006.md) y [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md).
+Los archivos binarios (fotografías de ejemplares) se guardan en un almacén compatible con S3 (MinIO en local) y los **datos descriptivos** (árbol, orden, tamaño, etc.) se almacenan en PostgreSQL, dentro del esquema `media`. Para subir una imagen, la aplicación pide al backend una URL temporal de subida, envía el fichero directamente al almacén —sin exponer las credenciales del bucket en el navegador— y, al terminar, confirma en la API para registrar la foto en base de datos. Detalle en [media-upload-hu006.md](docs/engineering/media-upload-hu006.md) y [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md).
 
 <details>
 <summary><strong>Desplegar</strong> — Secuencia presign, subida y confirmación</summary>
 
-Los **binarios** viven en un almacén **S3-compatible** (**MinIO** en desarrollo, **S3** en producción); los **metadatos** (árbol, clave de objeto, orden, foto principal, etc.) en PostgreSQL, esquema **`media`**, gestionados por **media-service** tras el **API Gateway**. La SPA **nunca** recibe credenciales de bucket: tras crear la ficha del árbol en **catalog-service**, por cada imagen pide una **URL prefirmada** (`POST /api/media/uploads/presign`), sube el fichero con **PUT directo** al almacén y **confirma** (`POST /api/media/photos/confirm`) para registrar la fila en `media`; la primera confirmación del árbol queda como **foto principal**. La visibilidad de cada foto **hereda** la de la ficha. Contrato HTTP: [openapi.yaml](docs/api/openapi.yaml); historia y criterios: [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md); validaciones, propiedades, principal y EXIF en cliente: [media-upload-hu006.md](docs/engineering/media-upload-hu006.md).
+La SPA **nunca** recibe credenciales de bucket: tras crear la ficha del árbol en **catalog-service**, por cada imagen pide una **URL prefirmada** (`POST /api/media/uploads/presign`), sube el fichero con **PUT directo** al almacén y **confirma** (`POST /api/media/photos/confirm`) para registrar la fila en `media`; la primera confirmación del árbol queda como **foto principal**. La visibilidad de cada foto **hereda** la de la ficha. Contrato HTTP: [openapi.yaml](docs/api/openapi.yaml); historia y criterios: [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md); validaciones, propiedades, principal y EXIF en cliente: [media-upload-hu006.md](docs/engineering/media-upload-hu006.md).
 
 ```mermaid
 sequenceDiagram
@@ -765,14 +764,12 @@ sequenceDiagram
 
 ### **3.2.4 Uso de IA: características de especie (MVP) e identificación/chat (futuro)**
 
-En el MVP solo aplica la consulta de características de especie por **ADMIN** ([HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md), **Cerrada**); identificación por imagen y chat quedan para próxima versión ([HU-009](docs/backlog/backlog.md), [HU-010](docs/backlog/backlog.md)). El **frontend** invoca **ai-assistant-service** (`POST /api/ai/species/enrichment-suggestions`) con nombre científico y común; el servicio valida el JSON del LLM (referencia [mongo.md](docs/data-model/mongo.md) §6.3) y devuelve un resultado **orientativo** para precargar el popup de enriquecimiento de especie (**HU-015**). La consulta **no** persiste en Mongo; el **ADMIN** revisa y guarda con el flujo existente (`PUT` en **catalog-service**).
+En el MVP solo se ha implementado la consulta de características de especie restringida al role **ADMIN**. El **frontend** invoca **ai-assistant-service** (`POST /api/ai/species/enrichment-suggestions`) pasando el nombre científico y común; el servicio valida el JSON recibido del LLM (referencia [mongo.md](docs/data-model/mongo.md) §6.3) y devuelve un resultado **orientativo** para precargar el popup de enriquecimiento de especie. 
 
-**Condiciones de producto (HU-016):** solo rol **ADMIN** (**403** para colaborador); la acción en UI solo si la especie **aún no tiene** enriquecimiento persistido en Mongo; auditoría en **`ai.AUDITORIA_USO_IA`** tras respuesta válida. En local, `mtl.ai.provider.mode=stub` (sin clave OpenAI). Desglose: [HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md).
+**Condiciones de producto (HU-016):** para el MVP se usa, `mtl.ai.provider.mode=stub` en local simulando el LLM (esto permite trabajar sin necesidad de clave OpenAI). Desglose: [HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md).
 
 <details>
 <summary><strong>Desplegar</strong> — Secuencia de consulta IA (MVP)</summary>
-
-En el MVP solo aplica la consulta de características de especie por **ADMIN** ([HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md), **Cerrada**); identificación por imagen y chat: [HU-009](docs/backlog/backlog.md) y [HU-010](docs/backlog/backlog.md) (próxima versión). La acción está disponible solo si la especie aún no tiene enriquecimiento persistido; el resultado de la IA **precarga** el popup de especie (alta/edición de ejemplar) sin guardar automáticamente. Detalle: [backlog](docs/backlog/backlog.md) §3 · [services/README.md](services/README.md) · [frontend/README.md](frontend/README.md).
 
 **Flujo de consulta IA (MVP; consulta y precarga en pantalla — sin persistencia en esta historia):**
 
