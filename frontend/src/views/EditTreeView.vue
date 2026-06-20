@@ -63,9 +63,13 @@ const {
   speciesPopupOpen,
   speciesEnrichment,
   canEditSpeciesEnrichment,
+  canRequestSpeciesAiSuggestion,
   isLoadingSpeciesEnrichment,
   isSavingSpeciesEnrichment,
+  isLoadingAiSuggestion,
   speciesEnrichmentError,
+  aiSuggestionError,
+  speciesAiSuggestionPayload,
   treeEnrichmentDraft,
   isLoadingTreeEnrichment,
   treeEnrichmentError,
@@ -73,6 +77,7 @@ const {
   mongoProjectionWarning,
   onSpeciesPopupOpen,
   onTreeEnrichmentDraftState,
+  requestSpeciesAiSuggestion,
   saveSpeciesEnrichment,
 } = enrichment
 
@@ -213,7 +218,12 @@ onMounted(async () => {
                 :loading="isLoadingSpeciesEnrichment"
                 :saving="isSavingSpeciesEnrichment"
                 :error="speciesEnrichmentError"
+                :can-request-ai-suggestion="canRequestSpeciesAiSuggestion"
+                :is-loading-ai-suggestion="isLoadingAiSuggestion"
+                :ai-suggestion-error="aiSuggestionError"
+                :ai-suggestion-payload="speciesAiSuggestionPayload"
                 @open="onSpeciesPopupOpen"
+                @request-ai-suggestion="requestSpeciesAiSuggestion"
                 @save="onSpeciesEnrichmentSave"
               />
             </div>

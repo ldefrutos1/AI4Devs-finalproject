@@ -46,7 +46,8 @@
 .mtl-form-dialog-panel.mtl-enrichment-dialog-panel {
   display: flex;
   flex-direction: column;
-  width: min(64rem, calc(100vw - 2rem));
+  flex-shrink: 0;
+  width: min(72rem, calc(100vw - 2rem));
   max-height: min(90vh, calc(100dvh - 2 * var(--space-4)));
   overflow: hidden;
 }

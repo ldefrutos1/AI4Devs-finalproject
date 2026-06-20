@@ -21,7 +21,7 @@ tags:
   - name: notifications
     description: Suscripciones y notificaciones (notification-service)
   - name: ai
-    description: Consulta de características de especie con IA (ai-assistant-service; contrato HU-016 pendiente)
+    description: Consulta orientativa de enriquecimiento de especie con IA (ai-assistant-service, HU-016)
   - name: media
     description: Metadatos de fotografías y subida a almacén objeto (media-service)
 
@@ -1029,6 +1029,49 @@ paths:
         "404":
           $ref: "#/components/responses/ProblemNotFound"
 
+  /api/ai/species/enrichment-suggestions:
+    post:
+      tags: [ai]
+      summary: Solicitar sugerencia IA de enriquecimiento de especie (HU-016)
+      description: >
+        Solo **ADMIN** (rol de realm; **403** para **COLABORADOR**). Invoca al proveedor de IA externo con
+        `scientificName` y `commonName` y devuelve un JSON **orientativo** validado estructuralmente según
+        [mongo.md](../data-model/mongo.md) §6.3. Propiedades y enums del cuerpo de respuesta en **inglés**
+        homogéneo ([ADR-0007](../adr/0007-english-http-spanish-persistence.md)); compatible con la precarga en
+        `SpeciesEnrichmentPopup` (**HU-015**; mismos campos que `SpeciesEnrichmentReplaceRequest`). **No** persiste
+        en Mongo ni consulta **catalog-service**. La UI decide si la acción está disponible (sin enriquecimiento
+        previo) vía catálogo. **404** si la IA no devuelve contenido utilizable antes de validación. Copy de producto:
+        resultado orientativo, no veredicto científico ([product-context](../../.cursor/rules/product-context.mdc)).
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/CorrelationId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiSpeciesEnrichmentSuggestionRequest"
+      responses:
+        "200":
+          description: Sugerencia IA validada, lista para precarga en la UI
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiSpeciesEnrichmentSuggestionResponse"
+        "400":
+          $ref: "#/components/responses/ProblemBadRequest"
+        "401":
+          $ref: "#/components/responses/ProblemUnauthorized"
+        "403":
+          $ref: "#/components/responses/ProblemForbidden"
+        "404":
+          $ref: "#/components/responses/ProblemNotFound"
+        "422":
+          $ref: "#/components/responses/ProblemUnprocessableEntity"
+        "502":
+          $ref: "#/components/responses/ProblemBadGateway"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1770,9 +1813,7 @@ components:
         distribution:
           $ref: "#/components/schemas/SpeciesDistribution"
         ecologicalData:
-          type: object
-          additionalProperties: true
-          description: Datos ecológicos semiestructurados (hábitat, altitud, clima, etc.).
+          $ref: "#/components/schemas/SpeciesEcologicalData"
         references:
           type: array
           items:
@@ -1790,12 +1831,173 @@ components:
         distribution:
           $ref: "#/components/schemas/SpeciesDistribution"
         ecologicalData:
-          type: object
-          additionalProperties: true
+          $ref: "#/components/schemas/SpeciesEcologicalData"
         references:
           type: array
           items:
             $ref: "#/components/schemas/BibliographicReference"
+    AiSpeciesEnrichmentSuggestionRequest:
+      type: object
+      required: [scientificName, commonName]
+      description: >
+        Entrada de `POST /api/ai/species/enrichment-suggestions` (**HU-016**). Identifica la especie
+        por nombres desnormalizados; no incluye `speciesId` porque ai-assistant-service no accede al catálogo SQL.
+      properties:
+        scientificName:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Nombre científico binomial de la especie (p. ej. `Quercus ilex`).
+        commonName:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Nombre común principal de la especie en el catálogo (p. ej. `Encina`).
+    AiSpeciesEnrichmentSuggestionResponse:
+      type: object
+      description: >
+        Salida orientativa de la consulta IA (**HU-016**). Misma forma que `SpeciesEnrichmentReplaceRequest`
+        para precarga directa en `SpeciesEnrichmentPopup` (HU-015). Validación estructural en
+        ai-assistant-service según [mongo.md](../data-model/mongo.md) §6.3; no implica veracidad de referencias.
+      additionalProperties: false
+      properties:
+        synonyms:
+          type: array
+          items:
+            type: string
+          description: Sinónimos taxonómicos o nombres vernáculos alternativos.
+        distribution:
+          $ref: "#/components/schemas/SpeciesDistribution"
+        ecologicalData:
+          $ref: "#/components/schemas/AiSpeciesEcologicalData"
+        references:
+          type: array
+          items:
+            $ref: "#/components/schemas/BibliographicReference"
+          description: Referencias bibliográficas sugeridas; deben revisarse manualmente antes de confiar en ellas.
+    AiSpeciesEcologicalData:
+      type: object
+      description: >
+        `ecologicalData` de la respuesta IA (**HU-016**). Propiedades en **camelCase** e idioma **inglés**
+        en el wire HTTP ([ADR-0007](../adr/0007-english-http-spanish-persistence.md)). El servicio puede
+        aceptar valores en español en la salida cruda del LLM y normalizarlos antes de responder.
+      additionalProperties: true
+      properties:
+        habitat:
+          type: array
+          items:
+            type: string
+        altitudMinM:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Altitud mínima de hábitat en metros.
+        altitudMaxM:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Altitud máxima de hábitat en metros.
+        clima:
+          type: array
+          items:
+            type: string
+        suelo:
+          type: array
+          items:
+            type: string
+          description: Tipos de suelo preferidos.
+        longevityMaxYears:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Longevidad máxima estimada en años.
+        growthRate:
+          type: string
+          enum: [slow, moderate, fast]
+          description: Velocidad de crecimiento (wire HTTP en inglés).
+        leafType:
+          type: string
+          enum: [deciduous, evergreen, marcescent]
+          description: Persistencia foliar (wire HTTP en inglés).
+        floweringPeriod:
+          $ref: "#/components/schemas/SpeciesFloweringPeriod"
+        associatedFauna:
+          type: array
+          items:
+            type: string
+          description: Fauna asociada (nombres científicos recomendados).
+    SpeciesEcologicalData:
+      type: object
+      description: >
+        Datos ecológicos semiestructurados en **camelCase** (contrato HTTP). Campos documentados alineados
+        con `datos_ecologicos` en [mongo.md](../data-model/mongo.md) §5.1 y validación §6.3. El editor guiado
+        de la UI (HU-015) usa `habitat`, `altitudMinM`, `altitudMaxM` y `clima`; el resto se edita en modo JSON.
+      additionalProperties: true
+      properties:
+        habitat:
+          type: array
+          items:
+            type: string
+        altitudMinM:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Altitud mínima de hábitat en metros (`altitud_min_m` en Mongo).
+        altitudMaxM:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Altitud máxima de hábitat en metros (`altitud_max_m` en Mongo).
+        clima:
+          type: array
+          items:
+            type: string
+        suelo:
+          type: array
+          items:
+            type: string
+          description: Tipos de suelo preferidos.
+        longevityMaxYears:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Longevidad máxima estimada en años (`longevidad_max_años` en Mongo).
+        growthRate:
+          type: string
+          enum: [lento, moderado, rápido]
+          description: >
+            Velocidad de crecimiento en documentos Mongo (`velocidad_crecimiento`, §6.3). En respuestas
+            de catálogo puede aparecer en JSON libre; la respuesta IA (**HU-016**) usa `AiSpeciesEcologicalData`.
+        leafType:
+          type: string
+          enum: [caduca, perennifolia, marcescente]
+          description: >
+            Persistencia foliar en Mongo (`tipo_hoja`, §6.3). En respuestas de catálogo puede aparecer en JSON libre;
+            la respuesta IA (**HU-016**) usa `AiSpeciesEcologicalData`.
+        floweringPeriod:
+          $ref: "#/components/schemas/SpeciesFloweringPeriod"
+        associatedFauna:
+          type: array
+          items:
+            type: string
+          description: Fauna asociada (nombres científicos recomendados; `fauna_asociada` en Mongo).
+    SpeciesFloweringPeriod:
+      type: object
+      additionalProperties: false
+      description: Periodo de floración (`periodo_floracion` en Mongo).
+      properties:
+        startMonth:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 12
+          description: Mes de inicio (`inicio_mes` en Mongo).
+        endMonth:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 12
+          description: Mes de fin (`fin_mes` en Mongo).
     SpeciesDistribution:
       type: object
       properties:
@@ -2302,6 +2504,13 @@ components:
             $ref: "#/components/schemas/Problem"
     ProblemNotFound:
       description: Recurso no encontrado
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    ProblemUnprocessableEntity:
+      description: >
+        Entidad no procesable (p. ej. respuesta del LLM que no supera la validación estructural de mongo.md §6.3).
       content:
         application/problem+json:
           schema:

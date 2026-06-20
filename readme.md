@@ -765,14 +765,16 @@ sequenceDiagram
 
 ### **3.2.4 Uso de IA: características de especie (MVP) e identificación/chat (futuro)**
 
-En el MVP solo aplica la consulta de características de especie por **ADMIN** ([HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md)); identificación por imagen y chat quedan para próxima versión ([HU-009](docs/backlog/backlog.md), [HU-010](docs/backlog/backlog.md)).
+En el MVP solo aplica la consulta de características de especie por **ADMIN** ([HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md), **Cerrada**); identificación por imagen y chat quedan para próxima versión ([HU-009](docs/backlog/backlog.md), [HU-010](docs/backlog/backlog.md)). El **frontend** invoca **ai-assistant-service** (`POST /api/ai/species/enrichment-suggestions`) con nombre científico y común; el servicio valida el JSON del LLM (referencia [mongo.md](docs/data-model/mongo.md) §6.3) y devuelve un resultado **orientativo** para precargar el popup de enriquecimiento de especie (**HU-015**). La consulta **no** persiste en Mongo; el **ADMIN** revisa y guarda con el flujo existente (`PUT` en **catalog-service**).
+
+**Condiciones de producto (HU-016):** solo rol **ADMIN** (**403** para colaborador); la acción en UI solo si la especie **aún no tiene** enriquecimiento persistido en Mongo; auditoría en **`ai.AUDITORIA_USO_IA`** tras respuesta válida. En local, `mtl.ai.provider.mode=stub` (sin clave OpenAI). Desglose: [HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md).
 
 <details>
 <summary><strong>Desplegar</strong> — Secuencia de consulta IA (MVP)</summary>
 
-En el MVP solo aplica la consulta de características de especie por **ADMIN** ([HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md)); identificación por imagen y chat: [HU-009](docs/backlog/backlog.md) y [HU-010](docs/backlog/backlog.md) (próxima versión). Detalle de historias: [backlog](docs/backlog/backlog.md) §3.
+En el MVP solo aplica la consulta de características de especie por **ADMIN** ([HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md), **Cerrada**); identificación por imagen y chat: [HU-009](docs/backlog/backlog.md) y [HU-010](docs/backlog/backlog.md) (próxima versión). La acción está disponible solo si la especie aún no tiene enriquecimiento persistido; el resultado de la IA **precarga** el popup de especie (alta/edición de ejemplar) sin guardar automáticamente. Detalle: [backlog](docs/backlog/backlog.md) §3 · [services/README.md](services/README.md) · [frontend/README.md](frontend/README.md).
 
-**Flujo de consulta IA (MVP; orquestación en la SPA — sin llamadas ai-assistant-service → catalog-service):**
+**Flujo de consulta IA (MVP; consulta y precarga en pantalla — sin persistencia en esta historia):**
 
 ```mermaid
 sequenceDiagram
@@ -780,14 +782,11 @@ sequenceDiagram
   participant KC as Keycloak
   participant GW as api_gateway
   participant AIS as ai_assistant_service
-  participant CAT as catalog_service
   SPA->>KC: Registro_o_login_PKCE
   SPA->>GW: Solicitar_enriquecimiento_IA
   GW->>AIS: Proxy_JWT
   AIS-->>SPA: JSON_validado_orientativo
-  SPA->>GW: Guardar_especie_detalle
-  GW->>CAT: PUT_enrichment
-  CAT-->>SPA: especie_detalle_persistido
+  SPA-->>SPA: Precargar_campos_edicion
 ```
 
 
@@ -1271,7 +1270,7 @@ erDiagram
 
 ### **4.3. Descripción de entidades principales (orientación física)**
 
-Un **PostgreSQL** con cuatro esquemas de aplicación y **MongoDB** de enriquecimiento (colecciones en [mongo.md](docs/data-model/mongo.md)); acceso desde **catalog-service** (**HU-015**). El flujo **HU-016** persiste `especie_detalle` vía SPA → **catalog-service** (orquestación en cliente; **ai-assistant-service** valida JSON LLM).
+Un **PostgreSQL** con cuatro esquemas de aplicación y **MongoDB** de enriquecimiento (colecciones en [mongo.md](docs/data-model/mongo.md)); acceso desde **catalog-service** (**HU-015**). El flujo **HU-016** consulta IA en **ai-assistant-service** y precarga el popup; la persistencia de `especie_detalle` sigue siendo SPA → **catalog-service** (**HU-015**), sin escribir Mongo desde el servicio IA.
 
 **Usuario de aplicación:** La auditoría de la aplicación se implementa en torno al usuario proporcionado por el token generado por Keycloak como proveedor OIDC. Para evitar duplicidades los diversos esquemas almacenan el identificador estable del proveedor (`sub`) que se guarda en el campo **`subject_oidc`**. En el caso de catalog-service este campo se guarda en una tabla USUARIO_APP con unicidad, no como clave primaria; esto permite trazabilidad sin duplicar la información; las FK de los campos de auditoría `creado_por` y `modificado_por` referencian a la clave primaria de esta tabla.
 
@@ -1343,6 +1342,32 @@ Respecto al riesgo de Listado sin filtros vamos a añadir en la historia el filt
 
 </details>
 
+> El diálogo de refinamiento de HU-016 (evidencia del curso) está en el bloque **Desplegar** siguiente.
+
+<details>
+<summary><strong>Desplegar</strong> — Ejemplo histórico HU-016 (prompts de refinamiento)</summary>
+
+> *Registro histórico:* los prompts siguientes reproducen el diálogo de refinamiento de HU-016 tal como ocurrió; pueden reflejar decisiones intermedias que no coinciden con el diseño final. Fuente de verdad: [HU-016-consulta-admin-caracteristicas-especie-ia.md](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md) y [HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md).
+
+**Ejemplo del proceso: Historia de Usuario — HU-016 (Consulta de características de especie, ADMIN, MVP)**
+
+**Prompt 1:**
+/hu-refinement-mtl HU-016
+
+**Prompt 2:**
+respecto a las incoherencias detectadas: 
+- 1.- usuario administrador y ADMIN son terminos equivalentes 
+- 2.- las historias HU-009 y HU-010 están planificaas para versiones futudas, ver backlog, revisar texto de readme para comprobar que es coherente con lo indicado 
+- 3.- la historia no aplica a la persistencia de Mongo, solo a la consulta de datos a la IA. El funcionamiento será permitir desde la pantalla de alta actual una consulta a la IA que cargará los campos de dicha pantalla. Queda fuera ded esta historia la persistencia con Mongo 
+- 4.- El API a incluir es exclusivamente la consulta a la IA de datos de una especie: como entrada se pasará el nombre comun y cientifico de la especie, como respuesta se espera un json que se pueda precargar en la pantalla ya existente de edición de estos datos. Por tanto es importante fijar el formato de lo que debe devolver el LLM: datos que se puedan cargar en la pantalla de edición de caracteristicas de la especie. La historia por tanto solo invoca al servicio ai-assistant-service para obtener el JSON de enrequecimiento de especie y carga los datos en la pantalla ya existente. La funcionalidad solo estará activa si aún no hay datos de enriquecimiento en Mongo. Dime si tienes alguna duda más
+
+**Prompt 3:**
+
+el contrado exacto JSON se cerrará al implementar los ticker, por ahora simplemente ten en cuenta que se deba añadir un ticket al respecto al hacer el breakdown de la historia. Dime si está todo claro para pasar al breakdown en ticket de trabajo
+
+</details>
+
+
 
 ---
 
@@ -1375,6 +1400,91 @@ así está bien, implementa el endpoint del Listado de TASK-HU-008-02, si tienes
 
 </details>
 
+<details>
+<summary><strong>Desplegar</strong> — Ejemplo histórico HU-016 (prompts de desglose en tickets)</summary>
+
+> *Registro histórico:* los prompts siguientes documentan el desglose de HU-016 en su momento; el contenido puede no reflejar el breakdown final ([HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md)).
+
+**Ejemplo del proceso: Ticket 1 y 2 — HU-0168**
+
+**Prompt 1:**
+/hu-breakdown-mtl HU-016.
+
+**Prompt 2:**
+ok empieza con TASK-HU-016-01, si tienes alguna duda preguntame
+
+**Prompt 3:**
+para con TASK-HU-016-02 se empleó:
+
+## Objetivo
+Integrar **OpenAI Responses API** en `ai-assistant-service` para HU-016 (enriquecimiento orientativo de especie por ADMIN), sustituyendo el adaptador HTTP genérico actual, manteniendo el modo `stub` para local/tests y dejando una base reutilizable para HU-009 (visión) y HU-010 (chat).
+## Alcance
+- **Incluye:**
+  - Módulo Maven: `services/ai-assistant-service/` únicamente.
+  - Cliente OpenAI con **RestClient** (no WebClient, no RestTemplate) contra la **API oficial** (`POST /v1/responses`).
+  - `@ConfigurationProperties` para OpenAI (`mtl.ai.openai.*`): `apiKey`, `baseUrl` (default `https://api.openai.com`), `model` (enriquecimiento), `connectTimeout`, `readTimeout`, parámetros de retry acotados.
+  - API key **nunca hardcodeada**: `${MTL_OPENAI_API_KEY}` en `application.properties` / `application-prod.properties` (sin valor por defecto en prod).
+  - Implementación `OpenAiSpeciesEnrichmentAiProvider` (`@ConditionalOnProperty` `mtl.ai.provider.mode=openai`) que implemente el puerto existente `SpeciesEnrichmentAiProvider`.
+  - Clase compartida `OpenAiResponsesClient` (+ DTOs wire + parser de `output` → texto/JSON) en `com.mtl.ai.infrastructure.client.openai`.
+  - Timeouts HTTP configurables.
+  - Retry con backoff exponencial **solo** para errores transitorios (429, 502, 503, timeout/conexión); **no** reintentar 400, 401, 403, 404 ni otros 4xx de cliente.
+  - Mapeo diferenciado de errores OpenAI → `AiAssistantException` / HTTP: 502 proveedor no disponible, 404 sin resultado utilizable, 422 respuesta inválida (delegando validación estructural a `SpeciesEnrichmentValidationService` como ahora).
+  - Logging estructurado (SLF4J, ya hay logstash): loguear modelo, duración, correlationId; **no** loguear API key, Authorization ni prompt completo con datos sensibles.
+  - Mantener `AiPromptFactory` (ajustar solo si hace falta para Responses API / JSON mode); el prompt debe seguir exigiendo JSON raíz con claves `synonyms`, `distribution`, `ecologicalData`, `references`; enums `growthRate` y `leafType` en **inglés** (`slow|moderate|fast`, `deciduous|evergreen|marcescent`).
+  - Flujo sin cambios en controller/DTO público: `SpeciesEnrichmentSuggestionService` → provider → `SpeciesEnrichmentValidationService` → `AiSpeciesEnrichmentSuggestionResponse` + auditoría `AUDITORIA_USO_IA`.
+  - Tests: unitarios del parser/cliente (mock RestClient o WireMock), mantener/ajustar tests existentes; no romper `StubSpeciesEnrichmentAiProvider` ni `mode=stub` en `application-test.properties`.
+- **Excluye / no tocar:**
+  - `docs/` salvo que el cambio de variables de entorno lo exija explícitamente en `services/README.md` (máximo una línea en tabla de puertos/env si aplica).
+  - OpenAPI (el contrato HTTP expuesto no cambia).
+  - `api-gateway`, frontend, `catalog-service`, Mongo.
+  - Endpoints de chat o identificación por imagen (solo preparar cliente OpenAI reutilizable).
+  - WebClient / streaming.
+## Documentación de referencia (fuente de verdad)
+- Reglas backend: `.cursor/rules/backend-generation-standard.mdc`, `spring-boot-4-backend.mdc`, `api-security.mdc`, `logging.mdc`, `quality-and-testing.mdc`
+- Tests: `docs/engineering/testing-java.md` §2
+- Contrato HTTP: `docs/api/openapi.yaml` (`POST /api/ai/species/enrichment-suggestions`, schemas `AiSpeciesEnrichmentSuggestion*`)
+- Validación estructural: `docs/data-model/mongo.md` §6.3 (referencia; la implementación vive en `SpeciesEnrichmentValidationService`)
+- HU: `docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md`
+- Producto IA orientativa: `.cursor/rules/product-context.mdc`
+- Código existente a respetar/evolucionar:
+  - `AiPromptFactory`, `SpeciesEnrichmentSuggestionService`, `SpeciesEnrichmentValidationService`
+  - `StubSpeciesEnrichmentAiProvider`, `HttpSpeciesEnrichmentAiProvider` (sustituir/deprecar)
+  - `AiAssistantExceptionHandler`, `AiProviderConfig`
+## Diseño obligatorio
+1. **Separación de capas**
+   - `application`: orquestación, prompt, validación, auditoría (sin HTTP).
+   - `infrastructure.client.openai`: RestClient, request/response OpenAI, retry, parser.
+   - No devolver al frontend el JSON completo de OpenAI; solo DTO validado.
+2. **Configuración**
+   - `mtl.ai.provider.mode=stub|openai` (default `stub` en local).
+   - `mtl.ai.openai.api-key=${MTL_OPENAI_API_KEY:}`.
+   - Validar en arranque (prod): si `mode=openai` y falta API key → fallo claro al boot o al primer uso (preferible `@PostConstruct` / `ApplicationRunner` con mensaje operativo, sin exponer la clave).
+3. **OpenAI Responses API**
+   - Usar endpoint oficial `/v1/responses`.
+   - Instrucciones de sistema + input de usuario desde `AiPromptFactory`.
+   - Preferir salida JSON estructurada si la API lo permite (`text.format` / JSON mode); si no, parsear texto del `output`.
+   - Extraer solo el contenido utilizable antes de pasar a `SpeciesEnrichmentValidationService`.
+4. **Manejo de errores**
+   - Reutilizar `@RestControllerAdvice` existente.
+   - Mensajes al cliente genéricos en 500; detalle técnico solo en logs WARN/ERROR sin PII ni secretos.
+5. **Convenciones del monorepo**
+   - Paquetes lista blanca bajo `com.mtl.ai.*`.
+   - Nombres de test: `*Test` (Surefire), `*IT` (Failsafe).
+   - Jackson Boot 4: `JsonMapper` / `ObjectMapper` según patrón ya usado en el módulo.
+## Definición de hecho
+- `mvn -pl ai-assistant-service test` en verde.
+- `mvn -pl ai-assistant-service verify` en verde (incluye IT existentes).
+- Con `MTL_AI_PROVIDER_MODE=stub`, el flujo actual sigue funcionando sin clave OpenAI.
+- Con `MTL_AI_PROVIDER_MODE=openai` y `MTL_OPENAI_API_KEY` configurada, el provider llama a OpenAI (tests del cliente mockeados; no test de integración real contra OpenAI en CI).
+- Sin API key en código, logs ni respuestas Problem.
+- Sin `System.out.println`.
+## Modo
+**Implementar** (código + tests mínimos por capa según testing-java.md §2).
+## Nota de producto
+La respuesta es **orientativa**, no veredicto científico; el prompt no debe presentar la salida como determinación oficial de especie.
+
+
+</details>
 
 ---
 
@@ -1383,7 +1493,13 @@ así está bien, implementa el endpoint del Listado de TASK-HU-008-02, si tienes
 Para el trabajo con GitHub se ha definido una estrategia sencilla de ramas — detalle en [docs/onboarding/github-branching.md](docs/onboarding/github-branching.md).
 
 Las pull requests usan la plantilla [`.github/pull_request_template.md`](.github/pull_request_template.md) (GitHub la inserta al crear el PR).
-En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), calidad frontend (`lint`, `typecheck`, Vitest) y escaneo de secretos (Gitleaks) — workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml); E2E Playwright y auditoría de dependencias son **manuales** ([docs/engineering/devsecops-ci.md](docs/engineering/devsecops-ci.md)).  
+
+En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), calidad frontend (`lint`, `typecheck`, Vitest) y escaneo de secretos (Gitleaks) — workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+
+Adicionalmente, en cada PR, se lanza una revisión adicional desde **Codex**.
+
+
+Hay definidos dos **GitHub Actions** adicionales que se lanzan de forma manual: E2E Playwright y auditoría de dependencias ([docs/engineering/devsecops-ci.md](docs/engineering/devsecops-ci.md)).  
 
 > *Registro histórico:* los ejemplos de pull request siguientes muestran cómo se documentó el trabajo en su momento (resumen, plan de pruebas, notas técnicas). Pueden no coincidir con el diseño final ni con la plantilla o CI actuales; norma vigente en [github-branching.md](docs/onboarding/github-branching.md) y [devsecops-ci.md](docs/engineering/devsecops-ci.md). **Clic en Desplegar** para ver cada PR de ejemplo.
 

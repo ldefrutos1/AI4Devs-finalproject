@@ -125,10 +125,34 @@ Prerrequisitos: Compose con **MongoDB** (`27017`), Postgres, Keycloak; **catalog
 Usuarios de prueba: `colaborador` / `colaborador_dev` (**COLABORADOR**); usuario **ADMIN** si está configurado en Keycloak.
 
 1. **Escenario 1 — Colaborador edita ejemplar (BDD §2):** crear o editar una ficha propia. Tras guardar SQL, expandir **Información ampliada del ejemplar**, rellenar medidas/etiquetas/observaciones y guardar ficha. Comprobar `PUT /api/catalog/trees/{treeId}/enrichment` **200** y datos al recargar. El popup de especie debe ser solo lectura para colaborador.
-2. **Escenario 2 — ADMIN edita especie:** como **ADMIN**, abrir el icono junto al selector de especie, modificar sinónimos o datos ecológicos y **Guardar** en el popup. Comprobar `PUT /api/catalog/species/{speciesId}/enrichment` **200**. No debe aparecer acción de IA.
+2. **Escenario 2 — ADMIN edita especie:** como **ADMIN**, abrir el icono junto al selector de especie, modificar sinónimos o datos ecológicos y **Guardar** en el popup. Comprobar `PUT /api/catalog/species/{speciesId}/enrichment` **200**. Si la especie **ya tiene** datos ampliados, no debe mostrarse la acción de consulta IA (**HU-016**).
 3. **Escenario 3 — Detalle público:** abrir una ficha **publicada** con enriquecimiento (sin login). Ver popup de especie y panel de ejemplar en solo lectura. El listado público no debe mostrar estos bloques.
 4. **Escenario 4 — Aviso Mongo post-SQL:** con Mongo detenido o URI incorrecta, guardar una ficha SQL válida. La ficha debe persistir (**200**/**201** en `POST`/`PUT` trees) y la UI mostrar aviso (`enrichmentWarning` o copy de proyección Mongo). Tras restaurar Mongo, editar el panel de ejemplar y guardar debe completar el enriquecimiento.
 5. **Escenario 5 — Borrado cascada:** en ficha con datos en Mongo, **Eliminar árbol** (**HU-008**). Tras **204**, el documento `ejemplar_detalle` no debe existir; `especie_detalle` permanece si la especie sigue en catálogo.
 6. **Escenario 7 — Validación compartida:** enviar `measurements` con valor no numérico en el panel → **400** Problem legible; colaborador sobre ficha ajena sigue con **403** (**HU-008**).
 
 Checks automáticos previos: [devsecops-ci.md](../docs/engineering/devsecops-ci.md) (paridad CI). Opcional en local: `npx vitest run enrichment`; backend `mvn -f services/pom.xml -pl catalog-service verify` (IT Mongo si Docker disponible).
+
+## Consulta IA de especie (HU-016)
+
+Acción **Consultar sugerencia IA** en el popup de enriquecimiento de especie (`SpeciesEnrichmentPopup`), en **alta** y **edición** de ejemplar. Solo **ADMIN**; solo si `GET /api/catalog/species/{speciesId}/enrichment` indica especie **sin** datos ampliados (sinónimos, distribución, ecológicos o referencias). La consulta **precarga** campos; **no** guarda en Mongo hasta **Guardar especie** del popup (flujo **HU-015**).
+
+### Piezas principales
+
+| Capa | Ficheros |
+|------|----------|
+| Servicio API | `src/services/ai/speciesEnrichmentSuggestionService.ts`, `aiSuggestionErrors.ts` |
+| Composables | `useTreeFormEnrichment` (`canRequestSpeciesAiSuggestion`, `requestSpeciesAiSuggestion`), `useAiSuggestionErrorMapper` |
+| Componente | `SpeciesEnrichmentPopup.vue` (botón IA + precarga de borrador) |
+| i18n | `enrichment.species.ai.*`, `enrichment.ai.errors.*` |
+
+### Verificación manual (TASK-HU-016-09)
+
+Prerrequisitos: Compose + Postgres + Keycloak; **api-gateway** **8080**, **catalog-service** **8081**, **ai-assistant-service** **8084** (modo **`stub`** por defecto); **catalog-service** con Mongo activo; `npm run dev` en `frontend/`.
+
+1. **Escenario 1 — ADMIN precarga con IA:** login **ADMIN**; alta o edición de ejemplar con especie **sin** enriquecimiento previo. Abrir popup → **Consultar sugerencia IA** → comprobar campos precargados y mensaje de éxito; **no** debe haber `PUT` en catálogo hasta **Guardar especie**. Petición: `POST /api/ai/species/enrichment-suggestions` **200** vía gateway.
+2. **Escenario 2 — Sin acción si ya hay datos:** repetir con especie que ya tenga sinónimos/distribución/etc. en Mongo → el botón IA **no** aparece.
+3. **Escenario 3 — Colaborador:** login colaborador → popup de especie en solo lectura; sin botón IA; `POST` al endpoint IA → **403** si se fuerza la llamada.
+4. **Escenario 4 — Error IA:** simular **422**/**502** (mock o proveedor caído) → mensaje de error en popup; campos **sin** precargar.
+
+Checks automáticos: `npx vitest run src/services/ai src/composables/useTreeFormEnrichment.test.ts src/components/enrichment/SpeciesEnrichmentPopup.test.ts`; backend `mvn -f services/pom.xml -pl ai-assistant-service test verify`.

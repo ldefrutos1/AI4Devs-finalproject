@@ -659,6 +659,12 @@ export const es = {
       save: 'Guardar especie',
       saving: 'Guardando…',
       close: 'Cerrar',
+      ai: {
+        action: 'Consultar sugerencia IA',
+        loading: 'Consultando IA…',
+        success:
+          'Campos precargados con la sugerencia IA. Revisa el contenido antes de guardar.',
+      },
       fields: {
         scientificName: 'Nombre científico',
         commonName: 'Nombre común',
@@ -715,6 +721,22 @@ export const es = {
     },
     mongoProjectionWarning:
       'La ficha se guardó en el catálogo, pero el enriquecimiento en Mongo está incompleto. Revisa el bloque inferior e inténtalo de nuevo.',
+    ai: {
+      errors: {
+        networkError:
+          'No se pudo conectar con el asistente IA. Verifica tu conexión o que ai-assistant-service esté en marcha.',
+        unauthorized: 'Tu sesión no es válida o ha caducado. Inicia sesión de nuevo.',
+        badRequest: 'Los datos enviados para la consulta IA no son válidos.',
+        forbidden: 'Solo un administrador puede consultar sugerencias IA de especie.',
+        notFound: 'La IA no devolvió contenido utilizable para esta especie.',
+        unprocessableEntity:
+          'La respuesta de la IA no superó la validación. No se han precargado datos; revísalos manualmente si obtienes otra sugerencia.',
+        badGateway:
+          'El asistente IA no está disponible. Arranca ai-assistant-service o revisa el API Gateway.',
+        serviceError: 'Error en el servicio de IA.',
+        unexpectedError: 'No se pudo completar la consulta IA por un error inesperado.',
+      },
+    },
     errors: {
       networkError: 'No se pudo conectar con el servicio. Verifica tu conexión o el entorno local.',
       unauthorized: 'Tu sesión no es válida o ha caducado. Inicia sesión de nuevo.',
