@@ -1,52 +1,32 @@
 ## Índice
 
-1. [Ficha del proyecto](#1-ficha-del-proyecto)
-2. [Descripción general del producto](#2-descripción-general-del-producto)
+1. 📋 [Ficha del proyecto](#1-ficha-del-proyecto)
+2. 🌳 [Descripción general del producto](#2-descripción-general-del-producto)
    - [2.1 Objetivo](#21-objetivo)
    - [2.2 Características y funcionalidades principales](#22-características-y-funcionalidades-principales)
    - [2.2.1 Diagrama de contexto (C1)](#221-diagrama-de-contexto-del-sistema-c1)
-   - [2.2.2 Diagrama de casos de uso](#222-diagrama-de-casos-de-uso-del-sistema)
+   - [2.2.2 Diagrama de casos de uso del sistema](#222-diagrama-de-casos-de-uso-del-sistema)
    - [2.3 Diseño y experiencia de usuario](#23-diseño-y-experiencia-de-usuario)
    - [2.4 Instrucciones de instalación](#24-instrucciones-de-instalación)
-3. [Arquitectura del sistema](#3-arquitectura-del-sistema)
+   - [2.5 Demo del MVP](#25-demo-del-mvp)
+3. 🏗️ [Arquitectura del sistema](#3-arquitectura-del-sistema)
    - [3.1 Diagrama de arquitectura](#31-diagrama-de-arquitectura)
    - [3.2 Descripción de componentes principales](#32-descripción-de-componentes-principales)
-   - [3.2.1 Autenticación en Front (Vue)](#321-autenticación-en-front-vue)
-   - [3.2.2 Kafka](#322-kafka)
-   - [3.2.3 Almacenamiento de fotografías](#323-almacenamiento-de-fotografías)
-   - [3.2.4 Uso de IA](#324-uso-de-ia-características-de-especie-mvp-e-identificaciónchat-futuro)
-   - [3.3 Estructura del proyecto y ficheros](#33-descripción-de-alto-nivel-del-proyecto-y-estructura-de-ficheros)
+   - [3.3 Descripción de alto nivel del proyecto y estructura de ficheros](#33-descripción-de-alto-nivel-del-proyecto-y-estructura-de-ficheros)
    - [3.4 Infraestructura y despliegue](#34-infraestructura-y-despliegue)
    - [3.5 Seguridad](#35-seguridad)
    - [3.6 Tests](#36-tests)
-4. [Modelo de datos](#4-modelo-de-datos)
+4. 🛢️ [Modelo de datos](#4-modelo-de-datos)
    - [4.1 Modelo lógico del sistema completo](#41-modelo-lógico-del-sistema-completo)
-   - [4.2 Diagrama de persistencia (implementación)](#42-diagrama-de-persistencia-implementación)
-   - [4.2.1 PostgreSQL — catalog_service](#421-postgresql-catalog_service)
-   - [4.2.2 MongoDB — enriquecimiento](#422-mongodb-catalog-service-modelo-en-mongomd)
-   - [4.2.3 PostgreSQL — media_service](#423-postgresql-media_service)
-   - [4.2.4 PostgreSQL — notification_service](#424-postgresql-notification_service)
-   - [4.2.5 PostgreSQL — ai_assistant_service](#425-postgresql-ai_assistant_service-esquema-ai)
-   - [4.3 Descripción de entidades principales](#43-descripción-de-entidades-principales-orientación-física)
-5. [Especificación de la API](#5-especificación-de-la-api)
-   - [OpenAPI (contrato canónico)](docs/api/openapi.yaml)
-   - [Convenciones de nomenclatura](docs/engineering/naming-conventions.md)
-   - [Eventos Kafka](docs/events/kafka-events.md)
-6. [Historias de usuario](#6-historias-de-usuario)
-   - [Resumen de casos de uso](docs/use-cases/use-case-summary.md)
-   - [Backlog HU-001…HU-016](docs/backlog/backlog.md)
-   - [Convención de desgloses](docs/backlog/README.md)
-7. [Tickets de trabajo](#7-tickets-de-trabajo)
-   - [Skill hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md)
-   - [Convención de desgloses](docs/backlog/README.md)
-8. [Pull requests](#8-pull-requests)
-   - [Estrategia de ramas](docs/onboarding/github-branching.md)
-   - [CI y DevSecOps](docs/engineering/devsecops-ci.md)
-   - [Plantilla de PR](.github/pull_request_template.md)
-
+   - [4.2 Diagrama de entidad-relación (implementación física)](#42-diagrama-de-entidad-relación-implementación-física)
+5. 🔌 [Especificación de la API](#5-especificación-de-la-api)
+6. 📖 [Historias de usuario](#6-historias-de-usuario)
+7. 🎫 [Tickets de trabajo](#7-tickets-de-trabajo)
+8. 🔀 [Pull requests](#8-pull-requests)
+  
 ---
 
-## 1. Ficha del proyecto
+## 1. 📋 Ficha del proyecto
 
 ### **1.1. Tu nombre completo:**
 
@@ -70,7 +50,7 @@ MyTreeLibrary es una solución digital para crear y gestionar tu colección pers
 
 ---
 
-## 2. Descripción general del producto
+## 2. 🌳 Descripción general del producto
 
 ### **2.1. Objetivo:**
 
@@ -81,8 +61,6 @@ Desarrollar una plataforma web que permita registrar, organizar y consultar foto
 #### Valor aportado (qué soluciona)
 
 La solución combina la catalogación personal con la posibilidad de compartir y crear comunidad en torno a una afición compartida.
-
-Además, la plataforma incorpora inteligencia artificial como apoyo a la consulta de características de especies (ADMIN en el MVP); en versiones posteriores se prevé la identificación orientativa a partir de fotografías y el chat asistido.
 
 #### Destinatarios de la solución
 
@@ -210,33 +188,46 @@ La aplicación implementa una navegación simple por roles con una **home de ent
 
 ### **2.4. Instrucciones de instalación:**
 
-**Ruta feliz (entorno local):**
+1. **Infraestructura:** copiar `infra/compose/.env.example` → `infra/compose/.env`; desde `infra/compose/`, ejecutar `docker compose up -d`.
+2. **Backend:** desde la raíz del repo, **una terminal por microservicio**, arrancar con perfil **`dev`** (siempre **api-gateway** y los del flujo a probar; ver tabla). Ejemplo:
+   ```bash
+   mvn -f services/pom.xml -pl api-gateway spring-boot:run -Dspring-boot.run.profiles=dev
+   mvn -f services/pom.xml -pl catalog-service spring-boot:run -Dspring-boot.run.profiles=dev
+   ```
+3. **Frontend:** copiar `frontend/.env.example` → `frontend/.env`; desde `frontend/`, `npm install` y `npm run dev` → UI en **http://localhost:5173** (proxy `/api/*` al gateway).
 
-1. Copiar `infra/compose/.env.example` a `infra/compose/.env` y ejecutar `docker compose up -d` desde `infra/compose/` (Postgres, Keycloak, Kafka, Redis, MinIO, Mailpit, observabilidad).
-2. Arrancar microservicios con perfil **`dev`** — como mínimo **api-gateway** (8080) y los servicios del flujo que vayas a probar (ver tabla inferior).
-3. Copiar `frontend/.env.example` a `frontend/.env`; desde `frontend/`: `npm install` y `npm run dev` (UI en **http://localhost:5173**; Vite reenvía `/api/*` al gateway).
-
-> **Redis y catalog-service:** con perfil `dev`, el catálogo usa caché Redis; el contenedor Redis del Compose debe estar en marcha antes de arrancar **catalog-service**.
-
-#### Arranque mínimo por flujo
-
-Tras `docker compose up -d`, levanta **api-gateway** (8080) y, según lo que pruebes, los servicios en **`dev`**:
+> **Redis:** con perfil `dev`, **catalog-service** usa caché Redis; el contenedor debe estar en marcha antes de arrancarlo.
 
 | Flujo | Compose (además de Postgres/Keycloak) | Servicios en host |
 |-------|----------------------------------------|-------------------|
 | Consulta pública | — | catalog |
 | Alta / edición de árbol | Redis, Kafka | catalog (+ **media** si hay fotos) |
 | Fotos (subida) | MinIO | media |
-| Aviso por correo (Alta de ejemplar) | Kafka, Mailpit | notification |
+| Aviso por correo (alta de ejemplar) | Kafka, Mailpit | notification |
 | Admin (maestros / suscripciones) | — | catalog; notification (suscripciones) |
+| Consulta IA especie (ADMIN, stub) | — | catalog, ai-assistant |
 
-**Detalle ampliado:** servicios Compose, puertos y variables — [infra/compose/README.md](infra/compose/README.md). Comandos Maven, perfil `dev`, Flyway y tests backend — [services/README.md](services/README.md). Usuarios Keycloak y flujo OIDC — [frontend/README.md](frontend/README.md). Observabilidad — [platform/observability/README.md](platform/observability/README.md).
-
-**Datos iniciales:** **catalog-service** aplica semillas de maestros (familia, género, especie, provincia) con Flyway; el mantenimiento en aplicación por **ADMIN** (**HU-011**, UC-07) cubre solo la taxonomía; las **provincias** permanecen en semillas, sin pantalla admin en el MVP.
+**Detalle operativo** (puertos, usuarios Keycloak, Flyway, incidencias): [local-setup-guide.md](docs/onboarding/local-setup-guide.md).
 
 ---
 
-## 3. Arquitectura del sistema
+### **2.5. Demo del MVP:**
+
+**Vídeo** (~10 min): *pendiente* — se añadirá el enlace en este apartado tras la grabación.
+
+| Paso | Qué se muestra |
+|------|----------------|
+| 1 | Un visitante recorre el catálogo **sin login**: listado, ficha de detalle y mapa |
+| 2 | Un **colaborador** inicia sesión y da de alta un ejemplar en estado publicado |
+| 3 | Tras el alta, el aviso por correo queda visible en **Mailpit** ([localhost:8025](http://localhost:8025)) |
+| 4 | Un usuario **ADMIN** entra en maestros taxonómicos o en la gestión de suscripciones |
+| 5 | Como **ADMIN**, se pide una sugerencia IA de enriquecimiento de especie (modo `stub`): precarga el popup; la persistencia sigue siendo manual al guardar |
+
+Usuarios de prueba: [infra/compose/README.md](infra/compose/README.md). Historias de usuario implicadas: [§6](#6-historias-de-usuario) · [backlog.md](docs/backlog/backlog.md).
+
+---
+
+## 3. 🏗️ Arquitectura del sistema
 
 **NOTA:** La elección de una arquitectura de microservicios en Java con Spring y Vue tiene un **propósito didáctico**, con el fin de aprender estas tecnologías.
 
@@ -244,7 +235,7 @@ En esta sección:
 
 - [3.1 Diagrama de arquitectura](#31-diagrama-de-arquitectura)
 - [3.2 Descripción de componentes principales](#32-descripción-de-componentes-principales)
-- [3.3 Estructura del proyecto y ficheros](#33-descripción-de-alto-nivel-del-proyecto-y-estructura-de-ficheros)
+- [3.3 Descripción de alto nivel del proyecto y estructura de ficheros](#33-descripción-de-alto-nivel-del-proyecto-y-estructura-de-ficheros)
 - [3.4 Infraestructura y despliegue](#34-infraestructura-y-despliegue)
 - [3.5 Seguridad](#35-seguridad)
 - [3.6 Tests](#36-tests)
@@ -632,7 +623,11 @@ sequenceDiagram
 
 #### C4 — Secuencia de publicación (**EJEMPLAR_CREADO**)
 
-Durante el alta de un nuevo ejemplar; en la misma transacción se validan y guardan el ejemplar y la auditoría (**R3**); **tras el commit** se asigna `evento_id` y se publica en `catalog.ejemplar.evento` (formato en [kafka-events.md](docs/events/kafka-events.md)). La API responde **201** (elemento creado) antes de la publicación en Kafka; si la publicación falla, solo queda en logs — el consumidor debe ignorar mensajes duplicados (mismo `evento_id`).
+Durante el alta de un ejemplar, **catalog-service** valida y guarda la ficha y la auditoría (**R3**) en la misma transacción PostgreSQL. En cuanto esa transacción hace **commit**, el cliente recibe **201 Created**: el ejemplar ya está persistido.
+
+La publicación en Kafka ocurre **después**, de forma asíncrona (`AfterCommitTaskRegistrar`): se asigna un `evento_id` único y se envía el mensaje al topic `catalog.ejemplar.evento` (formato en [kafka-events.md](docs/events/kafka-events.md)).
+
+Si Kafka falla en ese paso posterior, el alta **no se revierte**; el fallo queda solo en logs para revisión operativa. Si el mensaje se reenvía o se repite la entrega, **notification-service** identifica el evento por `evento_id` y evita procesarlo dos veces (detalle en la secuencia de consumo siguiente).
 
 ```mermaid
 sequenceDiagram
@@ -766,7 +761,7 @@ sequenceDiagram
 
 En el MVP solo se ha implementado la consulta de características de especie restringida al role **ADMIN**. El **frontend** invoca **ai-assistant-service** (`POST /api/ai/species/enrichment-suggestions`) pasando el nombre científico y común; el servicio valida el JSON recibido del LLM (referencia [mongo.md](docs/data-model/mongo.md) §6.3) y devuelve un resultado **orientativo** para precargar el popup de enriquecimiento de especie. 
 
-**Condiciones de producto (HU-016):** para el MVP se usa, `mtl.ai.provider.mode=stub` en local simulando el LLM (esto permite trabajar sin necesidad de clave OpenAI). Desglose: [HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md).
+**Condiciones de producto (HU-016):** en local se usa `mtl.ai.provider.mode=stub` para simular el LLM (sin necesidad de clave OpenAI). Desglose: [HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md).
 
 <details>
 <summary><strong>Desplegar</strong> — Secuencia de consulta IA (MVP)</summary>
@@ -916,7 +911,7 @@ flowchart LR
 
 ---
 
-## 4. Modelo de datos
+## 4. 🛢️ Modelo de datos
 
 **NOTA:** El idioma en el que se ha realizado el modelo de datos es intencionadamente **el idioma del dominio de negocio** que en este caso es el español. La justificación es que en proyectos que no son internacionales, tiene sentido modelar en un idioma y la jerga del cliente. Esta decisión presenta un reto de coherencia y definición del idioma aplicable a cada capa del sistema.
 
@@ -925,12 +920,13 @@ flowchart LR
 En esta sección:
 
 - [4.1 Modelo lógico del sistema completo](#41-modelo-lógico-del-sistema-completo)
-- [4.2 Diagrama de persistencia (implementación)](#42-diagrama-de-persistencia-implementación)
-- [4.3 Descripción de entidades principales](#43-descripción-de-entidades-principales-orientación-física)
+- [4.2 Diagrama de entidad-relación (implementación física)](#42-diagrama-de-entidad-relación-implementación-física)
 
 ### **4.1. Modelo lógico del sistema completo**
 
 Vista unificada de las entidades principales del sistema y sus relaciones, independientemente del almacén o microservicio (§4.2). Las referencias entre dominios se expresan como **FK lógicas** sin una implementación de una restricción física real entre los distintos esquemas.
+
+**Usuario de aplicación:** La auditoría de la aplicación se implementa en torno al usuario proporcionado por el token generado por Keycloak como proveedor OIDC. Para evitar duplicidades los diversos esquemas almacenan el identificador estable del proveedor (`sub`) que se guarda en el campo **`subject_oidc`**. En el caso de catalog-service este campo se guarda en una tabla USUARIO_APP con unicidad, no como clave primaria; esto permite trazabilidad sin duplicar la información; las FK de los campos de auditoría `creado_por` y `modificado_por` referencian a la clave primaria de esta tabla.
 
 ```mermaid
 erDiagram
@@ -1027,7 +1023,7 @@ erDiagram
     EJEMPLAR ||--o{ AUDITORIA_USO_IA : contexto
 ```
 
-### **4.2. Diagrama de persistencia (implementación)**
+### **4.2. Diagrama de entidad-relación (implementación física)**
 
 **Leyenda:** 
 - `PK` = clave primaria; `FK` = clave foránea de negocio; `UK` = unicidad. 
@@ -1038,11 +1034,11 @@ Desglose de §4.1 por almacén: un **PostgreSQL** con esquemas `catalog`, `media
 
 En esta subsección:
 
-- [4.2.1 PostgreSQL — catalog_service](#421-postgresql-catalog_service)
-- [4.2.2 MongoDB — enriquecimiento](#422-mongodb-catalog-service-modelo-en-mongomd)
-- [4.2.3 PostgreSQL — media_service](#423-postgresql-media_service)
-- [4.2.4 PostgreSQL — notification_service](#424-postgresql-notification_service)
-- [4.2.5 PostgreSQL — ai_assistant_service](#425-postgresql-ai_assistant_service-esquema-ai)
+- [4.2.1 PostgreSQL: catalog_service](#421-postgresql-catalog_service)
+- [4.2.2 MongoDB (catalog-service; modelo en mongo.md)](#422-mongodb-catalog-service-modelo-en-mongomd)
+- [4.2.3 PostgreSQL media_service](#423-postgresql-media_service)
+- [4.2.4 PostgreSQL notification_service](#424-postgresql-notification_service)
+- [4.2.5 PostgreSQL ai_assistant_service (esquema ai)](#425-postgresql-ai_assistant_service-esquema-ai)
 
 #### **4.2.1 PostgreSQL: catalog_service:**
 
@@ -1265,15 +1261,9 @@ erDiagram
     }
 ```
 
-### **4.3. Descripción de entidades principales (orientación física)**
-
-Un **PostgreSQL** con cuatro esquemas de aplicación y **MongoDB** de enriquecimiento (colecciones en [mongo.md](docs/data-model/mongo.md)); acceso desde **catalog-service** (**HU-015**). El flujo **HU-016** consulta IA en **ai-assistant-service** y precarga el popup; la persistencia de `especie_detalle` sigue siendo SPA → **catalog-service** (**HU-015**), sin escribir Mongo desde el servicio IA.
-
-**Usuario de aplicación:** La auditoría de la aplicación se implementa en torno al usuario proporcionado por el token generado por Keycloak como proveedor OIDC. Para evitar duplicidades los diversos esquemas almacenan el identificador estable del proveedor (`sub`) que se guarda en el campo **`subject_oidc`**. En el caso de catalog-service este campo se guarda en una tabla USUARIO_APP con unicidad, no como clave primaria; esto permite trazabilidad sin duplicar la información; las FK de los campos de auditoría `creado_por` y `modificado_por` referencian a la clave primaria de esta tabla.
-
 ---
 
-## 5. Especificación de la API
+## 5. 🔌 Especificación de la API
 
 El contrato HTTP del proyecto está en [docs/api/openapi.yaml](docs/api/openapi.yaml) (OpenAPI 3). Desde el cliente se accede a los microservicios a través del API Gateway, con rutas agrupadas en `/api/catalog`, `/api/media`, `/api/notifications` y `/api/ai`. Donde hace falta autenticación, la API exige un JWT válido. Los listados son paginados (`page`, `size`) y las respuestas de error siguen el formato **RFC 9457** (`application/problem+json`).
 
@@ -1285,19 +1275,30 @@ Además de la API REST, algunos flujos usan mensajes en Kafka. Hoy el caso princ
 
 ---
 
-## 6. Historias de usuario
+## 6. 📖 Historias de usuario
 
-A partir del modelo de análisis (actores, casos de uso, diagrama PlantUML) y de la definición del producto en este archivo, se ha generado el backlog de historias de usuario a implementar.
+Backlog generado a partir de los casos de uso (§2.2.2) y del modelo de datos. Documentación completa (historias, criterios y tickets): [backlog.md](docs/backlog/backlog.md) · convención de desgloses: [backlog/README.md](docs/backlog/README.md) · casos de uso: [use-case-summary.md](docs/use-cases/use-case-summary.md).
 
-| Documento | Contenido |
-|-----------|-----------|
-| [use-case-summary.md](docs/use-cases/use-case-summary.md) | Casos de uso |
-| [backlog.md](docs/backlog/backlog.md) | Backlog con historias de usuario |
-| [backlog/README.md](docs/backlog/README.md) | Convención de desgloses y sincronización |
+| ID | Título | Estado |
+|----|--------|--------|
+| HU-001 | Autenticación OIDC | Cerrada |
+| HU-002 | Fichas publicadas (lista y detalle) | Cerrada |
+| HU-003 | Localización en mapa (detalle) | Cerrada |
+| HU-004 | Suscripción por correo sin cuenta | Cerrada |
+| HU-005 | Alta de ficha de árbol | Cerrada |
+| HU-006 | Fotografías asociadas al árbol | Cerrada |
+| HU-007 | Aviso por correo al crear ficha | Cerrada |
+| HU-008 | Edición y baja de mis árboles | Cerrada |
+| HU-009 | Identificación orientativa por imagen | Próxima versión |
+| HU-010 | Chat asistido | Próxima versión |
+| HU-011 | Maestros de catálogo | Cerrada |
+| HU-012 | Gestión de suscripciones | Cerrada |
+| HU-013 | Navegación y guardas por rol | Cerrada |
+| HU-014 | Consulta de fotografías del árbol | Cerrada |
+| HU-015 | Proyección y enriquecimiento Mongo | Cerrada |
+| HU-016 | Consulta IA características de especie (ADMIN) | Cerrada |
 
-La definición y refinamiento de cada una de las historias de usuario incluidas en el backlog, y sus correspondientes tickets de trabajo, se ha realizado mediante los siguientes prompts genéricos que se han guardado como skills de Cursor: `.cursor/skills/hu-refinement-mtl/SKILL.md` (generación/refinamiento de historias) y `.cursor/skills/hu-breakdown-mtl/SKILL.md` (desglose en tickets). Estos prompts generan el correspondiente archivo dentro de la carpeta backlog.
-
-El proceso seguido es:
+La definición y refinamiento de cada historia, y sus tickets de trabajo, se realizó con los skills Cursor [hu-refinement-mtl](.cursor/skills/hu-refinement-mtl/SKILL.md) y [hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md). Proceso seguido:
 - 1.- Generación de la Historia de Usuario a partir del backlog con `hu-refinement-mtl/SKILL.md`
 - 2.- Análisis del documento generado
 - 3.- Aclaración, definición y/o corrección de los puntos detectados en los apartados de Riesgos y Aclaraciones pendientes (refinamiento)
@@ -1368,7 +1369,7 @@ el contrado exacto JSON se cerrará al implementar los ticker, por ahora simplem
 
 ---
 
-## 7. Tickets de trabajo
+## 7. 🎫 Tickets de trabajo
 
 Como se ha comentado en el punto anterior, para mantener formato homogéneo se usa un prompt genérico que se ha almacenado como skill `.cursor/skills/hu-breakdown-mtl/SKILL.md` (desglose en tickets). Este prompt genera el correspondiente archivo md dentro de la carpeta backlog.
 
@@ -1485,7 +1486,7 @@ La respuesta es **orientativa**, no veredicto científico; el prompt no debe pre
 
 ---
 
-## 8. Pull requests
+## 8. 🔀 Pull requests
 
 Para el trabajo con GitHub se ha definido una estrategia sencilla de ramas — detalle en [docs/onboarding/github-branching.md](docs/onboarding/github-branching.md).
 
