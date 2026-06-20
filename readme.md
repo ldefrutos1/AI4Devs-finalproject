@@ -201,14 +201,15 @@ La aplicación implementa una navegación simple por roles con una **home de ent
 
 > **Redis:** con perfil `dev`, **catalog-service** usa caché Redis; el contenedor debe estar en marcha antes de arrancarlo.
 
-| Flujo | Compose (además de Postgres/Keycloak) | Servicios en host |
-|-------|----------------------------------------|-------------------|
-| Consulta pública | — | catalog |
-| Alta / edición de árbol | Redis, Kafka | catalog (+ **media** si hay fotos) |
-| Fotos (subida) | MinIO | media |
-| Aviso por correo (alta de ejemplar) | Kafka, Mailpit | notification |
-| Admin (maestros / suscripciones) | — | catalog; notification (suscripciones) |
-| Consulta IA especie (ADMIN, stub) | — | catalog, ai-assistant |
+| Flujo | Compose (además de Postgres/Keycloak) | Servicios en host (`dev`; la SPA usa `/api` vía **api-gateway** :8080) |
+|-------|----------------------------------------|------------------------------------------------------------------------|
+| Cualquier flujo vía SPA | — | **api-gateway** (obligatorio) |
+| Consulta pública | — | api-gateway, catalog-service |
+| Alta / edición de árbol | Redis, Kafka | api-gateway, catalog-service (+ **media-service** si hay fotos) |
+| Fotos (subida) | MinIO | api-gateway, media-service (+ **catalog-service** si aún no existe la ficha) |
+| Aviso por correo (alta de ejemplar) | Kafka, Mailpit | api-gateway, catalog-service, notification-service |
+| Admin (maestros / suscripciones) | — | api-gateway, catalog-service; notification-service (suscripciones) |
+| Consulta IA especie (ADMIN, stub) | — | api-gateway, ai-assistant-service (+ **catalog-service** para pantallas de alta/edición con popup de especie) |
 
 **Detalle operativo** (puertos, usuarios Keycloak, Flyway, incidencias): [local-setup-guide.md](docs/onboarding/local-setup-guide.md).
 
@@ -1216,7 +1217,7 @@ erDiagram
 
 #### **4.2.3 PostgreSQL media_service:**
 
-Metadatos de fotografías en esquema `media`. `ejemplar_id` referencia lógicamente a `catalog.ejemplar` (sin FK entre esquemas).
+Metadatos de fotografías en esquema `media`. `ejemplar_id` referencia lógicamente a `catalog.ejemplar` (sin FK entre esquemas). **UK compuesta** `uq_fotografia_objeto` sobre `(bucket_almacenamiento, clave_objeto)`.
 
 ```mermaid
 erDiagram
@@ -1224,8 +1225,8 @@ erDiagram
     FOTOGRAFIA {
         bigint fotografia_id PK
         bigint ejemplar_id
-        varchar bucket_almacenamiento UK
-        varchar clave_objeto UK
+        varchar bucket_almacenamiento
+        varchar clave_objeto
         varchar nombre_fichero_original
         varchar tipo_mime
         bigint tamano_bytes
@@ -1242,7 +1243,7 @@ erDiagram
 
 #### **4.2.4 PostgreSQL notification_service:**
 
-Avisos de nuevas altas en el sistema a los suscriptores.
+Avisos de nuevas altas en el sistema a los suscriptores. En **`notificacion`**, `ejemplar_id` y `tipo_evento` se obtienen vía **`evento_catalogo`** (3FN; no hay columnas duplicadas en la tabla).
 
 ```mermaid
 erDiagram
@@ -1267,8 +1268,6 @@ erDiagram
     NOTIFICACION {
         bigint notificacion_id PK
         bigint evento_id FK
-        bigint ejemplar_id
-        varchar tipo_evento_catalogo
         varchar estado_generacion
         timestamptz generada_en
     }
@@ -1288,7 +1287,7 @@ erDiagram
 
 #### **4.2.5 PostgreSQL ai_assistant_service (esquema `ai`):**
 
-Modelo objetivo de **AUDITORIA_USO_IA** (esquema `ai` inicializado; tabla pendiente de migración Flyway). **`subject_oidc`** persiste el claim `sub` del JWT (Keycloak) en el momento de la consulta; **`ejemplar_id`** referencia lógicamente a `catalog.ejemplar`. Sin FK entre esquemas ni dependencia de `catalog.usuario_app`: la trazabilidad del actor se toma directamente del token. Coherente con §4.1 y R3.
+Tabla **AUDITORIA_USO_IA** en esquema `ai`, creada por Flyway **`V2__create_auditoria_uso_ia.sql`** (HU-016; `V1__baseline.sql` solo inicializa el esquema). Entidad JPA `AuditoriaUsoIa`; cada consulta IA exitosa inserta una fila vía `SpeciesEnrichmentSuggestionService`. **`subject_oidc`** persiste el claim `sub` del JWT (Keycloak) en el momento de la consulta; **`ejemplar_id`** referencia lógicamente a `catalog.ejemplar` (nullable en enriquecimiento de especie). Sin FK entre esquemas ni dependencia de `catalog.usuario_app`: la trazabilidad del actor se toma directamente del token. Coherente con §4.1 y R3.
 
 ```mermaid
 erDiagram

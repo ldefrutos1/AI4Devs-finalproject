@@ -6,7 +6,7 @@ Fuentes: [readme.md](../../readme.md), [docs/use-cases/use-case-summary.md](../u
 
 ## 1. Resumen
 
-MyTreeLibrary es una plataforma web para aficionados a la naturaleza que permite registrar datos y fotografías de ejemplares de árboles así como su ubicación. Ofrece la posibilidad de recibir notificaciones de nuevas incorporaciones al catálogo mediante correo electrónico sin necesidad de crear una cuenta de usuario. El sistema incluye integración con IA. La arquitectura es SPA con microservicios Java y autenticación por JWT.
+MyTreeLibrary es una plataforma web para aficionados a la naturaleza que permite registrar datos y fotografías de ejemplares de árboles así como su ubicación. Ofrece la posibilidad de recibir notificaciones de nuevas incorporaciones al catálogo mediante correo electrónico sin necesidad de crear una cuenta de usuario. En el **MVP**, la IA aporta consulta **orientativa** de características de especie para **ADMIN** (**HU-016**, vía **ai-assistant-service**); identificación por imagen y chat (**UC-05**, **UC-06**) quedan para **próxima versión** (**HU-009**, **HU-010**). La arquitectura es SPA con microservicios Java y autenticación por JWT.
 
 ---
 
@@ -48,6 +48,7 @@ MyTreeLibrary es una plataforma web para aficionados a la naturaleza que permite
 | HU-015 | Catálogo colaborador    | Proyección y enriquecimiento Mongo ([HU](HU-015-proyeccion-y-enriquecimiento-mongo.md) · [Tickets](HU-015-ticket-breakdown.md))                                            | Como responsable del catálogo, quiero mantener en MongoDB proyecciones y enriquecimientos alineados con el maestro PostgreSQL de especies y árboles, para consultas y notas semiestructuradas sin duplicar la autoridad relacional ([mongo.md](../data-model/mongo.md), readme §3.2). | L          | Media     | Cerrada         |
 | HU-016 | Inteligencia artificial | Consulta de características de especie (ADMIN, MVP) ([HU](HU-016-consulta-admin-caracteristicas-especie-ia.md) · [Tickets](HU-016-ticket-breakdown.md))                                                            | Como usuario administrador, quiero poder consultar a la IA de las características de una especie ya registrada en el catálogo taxonómico, para disponer de información ampliada (hábitat, distribución, datos ecológicos, referencias, etc.) como apoyo a la gestión de maestros.     | M          | Media     | Cerrada         |
 
+Suposiciones, huecos y deuda detallada: ver [data-model.md](../data-model/data-model.md), cada `HU-*.md` y fuentes enlazadas en §2; este fichero no duplica ese refinamiento.
 
 ---
 
