@@ -37,6 +37,8 @@ public class MediaSecurityConfig {
                     .permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/media/trees/*/photos")
                     .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/media/trees/*/photos/*/content")
+                    .permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/media/uploads/presign")
                     .hasAnyRole("COLABORADOR", "ADMIN")
                     .requestMatchers(HttpMethod.POST, "/api/media/photos/confirm")

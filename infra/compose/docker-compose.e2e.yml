@@ -22,6 +22,8 @@
 #   docker compose -f docker-compose.e2e.yml up --build \
 #     --abort-on-container-exit --exit-code-from playwright
 #   docker compose -f docker-compose.e2e.yml down -v
+#
+# Orden de pruebas: system-e2e-tests (HTTP/JWT) y despues Playwright (UI).
 
 name: mtl-e2e
 
@@ -211,6 +213,32 @@ services:
     networks:
       - mtl
 
+  # ── system-e2e-tests: HTTP contra gateway (Failsafe, sin UI) ───────────────
+  system-e2e-tests:
+    image: maven:3.9.9-eclipse-temurin-21
+    working_dir: /workspace/services
+    volumes:
+      - ../../services:/workspace/services
+    environment:
+      MTL_E2E_AUTO_KEYCLOAK_TOKEN: "true"
+      MTL_E2E_GATEWAY_BASE_URL: http://api-gateway:8080
+      MTL_JWT_ISSUER_URI: http://keycloak:8080/realms/mtl-e2e
+      MTL_KEYCLOAK_BASE_URL: http://keycloak:8080
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command:
+      - bash
+      - -lc
+      - >
+        mvn -pl system-e2e-tests -am verify -DskipTests=false
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    networks:
+      - mtl
+
   # ── Frontend Vue (build Vite servido por Nginx, proxy /api -> gateway) ────
   frontend:
     image: ${FRONTEND_IMAGE:-mtl/frontend:e2e}
@@ -272,6 +300,8 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_started
+      system-e2e-tests:
+        condition: service_completed_successfully
     network_mode: "service:frontend"
 
 networks:

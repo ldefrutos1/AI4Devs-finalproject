@@ -87,8 +87,6 @@ Requisitos
 
 Si tienes alguna duda consultamela antes de continuar con el proceso
 
-**Prompt 3:**
-
 ### **2.2. Descripción de componentes principales:**
 
 **Prompt 1:**
@@ -108,10 +106,11 @@ Si tienes alguna duda consultamela antes de continuar con el proceso
 ### **2.4. Infraestructura y despliegue**
 
 **Prompt 1:**
+En este proyecto de microservicios con vue ya está definida la arquitectura de contenedores necesaria para la infraestructura en @infra/compose/docker-compose.yml pero queda pendiente la parte de generación de las imagenes propias del proyecto (la imagen del front y de los 5 imagenes del back: gateway y los 4 microservicios de la aplicación). Actua como un experto arquitecto de sofware para terminar de definir la infraestructura. Prepara un plan con estos puntos 1.- Revisión y validación de la estructura del docker-compose actual 2.- definición de la estrategia y archivos de configuración necesarias para la generación de la imagen de front 3.-  definición de la estrategia y archivos de configuración necesarias para la generación de las imágenes de back. Si tienes alguna duda preguntame antes de seguir
 
 **Prompt 2:**
 
-**Prompt 3:**
+Quiero una implementación profesional pero lo más sencilla posible; el objetivo poder cerrar el punto de infraestructura y despliegue con la generación de las imagenes de la aplicación y el subsiguiente Docker-compose. De este modo se podría generar un script de automatización con 1.- creación de imágenes 2.- arranque de los contenedores de infraestructura (docker compose ya existente) 3.- arranque de las imagenes de la aplicación (docker compose con las imagenes del front y back de la aplicaciones creadas en el punto 1) por ahora no se va a incluir en un pipeline CI, solo lo vamos a dejar preparado para poder incluirlo fácilmente en el futuro. La propuesta son un docker-compose de la aplicación docker-compose.apps.yml y otro de la infraestructura (el que ya está definido) A eso se añadiría el docker-compose.e2e; este tercer compose lo usaríamos para la ejecución de pruebas e2e de playwright y también incluiría el microservicio system-e2e-test (que no se incluye en el despliegue de la application) Por ahora solo se generan imagenes locales que se suben al docker local; sin subir a docker hub. El puerto del frontend dockerizado sería el que garantice  correr los contenedores sin problemas
 
 ### **2.5. Seguridad**
 
@@ -180,9 +179,6 @@ vamos con el test de admin-maestros.spec.ts
 5.- Borrarla y verificar ausencia.
 
 revisa que el codigo que has implementado sigue los estandares definidos para este tipo de test
-
-
-**Prompt 3:**
 
 ---
 

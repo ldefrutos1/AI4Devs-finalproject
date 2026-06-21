@@ -11,11 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.mtl.media.application.MediaEjemplarPhotoGalleryService;
 import com.mtl.media.application.MediaEjemplarPhotosDeleteService;
 import com.mtl.media.config.MediaJwtAuthenticationPrincipalTestMvcConfig;
-import com.mtl.media.config.MediaPresignProperties;
 import com.mtl.media.domain.CategoriaFotografia;
 import com.mtl.media.domain.Fotografia;
-import com.mtl.media.infrastructure.storage.ObjectStoragePresigner;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -48,8 +45,6 @@ class MediaEjemplarPhotoGalleryControllerWebMvcTest {
 
   @MockitoBean private MediaEjemplarPhotoGalleryService galleryService;
   @MockitoBean private MediaEjemplarPhotosDeleteService photosDeleteService;
-  @MockitoBean private ObjectStoragePresigner objectStoragePresigner;
-  @MockitoBean private MediaPresignProperties presignProperties;
 
   @AfterEach
   void clearSecurityContext() {
@@ -82,11 +77,6 @@ class MediaEjemplarPhotoGalleryControllerWebMvcTest {
 
   @Test
   void findByEjemplarId_ok_returnsOrderedGallery() throws Exception {
-    when(presignProperties.getExpiresIn()).thenReturn(Duration.ofMinutes(15));
-    when(objectStoragePresigner.presignedGetUrl("mtl-photos", "trees/5/p1.jpg", Duration.ofMinutes(15)))
-        .thenReturn("http://localhost:9000/mtl-photos/trees/5/p1.jpg?X-Amz-SignedHeaders=host");
-    when(objectStoragePresigner.presignedGetUrl("mtl-photos", "trees/5/p2.jpg", Duration.ofMinutes(15)))
-        .thenReturn("http://localhost:9000/mtl-photos/trees/5/p2.jpg?X-Amz-SignedHeaders=host");
     when(galleryService.findVisiblePhotos(eq(5L), org.mockito.ArgumentMatchers.any()))
         .thenReturn(List.of(buildPhoto(10L, true, 0), buildPhoto(11L, false, 1)));
 
@@ -96,12 +86,11 @@ class MediaEjemplarPhotoGalleryControllerWebMvcTest {
         .perform(withJwtPrincipal(get("/api/media/trees/5/photos"), authentication))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$[0].id").value(10))
-        .andExpect(
-            jsonPath("$[0].url")
-                .value("http://localhost:9000/mtl-photos/trees/5/p1.jpg?X-Amz-SignedHeaders=host"))
+        .andExpect(jsonPath("$[0].url").value("/api/media/trees/5/photos/10/content"))
         .andExpect(jsonPath("$[0].isPrimary").value(true))
         .andExpect(jsonPath("$[0].category").value("PUBLIC"))
         .andExpect(jsonPath("$[1].id").value(11))
+        .andExpect(jsonPath("$[1].url").value("/api/media/trees/5/photos/11/content"))
         .andExpect(jsonPath("$[1].order").value(1));
   }
 

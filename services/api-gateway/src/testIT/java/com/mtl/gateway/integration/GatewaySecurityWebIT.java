@@ -210,6 +210,24 @@ class GatewaySecurityWebIT {
   }
 
   @Test
+  void publicMediaGalleryContentRouteWithoutTokenDoesNotReturnUnauthorized() {
+    upstream.stubFor(
+        get(urlPathMatching("/api/media/trees/[0-9]+/photos/[0-9]+/content"))
+            .willReturn(aResponse().withStatus(404)));
+    webTestClient
+        .get()
+        .uri("/api/media/trees/1/photos/10/content")
+        .exchange()
+        .expectStatus()
+        .value(
+            status ->
+                assertNotEquals(
+                    UNAUTHORIZED.value(),
+                    status,
+                    "contenido de foto en galería no debe exigir JWT"));
+  }
+
+  @Test
   void publicSubscriptionPostWithoutTokenDoesNotReturnUnauthorized() {
     webTestClient
         .method(HttpMethod.POST)

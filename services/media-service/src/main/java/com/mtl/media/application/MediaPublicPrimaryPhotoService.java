@@ -4,13 +4,7 @@ import com.mtl.media.domain.CategoriaFotografia;
 import com.mtl.media.domain.Fotografia;
 import com.mtl.media.infrastructure.client.catalog.CatalogPublicTreeVisibilityGuard;
 import com.mtl.media.infrastructure.persistence.jpa.repository.FotografiaRepository;
-import io.minio.GetObjectArgs;
-import io.minio.MinioClient;
-import io.minio.errors.ErrorResponseException;
-import io.minio.errors.MinioException;
-import java.io.InputStream;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -21,15 +15,15 @@ public class MediaPublicPrimaryPhotoService {
 
   private final FotografiaRepository fotografiaRepository;
   private final CatalogPublicTreeVisibilityGuard catalogPublicTreeVisibilityGuard;
-  private final MinioClient mediaMinioClient;
+  private final MediaStoredPhotoLoader storedPhotoLoader;
 
   public MediaPublicPrimaryPhotoService(
       FotografiaRepository fotografiaRepository,
       CatalogPublicTreeVisibilityGuard catalogPublicTreeVisibilityGuard,
-      MinioClient mediaMinioClient) {
+      MediaStoredPhotoLoader storedPhotoLoader) {
     this.fotografiaRepository = fotografiaRepository;
     this.catalogPublicTreeVisibilityGuard = catalogPublicTreeVisibilityGuard;
-    this.mediaMinioClient = mediaMinioClient;
+    this.storedPhotoLoader = storedPhotoLoader;
   }
 
   /**
@@ -45,27 +39,6 @@ public class MediaPublicPrimaryPhotoService {
             .findPrincipalForEjemplar(treeId, CategoriaFotografia.PUBLIC)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sin fotografía principal"));
 
-    byte[] body;
-    try (InputStream stream =
-        mediaMinioClient.getObject(
-            GetObjectArgs.builder()
-                .bucket(foto.getBucketAlmacenamiento())
-                .object(foto.getClaveObjeto())
-                .build())) {
-      body = stream.readAllBytes();
-    } catch (ErrorResponseException ex) {
-      if ("NoSuchKey".equals(ex.errorResponse().code())
-          || "NoSuchBucket".equals(ex.errorResponse().code())) {
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Objeto no encontrado en almacén");
-      }
-      throw new ResponseStatusException(
-          HttpStatus.BAD_GATEWAY, "No se pudo leer la imagen desde el almacén de objetos");
-    } catch (MinioException | java.io.IOException | java.security.InvalidKeyException | java.security.NoSuchAlgorithmException ex) {
-      throw new ResponseStatusException(
-          HttpStatus.BAD_GATEWAY, "No se pudo leer la imagen desde el almacén de objetos");
-    }
-
-    MediaType contentType = MediaType.parseMediaType(foto.getTipoMime());
-    return ResponseEntity.ok().contentType(contentType).body(body);
+    return storedPhotoLoader.toImageResponse(foto);
   }
 }

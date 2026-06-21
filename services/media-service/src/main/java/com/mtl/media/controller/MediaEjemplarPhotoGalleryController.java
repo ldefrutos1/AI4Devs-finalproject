@@ -2,10 +2,8 @@ package com.mtl.media.controller;
 
 import com.mtl.media.application.MediaEjemplarPhotoGalleryService;
 import com.mtl.media.application.MediaEjemplarPhotosDeleteService;
-import com.mtl.media.config.MediaPresignProperties;
 import com.mtl.media.domain.Fotografia;
 import com.mtl.media.dto.EjemplarPhotoGalleryItemResponse;
-import com.mtl.media.infrastructure.storage.ObjectStoragePresigner;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -25,25 +23,21 @@ public class MediaEjemplarPhotoGalleryController {
 
   private final MediaEjemplarPhotoGalleryService galleryService;
   private final MediaEjemplarPhotosDeleteService photosDeleteService;
-  private final ObjectStoragePresigner objectStoragePresigner;
-  private final MediaPresignProperties presignProperties;
 
   public MediaEjemplarPhotoGalleryController(
       MediaEjemplarPhotoGalleryService galleryService,
-      MediaEjemplarPhotosDeleteService photosDeleteService,
-      ObjectStoragePresigner objectStoragePresigner,
-      MediaPresignProperties presignProperties) {
+      MediaEjemplarPhotosDeleteService photosDeleteService) {
     this.galleryService = galleryService;
     this.photosDeleteService = photosDeleteService;
-    this.objectStoragePresigner = objectStoragePresigner;
-    this.presignProperties = presignProperties;
   }
 
   @GetMapping("/trees/{treeId}/photos")
   public List<EjemplarPhotoGalleryItemResponse> findByEjemplarId(
       @PathVariable long treeId, Authentication authentication) {
     Jwt jwt = resolveJwt(authentication);
-    return galleryService.findVisiblePhotos(treeId, jwt).stream().map(this::toResponse).toList();
+    return galleryService.findVisiblePhotos(treeId, jwt).stream()
+        .map(photo -> toResponse(treeId, photo))
+        .toList();
   }
 
   @DeleteMapping("/trees/{treeId}/photos")
@@ -52,10 +46,10 @@ public class MediaEjemplarPhotoGalleryController {
     photosDeleteService.deleteAllPhotosForEjemplar(treeId, jwt);
   }
 
-  private EjemplarPhotoGalleryItemResponse toResponse(Fotografia photo) {
+  private EjemplarPhotoGalleryItemResponse toResponse(long treeId, Fotografia photo) {
     return new EjemplarPhotoGalleryItemResponse(
         photo.getFotografiaId(),
-        buildReadUrl(photo),
+        buildReadUrl(treeId, photo.getFotografiaId()),
         photo.isEsPrincipal(),
         photo.getOrden(),
         photo.getTipoMime(),
@@ -64,9 +58,9 @@ public class MediaEjemplarPhotoGalleryController {
         photo.getCategoria());
   }
 
-  private String buildReadUrl(Fotografia photo) {
-    return objectStoragePresigner.presignedGetUrl(
-        photo.getBucketAlmacenamiento(), photo.getClaveObjeto(), presignProperties.getExpiresIn());
+  /** URL relativa vía gateway (mismo origen que la SPA); evita acceso directo a MinIO desde el navegador. */
+  private static String buildReadUrl(long treeId, long photoId) {
+    return "/api/media/trees/" + treeId + "/photos/" + photoId + "/content";
   }
 
   private static Jwt resolveJwt(Authentication authentication) {

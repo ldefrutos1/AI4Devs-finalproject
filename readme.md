@@ -863,11 +863,28 @@ proyecto/
 
 ### **3.4. Infraestructura y despliegue**
 
-**Desarrollo:** Docker Compose (o equivalente) con **un** PostgreSQL (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO, Kafka, Keycloak, **Mailpit** (SMTP de prueba para notificaciones en local), **Prometheus** (`prom/prometheus:v3.2.1`) y **Grafana** (`grafana/grafana:11.5.2`) para métricas y dashboards ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)); los microservicios Spring Boot suelen ejecutarse en el **host** (puertos 8080–8084) para que Prometheus haga scrape vía `host.docker.internal`, o como contenedores si se adaptan los targets.
+**Desarrollo:**
 
-Detalle de servicios, puertos y arranque en Compose: [infra/compose/README.md](infra/compose/README.md).
+**Infraestructura:** en desarrollo se necesita tener siempre arrancado `docker-compose.yml`, que levanta la infraestructura compartida: **un** PostgreSQL/PostGIS (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO, Kafka, Keycloak, **Mailpit** (SMTP de prueba para notificaciones en local), **Prometheus** (`prom/prometheus:v3.2.1`) y **Grafana** (`grafana/grafana:11.5.2`) para métricas y dashboards ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)).
 
-**Despliegue Producción:** orquestación (Kubernetes), secretos externos, Keycloak y Kafka en HA según entorno, bases de datos gestionadas y almacenamiento de objetos S3 en nube.
+```bash
+cd infra\compose
+docker compose up -d
+```
+
+Grafana queda disponible en `http://localhost:3000`. Detalle de servicios, puertos y arranque en Compose: [infra/compose/README.md](infra/compose/README.md).
+
+**Aplicación:** con la infraestructura anterior levantada, la aplicación puede arrancarse de dos formas:
+
+- **Contenedores de aplicación:** usar el overlay `docker-compose.apps.yml` para levantar la SPA, el API Gateway y los microservicios como contenedores. Antes, construir las imágenes con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1). La SPA queda disponible en `http://localhost:8088/`; Prometheus usa los targets internos definidos en `prometheus-docker.yml`.
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
+```
+
+- **IDE / Maven en host:** ejecutar la SPA y los microservicios desde el host para desarrollo habitual; ver [frontend/README.md](frontend/README.md) y [services/README.md](services/README.md). La SPA Vite usa `:5173`; el API Gateway usa `:8080`; los microservicios Spring Boot usan `:8081-8084`; Prometheus hace scrape vía `host.docker.internal`.
+
+**Despliegue Producción:** en entornos productivos el sistema se puede desplegar en un orquestador de contenedores (Kubernetes), se deben definir secretos externos, Keycloak y Kafka en HA según entorno, bases de datos gestionadas y almacenamiento de objetos S3 en nube.
 
 **Decisiones documentadas:** el descubrimiento de servicios y configuración de los microservicios se hace **sin Eureka ni Spring Cloud Config** (asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md).
 
@@ -882,18 +899,18 @@ flowchart TB
     subgraph dev [Entorno de Desarrollo]
         direction TB
 
-        subgraph host [Host dev habitual - IDE / mvn spring-boot:run]
+        subgraph host [Aplicación - host dev o docker-compose.apps.yml]
             direction TB
-            SPAh["🌐 SPA Vue3 Vite"]:::web
-            GWh["⚙️ API Gateway :8080"]:::web
-            MSh["Microservicios Spring Boot :8081-8084"]:::service
+            SPAh["🌐 Frontend SPA (Vite :5173 host / Nginx :8088 en Compose apps)"]:::web
+            GWh["⚙️ Backend API Gateway :8080 (host o Compose apps)"]:::web
+            MSh["Microservicios Spring Boot (host :8081-8084 / Compose apps :8080 interno)"]:::service
             SPAh --> GWh
             GWh --> MSh
         end
 
-        subgraph compose [Docker Compose - infra de apoyo]
+        subgraph compose [Docker Compose - infra base y overlay de aplicación]
             direction TB
-            DC["🐳 Docker Compose"]:::orch
+            DC["🐳 docker-compose.yml + docker-compose.apps.yml (opcional)"]:::orch
 
             KCd["🔐 Keycloak"]:::service
             Kd["⚡ Kafka"]:::service
@@ -917,15 +934,11 @@ flowchart TB
         DC --> PRd
         DC --> GRd
         KCd --> PGd
-        PRd --> GRd
-        PRd -.->|scrape Actuator host.docker.internal| GWh
+        GRd --> PRd
+        PRd -.->|scrape Actuator host.docker.internal o DNS interno| GWh
         PRd -.-> MSh
     end
 ```
-
-*Compose = infra de apoyo; microservicios y SPA suelen ejecutarse en el host.*
-
-
 
 ### **3.5. Seguridad**
 

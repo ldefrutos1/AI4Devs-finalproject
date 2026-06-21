@@ -1,0 +1,220 @@
+# MyTreeLibrary — servicios de aplicación (overlay sobre docker-compose.yml).
+#
+# Requisitos:
+#   1. Imágenes locales mtl/*:${MTL_IMAGE_TAG:-local} (ver scripts/dev/build-images.ps1).
+#   2. Infraestructura levantada: docker compose up -d
+#
+# Uso (desde infra/compose):
+#   docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
+#   docker compose -f docker-compose.yml -f docker-compose.apps.yml down
+#
+# Acceso:
+#   SPA:     http://localhost:${FRONTEND_PORT:-8088}
+#   API GW:  http://localhost:8080
+#   Keycloak (infra): http://localhost:${KEYCLOAK_PORT:-8180}
+
+x-app-extra-hosts: &app-extra-hosts
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+
+# Issuer del token (navegador) + JWKS alcanzable desde contenedores vía host.
+x-backend-jwt: &backend-jwt
+  MTL_JWT_ISSUER_URI: http://localhost:${KEYCLOAK_PORT:-8180}/realms/mtl
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://host.docker.internal:${KEYCLOAK_PORT:-8180}/realms/mtl/protocol/openid-connect/certs
+
+x-backend-healthcheck: &backend-healthcheck
+  test: ["CMD-SHELL", "curl -sf http://localhost:8080/actuator/health || exit 1"]
+  interval: 10s
+  timeout: 5s
+  retries: 20
+  start_period: 90s
+
+services:
+  # MinIO: CORS para PUT desde la SPA y URL pública para validar firmas SigV4 del navegador.
+  minio:
+    environment:
+      MINIO_API_CORS_ALLOW_ORIGIN: ${MINIO_API_CORS_ALLOW_ORIGIN:-http://localhost:5173,http://127.0.0.1:5173,http://localhost:8088,http://127.0.0.1:8088}
+      MINIO_API_CORS_ALLOW_METHODS: ${MINIO_API_CORS_ALLOW_METHODS:-GET,PUT,POST,DELETE,HEAD,OPTIONS}
+      MINIO_API_CORS_ALLOW_HEADERS: ${MINIO_API_CORS_ALLOW_HEADERS:-*}
+      # 127.0.0.1 evita IPv6 (::1) en Windows+Docker Desktop: localhost:9000 suele colgar en el navegador.
+      MINIO_SERVER_URL: http://127.0.0.1:${MINIO_API_PORT:-9000}
+
+  # Prometheus: scrape por DNS interno cuando las apps corren en contenedor.
+  prometheus:
+    volumes:
+      - ../../platform/observability/prometheus/prometheus-docker.yml:/etc/prometheus/prometheus.yml:ro
+
+  catalog-service:
+    <<: *app-extra-hosts
+    image: mtl/catalog-service:${MTL_IMAGE_TAG:-local}
+    build:
+      context: ../../services/catalog-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *backend-jwt
+      SPRING_PROFILES_ACTIVE: dev
+      APP_ENV: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-mtl}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-mtl}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-mtl_dev_password}
+      SPRING_MONGODB_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME:-mtl}:${MONGO_INITDB_ROOT_PASSWORD:-mtl_mongo_dev_password}@mongo:27017/mtl_catalog?authSource=admin
+      MTL_MEDIA_BASE_URL: http://media-service:8080
+      MTL_REDIS_HOST: redis
+      MTL_REDIS_PORT: "6379"
+      MTL_CATALOG_KAFKA_ENABLED: "true"
+      MTL_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck: *backend-healthcheck
+    networks:
+      - mtl
+
+  media-service:
+    <<: *app-extra-hosts
+    image: mtl/media-service:${MTL_IMAGE_TAG:-local}
+    build:
+      context: ../../services/media-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *backend-jwt
+      SPRING_PROFILES_ACTIVE: dev
+      APP_ENV: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-mtl}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-mtl}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-mtl_dev_password}
+      MTL_CATALOG_BASE_URL: http://catalog-service:8080
+      MTL_MEDIA_STORAGE_ENDPOINT: http://minio:9000
+      MTL_MEDIA_STORAGE_PUBLIC_ENDPOINT: http://127.0.0.1:${MINIO_API_PORT:-9000}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio_dev_password}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+    healthcheck: *backend-healthcheck
+    networks:
+      - mtl
+
+  notification-service:
+    <<: *app-extra-hosts
+    image: mtl/notification-service:${MTL_IMAGE_TAG:-local}
+    build:
+      context: ../../services/notification-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *backend-jwt
+      SPRING_PROFILES_ACTIVE: dev
+      APP_ENV: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-mtl}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-mtl}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-mtl_dev_password}
+      MTL_NOTIFICATION_KAFKA_ENABLED: "true"
+      MTL_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MTL_NOTIFICATION_MAIL_HOST: mailpit
+      MTL_NOTIFICATION_MAIL_PORT: "1025"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    healthcheck: *backend-healthcheck
+    networks:
+      - mtl
+
+  ai-assistant-service:
+    <<: *app-extra-hosts
+    image: mtl/ai-assistant-service:${MTL_IMAGE_TAG:-local}
+    build:
+      context: ../../services/ai-assistant-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *backend-jwt
+      SPRING_PROFILES_ACTIVE: dev
+      APP_ENV: docker
+      MTL_AI_PROVIDER_MODE: stub
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-mtl}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-mtl}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-mtl_dev_password}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck: *backend-healthcheck
+    networks:
+      - mtl
+
+  api-gateway:
+    <<: *app-extra-hosts
+    image: mtl/api-gateway:${MTL_IMAGE_TAG:-local}
+    build:
+      context: ../../services/api-gateway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      <<: *backend-jwt
+      APP_ENV: docker
+      MTL_CATALOG_URI: http://catalog-service:8080
+      MTL_MEDIA_URI: http://media-service:8080
+      MTL_NOTIFICATION_URI: http://notification-service:8080
+      MTL_AI_URI: http://ai-assistant-service:8080
+    depends_on:
+      catalog-service:
+        condition: service_healthy
+      media-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+      ai-assistant-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    networks:
+      - mtl
+
+  frontend:
+    image: mtl/frontend:${MTL_IMAGE_TAG:-local}
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_OIDC_ISSUER: http://localhost:${KEYCLOAK_PORT:-8180}/realms/mtl
+        VITE_OIDC_CLIENT_ID: mtl-spa
+        VITE_OIDC_SCOPE: "openid profile email"
+        VITE_GATEWAY_BASE_URL: ""
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-8088}:80"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:80/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 15s
+    networks:
+      - mtl
+
+networks:
+  mtl:
+    external: false

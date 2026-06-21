@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { useTemplateRef } from 'vue'
+import { computed, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import MtlConfirmDialog from '@/components/MtlConfirmDialog.vue'
 import TreePhotoFullscreenViewer from '@/components/TreePhotoFullscreenViewer.vue'
+import { useGalleryPhotoDisplayUrls } from '@/composables/useGalleryPhotoDisplayUrls'
 import {
   EDIT_TREE_GALLERY_PHOTO_ACCEPT_MIME,
   useEditTreeGallery,
@@ -36,6 +37,8 @@ const {
 } = useEditTreeGallery({ ...props.gallery, photoFileInputRef })
 
 const { galleryPhotos, isDeletingPhoto, isUploadingPhoto, canAddGalleryPhoto } = props.gallery
+const { urlFor: galleryPhotoDisplayUrl } = useGalleryPhotoDisplayUrls(galleryPhotos)
+const selectedPhotoSrc = computed(() => galleryPhotoDisplayUrl(selectedPhoto.value))
 </script>
 
 <template>
@@ -55,7 +58,7 @@ const { galleryPhotos, isDeletingPhoto, isUploadingPhoto, canAddGalleryPhoto } =
       >
         <img
           class="tree-detail-gallery-image"
-          :src="selectedPhoto.url"
+          :src="selectedPhotoSrc"
           :alt="galleryAltText"
           draggable="false"
           @dblclick="openFullscreen"

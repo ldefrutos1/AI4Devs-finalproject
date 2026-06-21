@@ -17,7 +17,6 @@ import tools.jackson.databind.node.ObjectNode;
  */
 public final class KeycloakE2eAdminSupport {
 
-  private static final String REALM = "mtl";
   private static final String SPA_CLIENT_ID = "mtl-spa";
   private static final String DEFAULT_COLABORADOR_USER = "colaborador";
   private static final String DEFAULT_COLABORADOR_PASSWORD = "colaborador_dev";
@@ -56,7 +55,7 @@ public final class KeycloakE2eAdminSupport {
             "username", colaboradorUsername(),
             "password", colaboradorPassword(),
             "scope", "openid");
-    JsonNode json = postForm(tokenEndpoint(REALM), body);
+    JsonNode json = postForm(tokenEndpoint(keycloakRealm()), body);
     String token = json.path("access_token").asString(null);
     if (token == null || token.isBlank()) {
       throw new IllegalStateException("Keycloak no devolvió access_token: " + json);
@@ -93,7 +92,7 @@ public final class KeycloakE2eAdminSupport {
                 URI.create(
                     keycloakBaseUrl()
                         + "/admin/realms/"
-                        + REALM
+                        + keycloakRealm()
                         + "/clients?clientId="
                         + urlEncode(SPA_CLIENT_ID)))
             .timeout(Duration.ofSeconds(30))
@@ -103,7 +102,8 @@ public final class KeycloakE2eAdminSupport {
             .build();
     JsonNode clients = sendJson(request);
     if (!clients.isArray() || clients.isEmpty()) {
-      throw new IllegalStateException("Cliente " + SPA_CLIENT_ID + " no encontrado en realm " + REALM);
+      throw new IllegalStateException(
+          "Cliente " + SPA_CLIENT_ID + " no encontrado en realm " + keycloakRealm());
     }
     return clients.get(0).path("id").asString();
   }
@@ -112,7 +112,11 @@ public final class KeycloakE2eAdminSupport {
     HttpRequest request =
         HttpRequest.newBuilder(
                 URI.create(
-                    keycloakBaseUrl() + "/admin/realms/" + REALM + "/clients/" + clientUuid))
+                    keycloakBaseUrl()
+                        + "/admin/realms/"
+                        + keycloakRealm()
+                        + "/clients/"
+                        + clientUuid))
             .timeout(Duration.ofSeconds(30))
             .header("Authorization", "Bearer " + adminToken)
             .header("Accept", "application/json")
@@ -132,7 +136,11 @@ public final class KeycloakE2eAdminSupport {
       HttpRequest request =
           HttpRequest.newBuilder(
                   URI.create(
-                      keycloakBaseUrl() + "/admin/realms/" + REALM + "/clients/" + clientUuid))
+                      keycloakBaseUrl()
+                        + "/admin/realms/"
+                        + keycloakRealm()
+                        + "/clients/"
+                        + clientUuid))
               .timeout(Duration.ofSeconds(30))
               .header("Authorization", "Bearer " + adminToken)
               .header("Content-Type", "application/json")
@@ -195,6 +203,23 @@ public final class KeycloakE2eAdminSupport {
     } catch (Exception e) {
       throw new IllegalStateException("Error leyendo JSON de " + request.uri(), e);
     }
+  }
+
+  private static String keycloakRealm() {
+    String explicit = System.getenv("MTL_KEYCLOAK_REALM");
+    if (explicit != null && !explicit.isBlank()) {
+      return explicit.trim();
+    }
+    String issuer =
+        System.getenv()
+            .getOrDefault("MTL_JWT_ISSUER_URI", "http://localhost:8180/realms/mtl");
+    int idx = issuer.indexOf("/realms/");
+    if (idx < 0) {
+      return "mtl";
+    }
+    String realm = issuer.substring(idx + "/realms/".length());
+    int slash = realm.indexOf('/');
+    return slash >= 0 ? realm.substring(0, slash) : realm;
   }
 
   private static String tokenEndpoint(String realm) {

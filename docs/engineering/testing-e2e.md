@@ -29,6 +29,7 @@ Construye y arranca un **stack mínimo y efímero** y ejecuta Playwright como co
 - **DB efímeras:** Postgres/Mongo/Kafka en `tmpfs` (RAM) y Keycloak con **H2 en memoria** (importa el realm [mtl-e2e](../../infra/compose/init/keycloak-e2e/mtl-e2e-realm.json)). Cada ejecución parte de cero.
 - **Coherencia de issuer:** el navegador (contenedor Playwright) y los backends usan el **mismo** `http://keycloak:8080/realms/mtl-e2e`, evitando el problema de doble hostname de Keycloak.
 - **Imágenes (Opción A):** los jars se compilan antes con Maven y los Dockerfiles solo los empaquetan (JRE 21). El frontend se sirve con Nginx y hace proxy de `/api` al gateway.
+- **Orden E2E:** primero `system-e2e-tests` (HTTP/JWT vía Maven en contenedor), después Playwright (UI).
 - **"En memoria" real:** H2 no es viable para `catalog-service` (PostGIS, `unaccent`, SQL nativo); el equivalente práctico es Postgres/Mongo **efímeros** en `tmpfs`.
 
 ## 3. Selectores y login

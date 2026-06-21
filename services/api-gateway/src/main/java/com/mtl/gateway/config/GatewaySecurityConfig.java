@@ -45,6 +45,8 @@ public class GatewaySecurityConfig {
                     .permitAll()
                     .pathMatchers(HttpMethod.GET, "/api/media/trees/*/photos")
                     .permitAll()
+                    .pathMatchers(HttpMethod.GET, "/api/media/trees/*/photos/*/content")
+                    .permitAll()
                     .pathMatchers(HttpMethod.POST, "/api/notifications/subscriptions")
                     .permitAll()
                     .pathMatchers("/api/**")

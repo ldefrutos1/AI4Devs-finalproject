@@ -21,6 +21,7 @@ El `iss` del token debe coincidir con `MTL_JWT_ISSUER_URI` (por defecto `http://
 | `MTL_E2E_RUN_SECURITY=true` | Habilita esc. 3 sin token en env (stack arriba) |
 | `MTL_E2E_GATEWAY_BASE_URL` | Default `http://127.0.0.1:8080` |
 | `MTL_KEYCLOAK_BASE_URL` | Default derivado de `MTL_JWT_ISSUER_URI` |
+| `MTL_KEYCLOAK_REALM` | Opcional; si falta, se deduce del sufijo `/realms/<realm>` de `MTL_JWT_ISSUER_URI` |
 | `KEYCLOAK_ADMIN` / `KEYCLOAK_ADMIN_PASSWORD` | Para modo automático (compose: `admin` / `admin_dev_password`) |
 
 Sin token ni `MTL_E2E_AUTO_KEYCLOAK_TOKEN`, los `*GatewayE2EIT` quedan deshabilitados (`@EnabledIf`); `mvn verify` sigue en verde (smoke unitario).

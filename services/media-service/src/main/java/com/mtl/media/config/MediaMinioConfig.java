@@ -13,19 +13,27 @@ public class MediaMinioConfig {
 
   @Bean
   public MinioClient mediaMinioClient(MediaStorageProperties properties) {
-    return MinioClient.builder()
-        .endpoint(properties.getEndpoint())
-        .credentials(properties.getAccessKey(), properties.getSecretKey())
-        .build();
+    return buildMinioClient(properties.getEndpoint(), properties);
   }
 
   @Bean
-  public ObjectStoragePresigner objectStoragePresigner(MinioClient mediaMinioClient) {
-    return new MinioObjectStoragePresigner(mediaMinioClient);
+  public ObjectStoragePresigner objectStoragePresigner(
+      MediaStorageProperties properties) {
+    MinioClient presignClient = buildMinioClient(properties.getPresignEndpoint(), properties);
+    return new MinioObjectStoragePresigner(presignClient, properties);
   }
 
   @Bean
   public ObjectStorageRemover objectStorageRemover(MinioClient mediaMinioClient) {
     return new MinioObjectStorageRemover(mediaMinioClient);
+  }
+
+  private static MinioClient buildMinioClient(
+      String endpoint, MediaStorageProperties properties) {
+    return MinioClient.builder()
+        .endpoint(endpoint)
+        .region(properties.getRegion())
+        .credentials(properties.getAccessKey(), properties.getSecretKey())
+        .build();
   }
 }

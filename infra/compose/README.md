@@ -1,6 +1,6 @@
 # Infraestructura local (Docker Compose)
 
-Entorno de **desarrollo** alineado con [readme.md](../../readme.md) (PostgreSQL + PostGIS, MongoDB, Redis, MinIO, Kafka en KRaft, Keycloak, Mailpit).
+Entorno de **desarrollo** alineado con [readme.md](../../readme.md). Tres ficheros Compose: infra base, overlay de aplicación y stack E2E (§ Ficheros Compose).
 
 ## Requisitos
 
@@ -16,7 +16,78 @@ docker compose up -d
 
 En Unix: `cp .env.example .env`.
 
-La primera vez, Postgres ejecuta los scripts en `init/postgres/` (esquemas, PostGIS, BD `keycloak` y rol `keycloak`). El servicio **`kafka-init`** crea el topic `catalog.ejemplar.evento` si no existe. El servicio **`minio-init`** crea el bucket `mtl-photos`; CORS para la SPA se configura con **`MINIO_API_CORS_ALLOW_ORIGIN`** en el servicio `minio` (véase § MinIO). El servicio **`mailpit`** expone SMTP de prueba y la UI de mensajes capturados (véase § Mailpit).
+La primera vez, Postgres ejecuta los scripts en `init/postgres/` (esquemas, PostGIS, BD `keycloak` y rol `keycloak`). **`kafka-init`** crea el topic `catalog.ejemplar.evento`. **`minio-init`** crea el bucket `mtl-photos` (§ MinIO). **`mailpit`** expone SMTP de prueba (§ Mailpit).
+
+Para la aplicación en contenedor usa [docker-compose.apps.yml](docker-compose.apps.yml) (§ Ficheros Compose). Los microservicios en el host (IDE/Maven) no están en este compose — [services/README.md](../../services/README.md).
+
+## Ficheros Compose
+
+| Fichero | Rol |
+|---------|-----|
+| [docker-compose.yml](docker-compose.yml) | Infra: Postgres, Mongo, Redis, MinIO, Kafka, Keycloak, Mailpit, Prometheus, Grafana |
+| [docker-compose.apps.yml](docker-compose.apps.yml) | **Overlay** de aplicación sobre el anterior |
+| [docker-compose.e2e.yml](docker-compose.e2e.yml) | Stack **autónomo** y efímero para E2E (no extiende los otros) |
+
+### docker-compose.apps.yml
+
+Añade **frontend** (Nginx + proxy `/api`), **api-gateway** y **catalog**, **media**, **notification**, **ai-assistant**. Imágenes `mtl/<servicio>:${MTL_IMAGE_TAG:-local}` — build con [build-images.ps1](../../scripts/dev/build-images.ps1).
+
+Ajustes sobre infra: **MinIO** (CORS `8088`, presign `127.0.0.1:9000`, § MinIO) y **Prometheus** ([prometheus-docker.yml](../../platform/observability/prometheus/prometheus-docker.yml), scrape por DNS interno).
+
+Requisitos: infra levantada (`docker compose up -d`) e imágenes construidas.
+
+```powershell
+# Desde la raíz
+.\scripts\dev\start-docker-stack.ps1              # build + infra + apps
+.\scripts\dev\start-docker-stack.ps1 -SkipBuild   # sin rebuild de imágenes
+.\scripts\dev\start-docker-stack.ps1 -InfraOnly   # solo infra
+.\scripts\dev\start-docker-stack.ps1 -AppsOnly    # solo apps
+.\scripts\dev\start-docker-stack.ps1 -Down        # bajar todo (-KeepVolumes conserva datos)
+```
+
+Manual (`infra/compose`):
+
+```bash
+docker compose up -d
+docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
+```
+
+| Acceso | URL |
+|--------|-----|
+| SPA | `http://localhost:8088` (`FRONTEND_PORT`) |
+| API Gateway | `http://localhost:8080` |
+| Keycloak | `http://localhost:8180` (infra) |
+
+OIDC: issuer `http://localhost:8180/realms/mtl` en el navegador; backends validan el mismo `iss` y obtienen JWKS vía `host.docker.internal`. Realm con redirect URIs `8088` en [mtl-realm.json](init/keycloak/mtl-realm.json) — si el realm ya existía en el volumen, añádelas en consola o recrea volúmenes.
+
+### docker-compose.e2e.yml
+
+Stack mínimo **autocontenido** (proyecto `mtl-e2e`) para el flujo login → alta → mis árboles → borrado. **No** incluye MinIO, notification ni ai-assistant. **No** publica puertos en el host.
+
+| Componente | Notas |
+|------------|-------|
+| Datos | Postgres, Mongo, Kafka, Redis en **tmpfs** (efímeros) |
+| Keycloak | H2 en memoria, realm **`mtl-e2e`** ([init/keycloak-e2e/](init/keycloak-e2e/)) |
+| Apps | `catalog-service`, `media-service`, `api-gateway`, frontend |
+| Tests | `system-e2e-tests` (HTTP/JWT) → **Playwright** (UI) |
+
+Guía canónica: [testing-e2e.md](../../docs/engineering/testing-e2e.md).
+
+```powershell
+# Desde la raíz
+.\scripts\dev\test-e2e.ps1
+.\scripts\dev\test-e2e.ps1 -SkipBuild -KeepStack   # depurar stack levantado
+.\scripts\dev\test-e2e.ps1 -Local                   # Playwright contra entorno ya arriba (p. ej. Vite :5173)
+```
+
+Manual (`infra/compose`, jars compilados):
+
+```bash
+docker compose -f docker-compose.e2e.yml up --build --abort-on-container-exit --exit-code-from playwright
+docker compose -f docker-compose.e2e.yml down -v
+```
+
+El exit code de **Playwright** decide éxito o fallo del pipeline.
 
 ## Puertos por defecto
 
@@ -33,6 +104,8 @@ La primera vez, Postgres ejecuta los scripts en `init/postgres/` (esquemas, Post
 | Mailpit UI | 8025 (`MAILPIT_UI_PORT`) | Bandeja de mensajes capturados: `http://localhost:8025` |
 | Prometheus | 9090 (`PROMETHEUS_PORT`) | Métricas: `http://localhost:9090` (targets en **Status → Targets**) |
 | Grafana | 3000 (`GRAFANA_PORT`) | Dashboards: `http://localhost:3000` (credenciales `GRAFANA_ADMIN_*` en `.env`) |
+| API Gateway (`docker-compose.apps.yml`) | 8080 | Gateway publicado al host |
+| Frontend Docker (`docker-compose.apps.yml`) | 8088 (`FRONTEND_PORT`) | SPA Nginx: `http://localhost:8088` |
 
 Dentro de la red Docker, Kafka PLAINTEXT: `kafka:9092`. El SMTP de Mailpit dentro de Compose: `mailpit:1025`.
 
@@ -40,7 +113,7 @@ Dentro de la red Docker, Kafka PLAINTEXT: `kafka:9092`. El SMTP de Mailpit dentr
 
 Stack según [ADR-0005](../../docs/adr/0005-microservices-observability-spring-boot.md). Configuración en [platform/observability/](../../platform/observability/README.md).
 
-Prometheus hace **scrape** de los microservicios Spring Boot en el **host** (`localhost:8080`–`8084`, perfil `dev` con `mvn spring-boot:run`). Los contenedores usan `host.docker.internal` (en Linux, `extra_hosts: host-gateway` en el servicio `prometheus`).
+Prometheus hace **scrape** de microservicios en el **host** (`localhost:8080`–`8084`, `mvn spring-boot:run`) o, con [docker-compose.apps.yml](docker-compose.apps.yml), por DNS interno (`prometheus-docker.yml`).
 
 Descargar imágenes y levantar solo observabilidad:
 
@@ -63,26 +136,25 @@ Los microservicios deben estar en marcha en el host para que los cinco targets a
 
 Imagen: `axllent/mailpit` (versión fijada en [docker-compose.yml](docker-compose.yml)).
 
-## MinIO y subida de fotos (media-service)
+## MinIO y subida de fotos
 
-El **media-service** genera URLs prefirmadas (SigV4) para que el navegador haga `PUT` directamente contra MinIO. Hace falta el bucket **`mtl-photos`** y cabeceras **CORS** que permitan el origen del Vite. Flujo y propiedades `mtl.media.*`: [docs/engineering/media-upload-hu006.md](../../docs/engineering/media-upload-hu006.md).
+Presign → `PUT` directo desde el navegador. Detalle: [media-upload-hu006.md](../../docs/engineering/media-upload-hu006.md).
 
-### Arranque automático (sin pasos manuales)
+| Pieza | Comportamiento |
+|-------|----------------|
+| **`minio-init`** | Crea `mtl-photos` al arrancar (`docker compose run --rm minio-init` si borraste el volumen). |
+| **CORS** | Global en MinIO community (`MINIO_API_CORS_ALLOW_ORIGIN`). Solo infra: Vite `5173`; con [docker-compose.apps.yml](docker-compose.apps.yml): también `8088`. |
+| **Presign (navegador)** | El overlay apps fija `MINIO_SERVER_URL` y `MTL_MEDIA_STORAGE_PUBLIC_ENDPOINT` en **`http://127.0.0.1:9000`**. En Windows+Docker, `localhost:9000` suele colgar (IPv6). |
+| **Consola** | `http://localhost:9001` — credenciales `MINIO_ROOT_*` del `.env`. |
 
-1. **Bucket:** el servicio **`minio-init`** (imagen `minio/mc`) espera a que MinIO responda y ejecuta `mc mb` idempotente sobre `mtl-photos`. No necesitas instalar `mc` en el host.
+Tras cambiar CORS o endpoint público:
 
-2. **CORS (MinIO community):** la API S3 de CORS **por bucket** no está disponible en la edición community; el `docker-compose` fija **`MINIO_API_CORS_ALLOW_ORIGIN`** en el servicio `minio` (orígenes típicos de Vite: `http://localhost:5173` y `http://127.0.0.1:5173`). Para otros orígenes o puertos, define en tu `.env` la variable `MINIO_API_CORS_ALLOW_ORIGIN` (lista separada por comas) y recrea el contenedor `minio`.
-
-Para repetir solo la creación del bucket (p. ej. tras borrar el volumen de MinIO):
-
-```bash
+```powershell
 cd infra/compose
-docker compose run --rm minio-init
+docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d --force-recreate minio media-service
 ```
 
-### Consola web (opcional)
-
-Sigue disponible en `http://localhost:${MINIO_CONSOLE_PORT:-9001}` con las mismas credenciales que `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` del `.env`.
+Vite en el host (`5173`) + MinIO en Docker: `mtl.media.storage.public-endpoint=http://127.0.0.1:9000` en `application-dev.properties`.
 
 ## Credenciales de desarrollo
 
@@ -115,8 +187,8 @@ El comando **`start-dev`** de Keycloak está pensado para **entorno local**: con
 | Realm | `mtl` |
 | Issuer (URL absoluta, host) | `http://localhost:8180/realms/mtl` (puerto = `KEYCLOAK_PORT`, por defecto 8180) |
 | Cliente SPA (público, PKCE) | `mtl-spa` |
-| Redirect URIs | Vite: `http://localhost:5173/*`, `http://127.0.0.1:5173/*`. Postman OAuth: `https://oauth.pstmn.io/v1/callback`, `https://oauth.pstmn.io/v1/browser-callback` (misma cadena en el campo **Callback URL** de Postman que en Keycloak) |
-| Web origins | `http://localhost:5173`, `http://127.0.0.1:5173`, `https://oauth.pstmn.io` |
+| Redirect URIs | Vite: `http://localhost:5173/*`, `http://127.0.0.1:5173/*`. Frontend Docker: `http://localhost:8088/*`, `http://127.0.0.1:8088/*`. Postman OAuth: `https://oauth.pstmn.io/v1/callback`, `https://oauth.pstmn.io/v1/browser-callback` (misma cadena en el campo **Callback URL** de Postman que en Keycloak) |
+| Web origins | `http://localhost:5173`, `http://127.0.0.1:5173`, `http://localhost:8088`, `http://127.0.0.1:8088`, `https://oauth.pstmn.io` |
 | Roles de realm | `COLABORADOR`, `ADMIN` (asignar a usuarios desde la consola de administración) |
 | Scopes OIDC (`mtl-spa`) | `fullScopeAllowed: true` en dev: el realm importado hereda los *default client scopes* estándar de Keycloak (incluye **`roles`** → `realm_access.roles` en el access token, y **`profile`** / **`email`**) |
 | Uso con **catalog-service** (`POST /api/catalog/trees`) | El access token debe traer al menos **`email`** y datos de perfil para `nombre` (`name` o `given_name`/`family_name`). En la SPA OIDC, pedir explícitamente `scope=openid profile email` al obtener el token (véase [ADR-0004](../../docs/adr/0004-catalog-rest-write-and-audit.md)). |
@@ -160,6 +232,7 @@ Estrategia de validación JWT en gateway y microservicios: [docs/security/jwt-ga
 
 ## Notas
 
-- **Microservicios** no están en este compose: solo dependencias. El gateway y los `services/*` se ejecutan aparte (IDE, Maven): orden y puertos en [services/README.md](../../services/README.md).
-- **Keycloak** arranca en modo `start-dev` con administrador de arranque (`KEYCLOAK_ADMIN` / `KEYCLOAK_ADMIN_PASSWORD`); el realm `mtl` se importa como se indica arriba.
-- **Mailpit** captura el correo enviado por SMTP en local (sin entrega a Internet); puertos y uso con **notification-service** en la sección Mailpit y en la tabla de puertos.
+- **Desarrollo habitual (host):** microservicios con IDE/Maven; infra con `docker compose up -d`. Puertos en [services/README.md](../../services/README.md).
+- **Aplicación contenerizada:** § `docker-compose.apps.yml`. **E2E:** § `docker-compose.e2e.yml`.
+- **Keycloak** en modo `start-dev`; realm `mtl` importado al primer arranque (§ Keycloak).
+- **Mailpit:** § Mailpit y tabla de puertos.

@@ -1,0 +1,2 @@
+# Scripts montados en contenedores Linux deben usar LF (evita fallos tipo "set: - invalid option").
+infra/compose/init/*.sh text eol=lf

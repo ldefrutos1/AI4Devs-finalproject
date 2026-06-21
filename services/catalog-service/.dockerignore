@@ -1,0 +1,4 @@
+# Contexto de build Opcion A: solo se copia target/*.jar (generado antes con Maven).
+src
+.git
+*.md

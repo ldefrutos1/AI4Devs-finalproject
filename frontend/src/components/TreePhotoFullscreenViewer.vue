@@ -1,8 +1,9 @@
 ﻿<script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import VueZoomable from 'vue-zoomable'
 import 'vue-zoomable/dist/style.css'
+import { useGalleryPhotoDisplayUrls } from '@/composables/useGalleryPhotoDisplayUrls'
 import type { TreePhotoGalleryItem } from '@/types/media'
 
 const props = defineProps<{
@@ -36,6 +37,8 @@ const selectedPhoto = computed(() => {
 
 const selectedPhotoPosition = computed(() => selectedIndex.value + 1)
 const zoomPercent = computed(() => Math.round(zoomLevel.value * 100))
+const { urlFor: galleryPhotoDisplayUrl } = useGalleryPhotoDisplayUrls(toRef(props, 'photos'))
+const selectedPhotoSrc = computed(() => galleryPhotoDisplayUrl(selectedPhoto.value))
 
 function clampIndex(rawIndex: number): number {
   if (!props.photos.length) {
@@ -134,7 +137,7 @@ onBeforeUnmount(() => {
           <div class="tree-photo-viewer-frame">
             <img
               class="tree-photo-viewer-image"
-              :src="selectedPhoto.url"
+              :src="selectedPhotoSrc"
               :alt="title"
               draggable="false"
             />

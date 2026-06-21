@@ -1,5 +1,6 @@
 package com.mtl.media.infrastructure.storage;
 
+import com.mtl.media.config.MediaStorageProperties;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.http.Method;
@@ -7,15 +8,18 @@ import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Presign PUT con SigV4 vía cliente MinIO. El {@code endpoint} configurado en el bean debe ser
- * alcanzable desde el navegador que ejecutará el PUT (p. ej. {@code http://localhost:9000} en local).
+ * Presign PUT/GET con SigV4. El cliente debe usar el endpoint público ({@code publicEndpoint}) para
+ * que el {@code host} firmado coincida con el PUT del navegador. La región fijada en el cliente
+ * evita {@code GetBucketLocation} (TCP) durante {@code getPresignedObjectUrl}.
  */
 public class MinioObjectStoragePresigner implements ObjectStoragePresigner {
 
   private final MinioClient minioClient;
+  private final String region;
 
-  public MinioObjectStoragePresigner(MinioClient minioClient) {
+  public MinioObjectStoragePresigner(MinioClient minioClient, MediaStorageProperties properties) {
     this.minioClient = minioClient;
+    this.region = properties.getRegion();
   }
 
   @Override
@@ -40,6 +44,7 @@ public class MinioObjectStoragePresigner implements ObjectStoragePresigner {
               .method(method)
               .bucket(bucket)
               .object(objectKey)
+              .region(region)
               .expiry(expiry, TimeUnit.SECONDS)
               .build());
     } catch (Exception e) {

@@ -10,6 +10,7 @@ $script:MtlPortDefinitions = @(
     @{ Port = 8083; Label = 'notification-service' }
     @{ Port = 8084; Label = 'ai-assistant-service' }
     @{ Port = 5173; Label = 'frontend Vite dev' }
+    @{ Port = 8088; Label = 'frontend Docker (Nginx)' }
     @{ Port = 5433; Label = 'PostgreSQL (host, Compose)' }
     @{ Port = 27017; Label = 'MongoDB' }
     @{ Port = 6379; Label = 'Redis' }

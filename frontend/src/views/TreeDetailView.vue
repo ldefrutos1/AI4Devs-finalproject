@@ -8,6 +8,7 @@ import PageBackLink from '@/components/layout/PageBackLink.vue'
 import TreeLocationMapPreview from '@/components/TreeLocationMapPreview.vue'
 import TreePhotoFullscreenViewer from '@/components/TreePhotoFullscreenViewer.vue'
 import { areLatLngInValidRange } from '@/composables/createTreeFormValidation'
+import { useGalleryPhotoDisplayUrls } from '@/composables/useGalleryPhotoDisplayUrls'
 import { usePublicTreeEnrichment } from '@/composables/usePublicTreeEnrichment'
 import { fetchPublicTreeDetail } from '@/services/catalog/catalogService'
 import { fetchTreePhotoGallery } from '@/services/media/treeGalleryService'
@@ -142,6 +143,8 @@ const selectedPhoto = computed(() => {
 const selectedPhotoPosition = computed(() =>
   selectedPhoto.value ? selectedPhotoIndex.value + 1 : 0,
 )
+const { urlFor: galleryPhotoDisplayUrl } = useGalleryPhotoDisplayUrls(galleryPhotos)
+const selectedPhotoSrc = computed(() => galleryPhotoDisplayUrl(selectedPhoto.value))
 
 async function loadTreeDetail(): Promise<void> {
   if (!treeId.value) {
@@ -260,7 +263,7 @@ onMounted(async () => {
             >
               <img
                 class="tree-detail-gallery-image"
-                :src="selectedPhoto.url"
+                :src="selectedPhotoSrc"
                 :alt="speciesTitle"
                 draggable="false"
                 @dblclick="openFullscreen"
