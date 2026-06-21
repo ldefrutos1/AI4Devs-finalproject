@@ -21,7 +21,6 @@
    - [4.2 Diagrama de entidad-relación (implementación física)](#42-diagrama-de-entidad-relación-implementación-física)
 5. 🔌 [Especificación de la API](#5-especificación-de-la-api)
 6. 📖 [Historias de usuario](#6-historias-de-usuario)
-   - [Desarrollo asistido por IA](#desarrollo-asistido-por-ia-gobierno-del-proceso)
 7. 🎫 [Tickets de trabajo](#7-tickets-de-trabajo)
 8. 🔀 [Pull requests](#8-pull-requests)
   
@@ -124,17 +123,17 @@ A continuación se incluye el diagrama de casos de uso del sistema.
 | UC-04 | Modificar y eliminar árboles del colaborador | Colaborador |
 | UC-05 | Identificar árbol asistido por IA (imagen) | Colaborador |
 | UC-06 | Consultar asistente IA (chat) | Colaborador |
-| UC-07 | Gestionar tablas de catálogo (maestros taxonómicos; incl. consulta IA enriquecimiento especie en MVP) | ADMIN |
+| UC-07 | Gestionar tablas de catálogo (incl. consulta IA enriquecimiento especie) | ADMIN |
 | UC-08 | Gestionar solicitudes de notificación | ADMIN |
 | UC-09 | Notificar por correo a suscriptores | Sistema |
 
-\* UC-05 y UC-06: fuera del MVP (HU-009, HU-010 — próxima versión en [backlog.md](docs/backlog/backlog.md) §3). Consulta IA de enriquecimiento de especie en maestros: [HU-016](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md) (**Cerrada**).
+\* UC-05 y UC-06: fuera del MVP (HU-009, HU-010 — próxima versión en [backlog.md](docs/backlog/backlog.md) §3).
 
 *El Modelo completo se puede consultar en:* [resumen de casos de uso](docs/use-cases/use-case-summary.md) · [modelo PlantUML](docs/use-cases/use-case-model.puml)
 
 ### **2.3. Diseño y experiencia de usuario:**
 
-La aplicación implementa una navegación simple por roles con una **home de entrada** adaptada a cada perfil.
+La aplicación implementa una navegación simple por roles con una **página de entrada (Inicio)** adaptada a cada perfil.
 
 ### Navegación de la aplicación
 
@@ -146,7 +145,7 @@ La aplicación implementa una navegación simple por roles con una **home de ent
 🏠  Inicio                   /
 🌳  Catálogo                 /ejemplares
     └─ Detalle               /ejemplares/:id
-✉️  Suscripción              /subscriptions/new
+✉️  Suscripción             /subscriptions/new
 ```
 
 ---
@@ -156,7 +155,7 @@ La aplicación implementa una navegación simple por roles con una **home de ent
 ↳ *Incluye todas las páginas públicas*
 
 ```
-➕  Alta de ejemplar            /ejemplares/new
+➕  Alta de ejemplar         /ejemplares/new
 📋  Mis árboles              /mis-ejemplares
     └─ Edición de ficha      /ejemplares/:id/edit
 ```
@@ -191,13 +190,21 @@ La aplicación implementa una navegación simple por roles con una **home de ent
 
 ### **2.4. Instrucciones de instalación:**
 
-1. **Infraestructura:** copiar `infra/compose/.env.example` → `infra/compose/.env`; desde `infra/compose/`, ejecutar `docker compose up -d`.
-2. **Backend:** desde la raíz del repo, **una terminal por microservicio**, arrancar con perfil **`dev`** (siempre **api-gateway** y los del flujo a probar; ver tabla). Ejemplo:
+1. **Infraestructura:** copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario: `infra/compose/.env.example` → `infra/compose/.env`. Desde `infra/compose/`, ejecutar:
+  ```bash
+  `docker compose up -d`
+   ```
+2. **Backend:** desde la raíz del repo, arrancar **una terminal por microservicio**, con perfil **`dev`** (siempre se debe arrancar **api-gateway** además de los microservicios a probar; ver tabla). Ejemplo:
    ```bash
    mvn -f services/pom.xml -pl api-gateway spring-boot:run -Dspring-boot.run.profiles=dev
    mvn -f services/pom.xml -pl catalog-service spring-boot:run -Dspring-boot.run.profiles=dev
    ```
-3. **Frontend:** copiar `frontend/.env.example` → `frontend/.env`; desde `frontend/`, `npm install` y `npm run dev` → UI en **http://localhost:5173** (proxy `/api/*` al gateway).
+3. **Frontend:** copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario  `frontend/.env.example` → `frontend/.env`. Desde `frontend/`, ejecutar:
+   ```bash
+   `npm install` 
+   `npm run dev`
+   ``` 
+   → UI en **http://localhost:5173** (proxy `/api/*` al gateway).
 
 > **Redis:** con perfil `dev`, **catalog-service** usa caché Redis; el contenedor debe estar en marcha antes de arrancarlo.
 
@@ -209,7 +216,7 @@ La aplicación implementa una navegación simple por roles con una **home de ent
 | Fotos (subida) | MinIO | api-gateway, media-service (+ **catalog-service** si aún no existe la ficha) |
 | Aviso por correo (alta de ejemplar) | Kafka, Mailpit | api-gateway, catalog-service, notification-service |
 | Admin (maestros / suscripciones) | — | api-gateway, catalog-service; notification-service (suscripciones) |
-| Consulta IA especie (ADMIN, stub) | — | api-gateway, ai-assistant-service (+ **catalog-service** para pantallas de alta/edición con popup de especie) |
+| Consulta IA especie (ADMIN, stub) | — | api-gateway, ai-assistant-service + **catalog-service** para pantallas de alta/edición con popup de especie |
 
 **Detalle operativo** (puertos, usuarios Keycloak, Flyway, incidencias): [local-setup-guide.md](docs/onboarding/local-setup-guide.md).
 
@@ -233,7 +240,7 @@ Usuarios de prueba: [infra/compose/README.md](infra/compose/README.md). Historia
 
 ## 3. 🏗️ Arquitectura del sistema
 
-**NOTA:** La elección de una arquitectura de microservicios en Java con Spring y Vue tiene un **propósito didáctico**, con el fin de aprender estas tecnologías.
+**NOTA:** La elección de una arquitectura de microservicios en Java con Spring y Vue tiene un **__propósito didáctico__**, con el fin de aprender estas tecnologías.
 
 En esta sección:
 
@@ -330,9 +337,9 @@ flowchart TB
 
 ### **3.2. Descripción de componentes principales**
 
-A continuación se detallan los componentes del diagrama C2 (§3.1), desplegados o consumidos por la plataforma. No se listan dependencias externas como el proveedor de mapas (**OpenStreetMap** / **Leaflet**) ni el proveedor de IA.
+A continuación se detallan los componentes del diagrama C2 (§3.1), propios del sistema. No se listan los componentes de la capa e infraestructura (Keycloak, PostgreSQL, Mongo, Redis, S3 MinIO), ni dependencias externas como el proveedor de mapas (**OpenStreetMap** / **Leaflet**) ni el proveedor de IA.
 
-> En **3.2.1–3.2.4**, los diagramas y secuencias técnicas están en bloques **Desplegar** (clic en el título para expandir o contraer).
+> En los bloques **3.2.1–3.2.4**, los diagramas y secuencias técnicas están en bloques **Desplegar** (clic en el título para expandir o contraer).
 
 #### Capa de aplicación y entrada
 
@@ -341,7 +348,7 @@ A continuación se detallan los componentes del diagrama C2 (§3.1), desplegados
 | **SPA** (`frontend/`) | Vue 3, Vite, TypeScript | Frontal de la aplicación. |
 | **API Gateway** (`api-gateway`) | Spring Cloud Gateway (WebFlux), Spring Boot 4 | Puerta de entrada: enruta a los microservicios, aplica filtros de seguridad y correlación |
 
-#### Microservicios de dominio
+#### Capa de Microservicios de dominio
 
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
@@ -350,13 +357,14 @@ A continuación se detallan los componentes del diagrama C2 (§3.1), desplegados
 | **notification-service** | Spring Boot 4, JPA, Flyway, Spring Kafka, JavaMail | Notificación de novedades. |
 | **ai-assistant-service** | Spring Boot 4 | Comunicación con proveedor IA. |
 
-#### Observabilidad y herramientas de desarrollo local
+#### Capa de Observabilidad y herramientas de desarrollo local
 
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
 | **Prometheus** | `prom/prometheus:v3.2.1` (Compose) | Métricas vía `/actuator/prometheus`. |
 | **Grafana** | `grafana/grafana:11.5.2` (Compose) | Dashboard **MTL Microservices**; UI **http://localhost:3000** |
 
+#### Esquemas en PostgreSQL
 
 **C2 (detalle) — un servidor PostgreSQL con PostGIS, cuatro esquemas, un esquema por servicio:**
 
@@ -397,7 +405,7 @@ En las pantallas que exigen identificarse, la SPA controla que se inicie sesión
 <details>
 <summary><strong>Desplegar</strong> — Diagramas C3/C4 del flujo de autenticación</summary>
 
-Objetivo: mantener rutas protegidas con sesión válida, renovar token de forma transparente y centralizar el manejo de `401` en cliente HTTP.
+A continuación se muestra la implementeción de seguridad del sistema que tiene como objetivo mantener rutas protegidas con sesión válida, renovar token de forma transparente y centralizar el manejo de `401` en cliente HTTP.
 
 #### C3 — Componentes (nivel 3): autenticación en el contenedor SPA Vue
 
@@ -522,7 +530,9 @@ sequenceDiagram
 
 ### **3.2.2 Kafka:**
 
-Tras el alta de un ejemplar, la notificación por correo a suscriptores se realiza de forma asincrona (regla **R7**). Después de crear la ficha del ejemplar, **catalog-service** publica un evento en Kafka (`catalog.ejemplar.evento`) y **notification-service** lo recibe para enviar los correos. El formato del mensaje está en [kafka-events.md](docs/events/kafka-events.md).
+Para el envío de notificaciones a suscriptores el sistema implementa una arquitectura de eventos (Event-Driven Architecture) con Kafka.
+
+Tras el alta de un ejemplar, el envío de correo a suscriptores se realiza de forma asincrona (regla **R7**). Después de crear la ficha del ejemplar, **catalog-service** publica un evento en Kafka (`catalog.ejemplar.evento`) y **notification-service** lo recibe para enviar los correos. El formato del mensaje está en [kafka-events.md](docs/events/kafka-events.md).
 
 <details>
 <summary><strong>Desplegar</strong> — Diagramas C3/C4 productor/consumidor y secuencias Kafka</summary>
@@ -568,7 +578,7 @@ flowchart TB
 
 #### C3 — Consumidor: **notification-service**
 
-**notification-service** escucha el topic que publica **catalog-service**, persiste su propio registro en PostgreSQL (esquema `notification`) y envía los correos. El flujo, en orden:
+El microservicio **notification-service** escucha el topic que publica **catalog-service**, persiste su propio registro en PostgreSQL (esquema `notification`) y envía los correos. A continuación se detalla el flujo seguido:
 
 1. Un **listener** de Kafka recibe el mensaje JSON del alta de ejemplar.
 2. La **ingestión** comprueba que el evento sea válido y de tipo `EJEMPLAR_CREADO`; cualquier otro tipo se descarta.
@@ -632,7 +642,7 @@ Durante el alta de un ejemplar, **catalog-service** valida y guarda la ficha y l
 
 La publicación en Kafka ocurre **después**, de forma asíncrona (`AfterCommitTaskRegistrar`): se asigna un `evento_id` único y se envía el mensaje al topic `catalog.ejemplar.evento` (formato en [kafka-events.md](docs/events/kafka-events.md)).
 
-Si Kafka falla en ese paso posterior, el alta **no se revierte**; el fallo queda solo en logs para revisión operativa. Si el mensaje se reenvía o se repite la entrega, **notification-service** identifica el evento por `evento_id` y evita procesarlo dos veces (detalle en la secuencia de consumo siguiente).
+Si Kafka falla en ese paso posterior, el alta **no se revierte**; el fallo queda solo en logs para revisión operativa.
 
 ```mermaid
 sequenceDiagram
@@ -673,7 +683,7 @@ sequenceDiagram
 
 #### C4 — Secuencia de consumo (**EJEMPLAR_CREADO**)
 
-El listener pasa la información recibida en JSON a la ingestión ([kafka-events.md](docs/events/kafka-events.md)). La primera vez se inserta `evento_catalogo` por `evento_id`; en caso de que ya exista, no se repite. El procesador guarda notificación y envíos en `notification`, manda correo a suscriptores con suscripción **ACTIVA** y deja el evento en estado **PROCESADO**.
+El listener pasa la información recibida en JSON a la ingestión ([kafka-events.md](docs/events/kafka-events.md)). La primera vez se inserta `evento_catalogo` por `evento_id`; en caso de que ya exista, no se repite; **notification-service** identifica el evento por `evento_id` y evita procesarlo dos veces. El procesador guarda notificación y envíos en `notification`, manda correo a suscriptores con suscripción **ACTIVA** y deja el evento en estado **PROCESADO**.
 
 ```mermaid
 sequenceDiagram
@@ -771,14 +781,14 @@ sequenceDiagram
 
 ### **3.2.4 Uso de IA: características de especie (MVP) e identificación/chat (futuro)**
 
-En el MVP solo se ha implementado la consulta de características de especie restringida al role **ADMIN**. El **frontend** invoca **ai-assistant-service** (`POST /api/ai/species/enrichment-suggestions`) pasando el nombre científico y común; el servicio valida el JSON recibido del LLM (referencia [mongo.md](docs/data-model/mongo.md) §6.3) y devuelve un resultado **orientativo** para precargar el popup de enriquecimiento de especie. 
+En el MVP la invocación a un LLM externo se ha restringido a la consulta de características de especie, función accesible para usuarios con rol **ADMIN**. El **frontend** invoca **ai-assistant-service** (`POST /api/ai/species/enrichment-suggestions`) pasando el nombre científico y el común; el servicio valida el JSON recibido del LLM (referencia [mongo.md](docs/data-model/mongo.md) §6.3) y devuelve un resultado **orientativo** para precargar el popup de enriquecimiento de especie. 
 
-**Condiciones de producto (HU-016):** en local se usa `mtl.ai.provider.mode=stub` para simular el LLM (sin necesidad de clave OpenAI). Desglose: [HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md).
+**Condiciones de producto (HU-016):** en local se usa `mtl.ai.provider.mode=stub` para simular el LLM (sin necesidad de una clave OpenAI). Desglose: [HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md).
 
 <details>
 <summary><strong>Desplegar</strong> — Secuencia de consulta IA (MVP)</summary>
 
-**Flujo de consulta IA (MVP; precarga en popup — sin persistir enriquecimiento en catálogo/Mongo; sí trazabilidad `auditoria_uso_ia` en PostgreSQL del servicio IA):**
+Flujo de consulta IA ( se precarga en popup con los datos recibidos del LLM y se guarda trazabilidad de la consulta en PostgreSQL `auditoria_uso_ia` — la responsabilidad de persistir enriquecimiento en catálogo/Mongo sigue en catalog-service).
 
 ```mermaid
 sequenceDiagram
