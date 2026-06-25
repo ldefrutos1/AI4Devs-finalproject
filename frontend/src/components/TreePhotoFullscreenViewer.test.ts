@@ -1,8 +1,16 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createI18n } from 'vue-i18n'
 import TreePhotoFullscreenViewer from '@/components/TreePhotoFullscreenViewer.vue'
 import { es } from '@/i18n/locales/es'
+import { apiFetchBlob } from '@/services/http/apiClient'
+
+vi.mock('@/services/http/apiClient', () => ({
+  apiFetchBlob: vi.fn(),
+}))
+
+const apiFetchBlobMock = vi.mocked(apiFetchBlob)
+const blobSourceUrl = new WeakMap<Blob, string>()
 
 function createTestI18n() {
   return createI18n({
@@ -37,6 +45,23 @@ const basePhotos = [
 ]
 
 describe('TreePhotoFullscreenViewer', () => {
+  beforeEach(() => {
+    apiFetchBlobMock.mockReset()
+    apiFetchBlobMock.mockImplementation(async (url: string) => {
+      const blob = new Blob([url], { type: 'image/jpeg' })
+      blobSourceUrl.set(blob, url)
+      return blob
+    })
+    vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob) => {
+      return `blob:${blobSourceUrl.get(blob) ?? ''}`
+    })
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('shows single-image mode without pagination controls', async () => {
     const wrapper = mount(TreePhotoFullscreenViewer, {
       props: {
@@ -78,8 +103,9 @@ describe('TreePhotoFullscreenViewer', () => {
       },
     })
     await flushPromises()
-
-    expect(wrapper.get('.tree-photo-viewer-image').attributes('src')).toContain('one.jpg')
+    await vi.waitFor(() => {
+      expect(wrapper.get('.tree-photo-viewer-image').attributes('src')).toContain('one.jpg')
+    })
     expect(wrapper.text()).toContain('Imagen 1 de 2')
 
     const nextButton = wrapper.findAll('button').find((button) => button.text() === 'Siguiente')
