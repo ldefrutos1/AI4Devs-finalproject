@@ -1,11 +1,11 @@
-# HU-006 — Desglose en tickets de trabajo (subida de fotografías al árbol)
+# HU-006 — Desglose en tickets de trabajo (fotografías asociadas al árbol)
 
 | Campo | Valor |
 |-------|--------|
 | **Historia** | [HU-006 en backlog.md](backlog.md) (tabla §3) |
 | **Refinamiento** | [HU-006-fotografias-asociadas-al-arbol.md](HU-006-fotografias-asociadas-al-arbol.md) |
 | **Épica** | Fotografías y medios |
-| **Título HU** | Subida de fotografías al árbol |
+| **Título HU** | Fotografías asociadas al árbol |
 | **Estado HU** | **Cerrada** (14/14 tickets **Hecho**) |
 
 **Convención de ID de ticket:** `TASK-HU-006-<nn>`.

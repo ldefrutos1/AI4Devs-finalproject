@@ -39,7 +39,7 @@ Como usuario público, colaborador o usuario con rol **ADMIN**, quiero disponer 
 ### Dependencias
 
 - **HU-001** (autenticación OIDC/JWT): necesaria para aplicar guardas en rutas de colaborador/`ADMIN`.
-- Definición de jerarquía y home ya documentada en `readme.md` §1.3 (páginas por perfil, decisión de menú y reglas de visibilidad).
+- Definición de jerarquía y home ya documentada en `readme.md` §2.3 (páginas por perfil, decisión de menú y reglas de visibilidad).
 - Disponibilidad de enrutado frontend (Vue Router) y estado de sesión expuesto al frontend.
 - Alineación con backlog actual en consulta pública (**HU-002**, **HU-003**, **HU-004**), catálogo colaborador (**HU-005**, **HU-008**) y administración (**HU-011**, **HU-012**).
 
@@ -62,7 +62,7 @@ Como usuario público, colaborador o usuario con rol **ADMIN**, quiero disponer 
 
 ### Referencias
 
-Backlog `HU-013`; `readme.md` §1.2 (consulta pública), §1.3 (jerarquía de páginas, home y menú), §2.1.1 (autenticación en front y rutas protegidas); backlog §6 (aterrizaje frontend MVP); épica Acceso e identidad.
+Backlog `HU-013`; `readme.md` §2.2 (consulta pública), §2.3 (jerarquía de páginas, home y menú), §3.2.1 (autenticación en front y rutas protegidas); `readme.md` §6 (aterrizaje frontend MVP); épica Acceso e identidad.
 
 ### Escenario 1 — Navegación pública disponible sin autenticación
 

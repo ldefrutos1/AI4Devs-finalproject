@@ -66,7 +66,7 @@ Como visitante sin cuenta, quiero consultar el listado y el detalle de las ficha
 
 ### Referencias
 
-Backlog `HU-002` (tabla §3), `readme.md` §1.2 (consulta pública y visualización), `readme.md` §1.3 (jerarquía pública), `docs/use-cases/use-case-summary.md` (UC-01), `docs/api/openapi.yaml` (rutas públicas de catálogo).
+Backlog `HU-002` (tabla §3), `readme.md` §2.2 (consulta pública y visualización), `readme.md` §2.3 (navegación pública), `docs/use-cases/use-case-summary.md` (UC-01), `docs/api/openapi.yaml` (rutas públicas de catálogo).
 
 ### Escenario 1 — Consulta pública de listado sin sesión
 

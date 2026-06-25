@@ -1,4 +1,4 @@
-# HU-006 — Subida de fotografías al árbol
+# HU-006 — Fotografías asociadas al árbol
 
 ## 1. Historia refinada
 
@@ -6,7 +6,7 @@
 |-------|--------|
 | **ID** | HU-006 |
 | **Épica** | Fotografías y medios |
-| **Título** | Subida de fotografías al árbol |
+| **Título** | Fotografías asociadas al árbol |
 | **Estimación de complejidad** | M |
 | **Prioridad** | Alta |
 | **Estado** | **Cerrada** |

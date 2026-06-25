@@ -62,7 +62,7 @@ Como usuario de la aplicación, quiero ver en el detalle de cada árbol publicad
 
 ### Referencias
 
-Backlog `HU-003` (tabla §3), `readme.md` §1.2 (consulta pública y visualización geográfica), `readme.md` §1.3 (detalle público con mapa integrado), `docs/use-cases/use-case-summary.md` (UC-01), relación funcional con [HU-002-fichas-publicadas-lista-y-detalle.md](HU-002-fichas-publicadas-lista-y-detalle.md).
+Backlog `HU-003` (tabla §3), `readme.md` §2.2 (consulta pública y visualización geográfica), `readme.md` §2.3 (detalle público con mapa integrado), `docs/use-cases/use-case-summary.md` (UC-01), relación funcional con [HU-002-fichas-publicadas-lista-y-detalle.md](HU-002-fichas-publicadas-lista-y-detalle.md).
 
 ### Escenario 1 — Mapa visible en detalle público con coordenadas válidas
 

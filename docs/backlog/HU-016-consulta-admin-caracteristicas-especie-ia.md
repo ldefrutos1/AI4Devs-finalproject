@@ -6,7 +6,7 @@
 |-------|------------|--------------------------------------|------------|
 | **ID** | HU-016 | Coherente | Correcto |
 | **Épica** | Inteligencia artificial | readme §2.2 (Integración con IA), §3.2.4; backlog §2 | Correcto |
-| **Título** | Consulta de características de especie (ADMIN, MVP) | Alineado con UC-07 / maestros y enriquecimiento `especie_detalle` | Correcto |
+| **Título** | Consulta de características de especie (ADMIN, MVP) | Épica IA; enriquecimiento `especie_detalle` vía **HU-015** (no UC-07; maestros en **HU-011**) | Correcto |
 | **Historia** | Como usuario administrador, quiero consultar a la IA las características de una especie… | Debe acotarse a rol **ADMIN**, IA **orientativa** y precarga de datos en la pantalla ya existente de edición de características de especie ([product-context](../../.cursor/rules/product-context.mdc)) | Refinada en §2 |
 | **Estimación** | M | Sin contradicción | **Se mantiene M** |
 | **Prioridad** | Media | Sin contradicción | **Se mantiene Media** |

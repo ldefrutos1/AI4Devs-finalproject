@@ -13,7 +13,7 @@
 
 **Historia de usuario**
 
-Como colaborador autenticado, quiero modificar o eliminar únicamente los árboles que di de alta yo, para mantener actualizada mi documentación sin afectar el trabajo de otros.
+Como colaborador autenticado, quiero modificar o eliminar únicamente los árboles que di de alta yo, y como administrador quiero poder hacerlo sobre cualquier ficha del catálogo, para mantener actualizada la documentación sin afectar indebidamente el trabajo de otros.
 
 - **Entregable de la historia:** Flujo vertical en **catalog-service**, **media-service** (borrado masivo de fotos por árbol) y **frontend** que permite al colaborador **listar y filtrar** sus fichas, **abrir una ficha en modo edición**, **persistir cambios** (**PUT**) y **eliminar físicamente** fichas propias (**DELETE** con cascada media → SQL → hook Mongo), respetando **R1**, **R2** y la **propiedad** (`usuario_app_id`; **ADMIN** sobre cualquier ficha). Si **media-service** falla al borrar fotos, el árbol **no** se elimina en PostgreSQL. **Rollback compensatorio** tras fotos borradas: **no** implementado en MVP (deuda documentada). **AUDITORIA_CATALOGO** (**R3**, [ADR-0004](../adr/0004-catalog-rest-write-and-audit.md)). Sin **`EJEMPLAR_CREADO`** ni notificación en edición/baja (**R7**). Rutas: **`/mis-ejemplares`**, **`/ejemplares/:id/edit`** (**HU-013**). Galería en edición: **[TASK-HU-006-14](HU-006-ticket-breakdown.md)** (**HU-006** cerrada). Desglose: **[HU-008-ticket-breakdown.md](HU-008-ticket-breakdown.md)**. *Nota post-cierre:* el paso Mongo pasó de stub a borrado real con **[TASK-HU-015-01](HU-015-ticket-breakdown.md)** (**Hecho**) cuando `mtl.catalog.mongo.enabled=true`.
 

@@ -13,7 +13,7 @@
 
 **Historia de usuario**
 
-Como colaborador autenticado, quiero registrar un árbol con datos descriptivos, coordenadas y especie elegida entre las disponibles en los maestros del catálogo, pudiendo dejar la ficha publicable para consulta pública, para documentar el ejemplar según las reglas del catálogo.
+Como colaborador autenticado, quiero registrar un árbol con datos descriptivos, coordenadas y especie elegida entre las disponibles en los maestros del catálogo, pudiendo dejar la ficha publicable para consulta pública; y como administrador quiero poder registrar ejemplares con las mismas reglas, para documentar el ejemplar según las reglas del catálogo.
 
 - **Entregable de la historia:** Ficha de **ÁRBOL** persistida en el **catálogo** (`catalog-service`) asociada al colaborador creador, con especie y provincia válidas según maestros, coordenadas del ejemplar, metadatos de negocio previstos (incluido estado de publicación acorde al producto) y trazas de auditoría de catálogo cuando aplique; **publicación a Kafka** del mensaje **`EJEMPLAR_CREADO`** en `catalog.ejemplar.evento` solo en el **alta exitosa** (implementación **TASK-HU-005-05**), alineado con [kafka-events.md](../events/kafka-events.md) y **R7** (**solo-on-create**). La **persistencia de `EVENTO_CATALOGO`**, el consumo estable del topic y el **envío de correo** quedan fuera: **[HU-007](backlog.md)** (`notification-service`).
 
@@ -29,7 +29,7 @@ Como colaborador autenticado, quiero registrar un árbol con datos descriptivos,
 
 #### Queda fuera de esta historia
 
-- **Subida de binarios** y política R4–R5 de fotografías (épica **Fotografías**, **HU-006** y **HU-014**, `media-service` y rutas de medios / fotos del árbol).
+- **Subida de binarios** y política R4–R5 de fotografías (épica **Fotografías y medios**, **HU-006** y **HU-014**, `media-service` y rutas de medios / fotos del árbol).
 - **Identificación asistida por IA** en el momento del alta (extensión **UC-05** sobre UC-03/04; **HU-009**).
 - **Edición posterior** de la ficha (**UC-04**, **HU-008**).
 - **Notificación por correo** a suscriptores (**[HU-007](backlog.md)**): aquí solo se garantiza la **publicación a Kafka** (`EJEMPLAR_CREADO`); el consumo del topic, **EVENTO_CATALOGO** / idempotencia y **SMTP** son responsabilidad del **notification-service** (desglose en [HU-007-ticket-breakdown.md](HU-007-ticket-breakdown.md)).

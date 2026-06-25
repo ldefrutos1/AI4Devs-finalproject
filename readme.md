@@ -70,7 +70,7 @@ La solución está dirigida a aficionados a la naturaleza en general y puede res
 
 #### Registro y publicación de árboles
 
-El sistema permite registrar árboles mediante fichas con información relevante, fotografías y ubicación, posibilitando su publicación para consulta pública. Los usuarios autenticados con perfil de colaborador pueden dar de alta nuevas fichas de ejemplares; así como la edición o eliminación de aquellos registros creados por ellos mismos. El sistema permite la edición de todos los ejemplares a los usuarios con perfil de administrador.
+El sistema permite registrar árboles mediante fichas con información relevante, fotografías y ubicación, posibilitando su publicación para consulta pública. Los usuarios autenticados con perfil de colaborador pueden dar de alta nuevas fichas de ejemplares, así como editar o eliminar los registros creados por ellos mismos. El perfil de administrador puede dar de alta fichas y editar o eliminar cualquier ejemplar del catálogo.
 
 #### Consulta pública y visualización geográfica
 
@@ -128,6 +128,8 @@ A continuación se incluye el diagrama de casos de uso del sistema.
 | UC-09 | Notificar por correo a suscriptores | Sistema |
 
 \* UC-05 y UC-06: fuera del MVP (HU-009, HU-010 — próxima versión en [backlog.md](docs/backlog/backlog.md) §3).
+
+\* UC-04: **COLABORADOR** solo sobre fichas propias; **ADMIN** (generalización de rol) sobre **cualquier** ficha ([HU-008](docs/backlog/HU-008-edicion-de-mis-arboles.md)).
 
 *El Modelo completo se puede consultar en:* [resumen de casos de uso](docs/use-cases/use-case-summary.md) · [modelo PlantUML](docs/use-cases/use-case-model.puml)
 
@@ -190,12 +192,13 @@ La aplicación implementa una navegación simple por roles con una **página de 
 
 ### **2.4. Instrucciones de instalación entorno de Desarrollo:**
 
-1. **Infraestructura:** para podeer ejecutar la aplicación en desarrollo se necesita arrancar los contenedores que tienen la infraestructura (PostgreSQL, Mongo, ...) definidos en el archivo dockeer-compose.yaml siguiendo estos pasos:
-- Copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario: `infra/compose/.env.example` → `infra/compose/.env`. - Desde `infra/compose/`, ejecutar:
+1. **Infraestructura:** para poder ejecutar la aplicación en desarrollo se necesita arrancar los contenedores que tienen la infraestructura (PostgreSQL, Mongo, ...) definidos en [`infra/compose/docker-compose.yml`](infra/compose/docker-compose.yml) siguiendo estos pasos:
+- Copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario: `infra/compose/.env.example` → `infra/compose/.env`.
+- Desde `infra/compose/`, ejecutar:
   ```bash
-  `docker compose up -d`
-   ```
-2. **Backend:** los servicios de backend se arrancar desde la raíz del repo, hay que arrancar **una terminal por microservicio**, con perfil **`dev`** (siempre se debe arrancar **api-gateway** además de los microservicios a probar; ver tabla). Ejemplo con api-gateway y catalog-servicce:
+  docker compose up -d
+  ```
+2. **Backend:** los servicios de backend se arrancan desde la raíz del repo, hay que arrancar **una terminal por microservicio**, con perfil **`dev`** (siempre se debe arrancar **api-gateway** además de los microservicios a probar; ver tabla). Ejemplo con api-gateway y catalog-service:
    ```bash
    mvn -f services/pom.xml -pl api-gateway spring-boot:run -Dspring-boot.run.profiles=dev
    mvn -f services/pom.xml -pl catalog-service spring-boot:run -Dspring-boot.run.profiles=dev
@@ -967,7 +970,7 @@ flowchart TB
 
 **Test E2E en tres niveles:**
 
-1. **Levantando contenedores en el proceso de prueba** — levanta stack efímero autocontenido en Docker (PostgreSQL, Mongo, Kafka, Keycloak, microservicios y front en contenedor). No se ejecuta automáticamente en cada PR por el coste de levantar contenedores. Ejecuta en secuencia `system-e2e-tests` (HTTP) y Playwright (UI). Se puedde ejecutar de dos modos:
+1. **Levantando contenedores en el proceso de prueba** — levanta stack efímero autocontenido en Docker (PostgreSQL, Mongo, Kafka, Keycloak, microservicios y front en contenedor). No se ejecuta automáticamente en cada PR por el coste de levantar contenedores. Ejecuta en secuencia `system-e2e-tests` (HTTP) y Playwright (UI). Se puede ejecutar de dos modos:
    - **CI:** workflow manual [E2E Playwright (alta de ejemplar)](.github/workflows/e2e-playwright.yml) en GitHub Actions → *Run workflow*.
    - **Local:** `.\scripts\dev\test-e2e.ps1` (compila jars, levanta `infra/compose/docker-compose.e2e.yml`, ejecuta ambas suites y baja el stack con `down -v`). Atajos: `-SkipBuild`, `-KeepStack` — [scripts/README.md](scripts/README.md).
 

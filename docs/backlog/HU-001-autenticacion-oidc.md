@@ -31,7 +31,7 @@ Como colaborador o usuario con rol **ADMIN**, quiero autenticarme mediante el pr
 - **Correlación** `X-Correlation-Id`: normalización en gateway, reenvío al upstream en proxy y lectura en MDC de microservicios MVC (**TASK-HU-001-10**).
 - Mensajes de error de acceso o sesión en frontend sin filtrar detalle interno del backend.
 - Tests automatizados del resource server sin depender de Keycloak manual en cada ejecución (JWT de prueba / decoder stub).
-- Documentación de variables (`VITE_*`, `MTL_JWT_ISSUER_URI`, etc.) y flujo de arranque en [services/README.md](../../services/README.md), [frontend/README.md](../../frontend/README.md) y readme §2.5 / §3.1.1.
+- Documentación de variables (`VITE_*`, `MTL_JWT_ISSUER_URI`, etc.) y flujo de arranque en [services/README.md](../../services/README.md), [frontend/README.md](../../frontend/README.md) y readme §2.5 / §3.2.1.
 
 #### Queda fuera de esta historia
 
@@ -89,7 +89,7 @@ Ver [HU-001-ticket-breakdown.md](HU-001-ticket-breakdown.md) (`TASK-HU-001-01` �
 
 ### Referencias
 
-Backlog `HU-001` (tabla §3); [HU-001-ticket-breakdown.md](HU-001-ticket-breakdown.md); [infra/compose/README.md](../../infra/compose/README.md); [jwt-gateway-strategy.md](../security/jwt-gateway-strategy.md); [readme.md](../../readme.md) §1.3 (matriz de páginas por rol), §2.5 y §3.1.1 (autenticación en front); [frontend/README.md](../../frontend/README.md) (flujo OIDC).
+Backlog `HU-001` (tabla §3); [HU-001-ticket-breakdown.md](HU-001-ticket-breakdown.md); [infra/compose/README.md](../../infra/compose/README.md); [jwt-gateway-strategy.md](../security/jwt-gateway-strategy.md); [readme.md](../../readme.md) §2.3 (matriz de páginas por rol), §2.5 y §3.2.1 (autenticación en front); [frontend/README.md](../../frontend/README.md) (flujo OIDC).
 
 ### Escenario 1 — Login y sesión válida por OIDC
 
@@ -126,7 +126,7 @@ Backlog `HU-001` (tabla §3); [HU-001-ticket-breakdown.md](HU-001-ticket-breakdo
 | **Valiosa** | Sí: desbloquea funciones protegidas del MVP y control básico por rol. |
 | **Estimable** | Sí: breakdown por capa (infra, front, gateway, catalog, QA). |
 | **Small** | Aceptable para **M**; no se amplió a IAM avanzado. |
-| **Testable** | Sí: IT por capa; `system-e2e-tests` (esc. 2–4); checklist manual esc. 1 (**001-14**); navegación/guardas en **HU-013** (Vitest; UI según §2.1.1). |
+| **Testable** | Sí: IT por capa; `system-e2e-tests` (esc. 2–4); checklist manual esc. 1 (**001-14**); navegación/guardas en **HU-013** (Vitest; UI según [testing-java.md](../engineering/testing-java.md) §2.1.1). |
 
 ## 4. Esfuerzo estimado de implementación
 
