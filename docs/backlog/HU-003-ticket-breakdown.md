@@ -6,6 +6,7 @@
 | **Refinamiento** | [HU-003-localizacion-en-mapa-dentro-del-detalle-de-arbol.md](HU-003-localizacion-en-mapa-dentro-del-detalle-de-arbol.md) |
 | **Épica** | Consulta pública |
 | **Título HU** | Localización en mapa dentro del detalle de árbol |
+| **Estado HU** | **Cerrada** (6/6 tickets **Hecho**) |
 
 **Convención de ID de ticket:** `TASK-HU-003-<nn>`.
 

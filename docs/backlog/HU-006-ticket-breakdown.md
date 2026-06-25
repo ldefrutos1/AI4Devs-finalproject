@@ -4,7 +4,7 @@
 |-------|--------|
 | **Historia** | [HU-006 en backlog.md](backlog.md) (tabla §3) |
 | **Refinamiento** | [HU-006-fotografias-asociadas-al-arbol.md](HU-006-fotografias-asociadas-al-arbol.md) |
-| **Épica** | Fotografías |
+| **Épica** | Fotografías y medios |
 | **Título HU** | Subida de fotografías al árbol |
 | **Estado HU** | **Cerrada** (14/14 tickets **Hecho**) |
 

@@ -9,6 +9,7 @@
 | **Título** | Suscripción por correo sin cuenta colaborador |
 | **Estimación de complejidad** | M |
 | **Prioridad** | Alta |
+| **Estado** | **Cerrada** |
 
 **Historia de usuario**
 

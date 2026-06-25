@@ -6,6 +6,7 @@
 | **Refinamiento** | [HU-004-suscripcion-por-correo-sin-cuenta-colaborador.md](HU-004-suscripcion-por-correo-sin-cuenta-colaborador.md) |
 | **Épica** | Notificaciones |
 | **Título HU** | Suscripción por correo sin cuenta colaborador |
+| **Estado HU** | **Cerrada** (7/7 tickets **Hecho**) |
 
 **Implementación backend:** toda la lógica de dominio, persistencia, Flyway y **Spring MVC** de esta HU se implementa en el microservicio **`notification-service`** (`services/notification-service`), no en otros servicios. El cliente (SPA) **no** llama al puerto del microservicio directamente.
 

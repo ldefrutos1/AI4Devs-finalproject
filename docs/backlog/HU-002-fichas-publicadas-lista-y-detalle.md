@@ -9,6 +9,7 @@
 | **Título** | Fichas publicadas (lista y detalle) |
 | **Estimación de complejidad** | M |
 | **Prioridad** | Alta |
+| **Estado** | **Cerrada** |
 
 **Historia de usuario**
 

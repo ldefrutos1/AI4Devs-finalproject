@@ -5,10 +5,11 @@
 | Campo | Valor |
 |-------|--------|
 | **ID** | HU-006 |
-| **Épica** | Fotografías |
+| **Épica** | Fotografías y medios |
 | **Título** | Subida de fotografías al árbol |
 | **Estimación de complejidad** | M |
 | **Prioridad** | Alta |
+| **Estado** | **Cerrada** |
 
 **Historia de usuario**
 

@@ -5,7 +5,7 @@
 | Campo | En backlog | En fuentes (readme, modelo, HU-015) | Valoración |
 |-------|------------|--------------------------------------|------------|
 | **ID** | HU-016 | Coherente | Correcto |
-| **Épica** | Inteligencia artificial | readme §2.1.4, §3.2.4; backlog §2 | Correcto |
+| **Épica** | Inteligencia artificial | readme §2.2 (Integración con IA), §3.2.4; backlog §2 | Correcto |
 | **Título** | Consulta de características de especie (ADMIN, MVP) | Alineado con UC-07 / maestros y enriquecimiento `especie_detalle` | Correcto |
 | **Historia** | Como usuario administrador, quiero consultar a la IA las características de una especie… | Debe acotarse a rol **ADMIN**, IA **orientativa** y precarga de datos en la pantalla ya existente de edición de características de especie ([product-context](../../.cursor/rules/product-context.mdc)) | Refinada en §2 |
 | **Estimación** | M | Sin contradicción | **Se mantiene M** |
@@ -15,7 +15,7 @@
 **Inconsistencias detectadas**
 
 - «Usuario administrador» y **ADMIN** se consideran equivalentes en la documentación funcional de esta historia.
-- readme §2.1.4, §3.2.4 y backlog §3 son coherentes: en el MVP solo entra la consulta de características de especie; identificación por imagen y chat quedan en **HU-009** / **HU-010** (próximas versiones).
+- readme §2.2 (Integración con IA), §3.2.4 y backlog §3 son coherentes: en el MVP solo entra la consulta de características de especie; identificación por imagen y chat quedan en **HU-009** / **HU-010** (próximas versiones).
 - La persistencia Mongo de `especie_detalle` queda fuera de **HU-016** y pertenece al alcance ya cerrado de **HU-015**.
 - El contrato `/api/ai/**` de esta historia debe limitarse a la **consulta a IA** para obtener un JSON compatible con la pantalla existente de edición de características de especie.
 
@@ -99,7 +99,7 @@ Como usuario con rol **ADMIN**, quiero consultar a la IA las características am
 
 ### Referencias
 
-readme §2.1.4, §3.2.4; [mongo.md](../data-model/mongo.md) (`especie_detalle`, §6.3); [data-model.md](../data-model/data-model.md) **R3**; **HU-011**, **HU-015**; [product-context.mdc](../../.cursor/rules/product-context.mdc).
+readme §2.2 (Integración con IA), §3.2.4; [mongo.md](../data-model/mongo.md) (`especie_detalle`, §6.3); [data-model.md](../data-model/data-model.md) **R3**; **HU-011**, **HU-015**; [product-context.mdc](../../.cursor/rules/product-context.mdc).
 
 ### Escenario 1 — ADMIN solicita IA y se precargan los campos
 

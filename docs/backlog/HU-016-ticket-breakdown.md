@@ -6,6 +6,7 @@
 | **Refinamiento** | [HU-016-consulta-admin-caracteristicas-especie-ia.md](HU-016-consulta-admin-caracteristicas-especie-ia.md) |
 | **Épica** | Inteligencia artificial |
 | **Título HU** | Consulta de características de especie (ADMIN, MVP) |
+| **Estado HU** | **Cerrada** (9/9 tickets **Hecho**) |
 
 **Convención de ID de ticket:** `TASK-HU-016-<nn>`.
 

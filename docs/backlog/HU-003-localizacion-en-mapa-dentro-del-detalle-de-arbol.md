@@ -10,6 +10,7 @@
 | **Título**                    | Localización en mapa dentro del detalle de árbol |
 | **Estimación de complejidad** | M                                                |
 | **Prioridad**                 | Alta                                             |
+| **Estado**                    | **Cerrada**                                      |
 
 
 **Historia de usuario**

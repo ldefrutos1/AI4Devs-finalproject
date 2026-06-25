@@ -6,6 +6,7 @@
 | **Refinamiento** | [HU-011-maestros-de-catalogo.md](HU-011-maestros-de-catalogo.md) |
 | **Épica** | Administración |
 | **Título HU** | Maestros de catálogo |
+| **Estado HU** | **Cerrada** (8/8 tickets **Hecho**) |
 
 **Convención de ID de ticket:** `TASK-HU-011-<nn>`.
 

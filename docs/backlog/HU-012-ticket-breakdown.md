@@ -6,6 +6,7 @@
 | **Refinamiento** | [HU-012-gestion-de-suscripciones-a-notificaciones.md](HU-012-gestion-de-suscripciones-a-notificaciones.md) |
 | **Épica** | Administración |
 | **Título HU** | Gestión de suscripciones a notificaciones |
+| **Estado HU** | **Cerrada** (8/8 tickets **Hecho**) |
 
 **Convención de ID de ticket:** `TASK-HU-012-<nn>`.
 

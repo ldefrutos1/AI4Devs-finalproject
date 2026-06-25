@@ -82,7 +82,7 @@ La solución ofrece un sistema de notificaciones para comunicar novedades a usua
 
 #### Integración con IA
 
-El producto se integra con IA para obtener información de las características de cada especie; en próximas versiones se implementará la identificación orientativa de la especie a partir de fotografías y la funciónalidad de chat.
+En el **MVP**, usuarios con rol **ADMIN** pueden consultar de forma **orientativa** las características ampliadas de una especie (**HU-016**): la IA precarga la pantalla de enriquecimiento; la persistencia en Mongo corresponde a **HU-015**. En **próximas versiones** se prevén la identificación orientativa por imagen (**HU-009**) y el chat asistido (**HU-010**).
 
 ### **2.2.1 Diagrama de contexto del sistema (C1)**
 
@@ -123,7 +123,7 @@ A continuación se incluye el diagrama de casos de uso del sistema.
 | UC-04 | Modificar y eliminar árboles del colaborador | Colaborador |
 | UC-05 | Identificar árbol asistido por IA (imagen) | Colaborador |
 | UC-06 | Consultar asistente IA (chat) | Colaborador |
-| UC-07 | Gestionar tablas de catálogo (incl. consulta IA enriquecimiento especie) | ADMIN |
+| UC-07 | Gestionar tablas de catálogo (maestros taxonómicos) | ADMIN |
 | UC-08 | Gestionar solicitudes de notificación | ADMIN |
 | UC-09 | Notificar por correo a suscriptores | Sistema |
 
@@ -1208,7 +1208,7 @@ Para el alta de ejemplar, los valores admitidos son:
 
 #### **4.2.2 MongoDB (catalog-service; modelo en mongo.md)**
 
-Almacén de **enriquecimiento** (*system of enrichment*): no sustituye a PostgreSQL. Dos colecciones principales — `especie_detalle` (datos ampliados de especie, p. ej. vía LLM en **HU-016**) y `ejemplar_detalle` (medidas, etiquetas y observaciones del ejemplar; `ejemplar_pg_id` = `catalog.ejemplar.ejemplar_id`). Desnormalización controlada de nombres de especie para búsqueda sin join obligatorio con SQL. Diseño, índices y validación: [mongo.md](docs/data-model/mongo.md). Implementado en **catalog-service** y consumido desde el **frontend** (**HU-015**, **Cerrada**).
+Almacén de **enriquecimiento** (*system of enrichment*): no sustituye a PostgreSQL. Dos colecciones principales — `especie_detalle` (datos ampliados de especie; persistencia en **HU-015**, con origen orientativo posible vía consulta IA en **HU-016**) y `ejemplar_detalle` (medidas, etiquetas y observaciones del ejemplar; `ejemplar_pg_id` = `catalog.ejemplar.ejemplar_id`). Desnormalización controlada de nombres de especie para búsqueda sin join obligatorio con SQL. Diseño, índices y validación: [mongo.md](docs/data-model/mongo.md). Implementado en **catalog-service** y consumido desde el **frontend** (**HU-015**, **Cerrada**).
 
 ```mermaid
 erDiagram
@@ -1371,10 +1371,10 @@ Backlog generado a partir de los casos de uso (§2.2.2) y del modelo de datos. D
 | HU-010 | Chat asistido | Próxima versión |
 | HU-011 | Maestros de catálogo | Cerrada |
 | HU-012 | Gestión de suscripciones | Cerrada |
-| HU-013 | Navegación y guardas por rol | Cerrada |
+| HU-013 | Estructura de páginas, navegación y guardas por rol (MVP) | Cerrada |
 | HU-014 | Consulta de fotografías del árbol | Cerrada |
 | HU-015 | Proyección y enriquecimiento Mongo | Cerrada |
-| HU-016 | Consulta IA características de especie (ADMIN) | Cerrada |
+| HU-016 | Consulta de características de especie (ADMIN, MVP) | Cerrada |
 
 Detalle del refinamiento y desglose de cada HU:
 - 1.- Generación de la Historia de Usuario a partir del backlog con `hu-refinement-mtl`

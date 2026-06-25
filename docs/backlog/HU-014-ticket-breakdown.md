@@ -4,8 +4,9 @@
 |-------|--------|
 | **Historia** | [HU-014 en backlog.md](backlog.md) (tabla §3) |
 | **Refinamiento** | [HU-014-consulta-de-fotografias-del-arbol.md](HU-014-consulta-de-fotografias-del-arbol.md) |
-| **Épica** | Fotografías |
+| **Épica** | Fotografías y medios |
 | **Título HU** | Consulta de fotografías del árbol |
+| **Estado HU** | **Cerrada** (tickets **Hecho**) |
 
 **Convención de ID de ticket:** `TASK-HU-014-<nn>`.
 
