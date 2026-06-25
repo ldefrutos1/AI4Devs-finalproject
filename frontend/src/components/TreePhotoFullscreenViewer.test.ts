@@ -52,8 +52,11 @@ describe('TreePhotoFullscreenViewer', () => {
       blobSourceUrl.set(blob, url)
       return blob
     })
-    vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob) => {
-      return `blob:${blobSourceUrl.get(blob) ?? ''}`
+    vi.spyOn(URL, 'createObjectURL').mockImplementation((obj: Blob | MediaSource) => {
+      if (obj instanceof Blob) {
+        return `blob:${blobSourceUrl.get(obj) ?? ''}`
+      }
+      return 'blob:media-source'
     })
     vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
   })
