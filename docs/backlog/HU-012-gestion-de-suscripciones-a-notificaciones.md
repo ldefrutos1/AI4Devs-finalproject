@@ -9,6 +9,7 @@
 | **Título** | Gestión de suscripciones a notificaciones |
 | **Estimación de complejidad** | M |
 | **Prioridad** | Media |
+| **Estado** | **Cerrada** |
 
 **Historia de usuario**
 

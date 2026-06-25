@@ -5,10 +5,11 @@
 | Campo | Valor |
 |-------|--------|
 | **ID** | HU-014 |
-| **Épica** | Fotografías |
+| **Épica** | Fotografías y medios |
 | **Título** | Consulta de fotografías del árbol |
 | **Estimación de complejidad** | M |
 | **Prioridad** | Alta |
+| **Estado** | **Cerrada** |
 
 **Historia de usuario**
 

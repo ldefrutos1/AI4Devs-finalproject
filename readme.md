@@ -82,7 +82,7 @@ La solución ofrece un sistema de notificaciones para comunicar novedades a usua
 
 #### Integración con IA
 
-El producto se integra con IA para obtener información de las características de cada especie; en próximas versiones se implementará la identificación orientativa de la especie a partir de fotografías y la funciónalidad de chat.
+En el **MVP**, usuarios con rol **ADMIN** pueden consultar de forma **orientativa** las características ampliadas de una especie (**HU-016**): la IA precarga la pantalla de enriquecimiento; la persistencia en Mongo corresponde a **HU-015**. En **próximas versiones** se prevén la identificación orientativa por imagen (**HU-009**) y el chat asistido (**HU-010**).
 
 ### **2.2.1 Diagrama de contexto del sistema (C1)**
 
@@ -123,7 +123,7 @@ A continuación se incluye el diagrama de casos de uso del sistema.
 | UC-04 | Modificar y eliminar árboles del colaborador | Colaborador |
 | UC-05 | Identificar árbol asistido por IA (imagen) | Colaborador |
 | UC-06 | Consultar asistente IA (chat) | Colaborador |
-| UC-07 | Gestionar tablas de catálogo (incl. consulta IA enriquecimiento especie) | ADMIN |
+| UC-07 | Gestionar tablas de catálogo (maestros taxonómicos) | ADMIN |
 | UC-08 | Gestionar solicitudes de notificación | ADMIN |
 | UC-09 | Notificar por correo a suscriptores | Sistema |
 
@@ -188,27 +188,29 @@ La aplicación implementa una navegación simple por roles con una **página de 
 | Suscripciones `/admin/subscriptions` | — | — | ✅ |
 
 
-### **2.4. Instrucciones de instalación:**
+### **2.4. Instrucciones de instalación entorno de Desarrollo:**
 
-1. **Infraestructura:** copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario: `infra/compose/.env.example` → `infra/compose/.env`. Desde `infra/compose/`, ejecutar:
+1. **Infraestructura:** para podeer ejecutar la aplicación en desarrollo se necesita arrancar los contenedores que tienen la infraestructura (PostgreSQL, Mongo, ...) definidos en el archivo dockeer-compose.yaml siguiendo estos pasos:
+- Copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario: `infra/compose/.env.example` → `infra/compose/.env`. - Desde `infra/compose/`, ejecutar:
   ```bash
   `docker compose up -d`
    ```
-2. **Backend:** desde la raíz del repo, arrancar **una terminal por microservicio**, con perfil **`dev`** (siempre se debe arrancar **api-gateway** además de los microservicios a probar; ver tabla). Ejemplo:
+2. **Backend:** los servicios de backend se arrancar desde la raíz del repo, hay que arrancar **una terminal por microservicio**, con perfil **`dev`** (siempre se debe arrancar **api-gateway** además de los microservicios a probar; ver tabla). Ejemplo con api-gateway y catalog-servicce:
    ```bash
    mvn -f services/pom.xml -pl api-gateway spring-boot:run -Dspring-boot.run.profiles=dev
    mvn -f services/pom.xml -pl catalog-service spring-boot:run -Dspring-boot.run.profiles=dev
    ```
-3. **Frontend:** copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario  `frontend/.env.example` → `frontend/.env`. Desde `frontend/`, ejecutar:
+3. **Frontend:** para ejecutar el frontend se deben seguir los siguientes pasos
+- Copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario  `frontend/.env.example` → `frontend/.env`. 
+- Desde `frontend/`, ejecutar:
    ```bash
    `npm install` 
    `npm run dev`
    ``` 
    → UI en **http://localhost:5173** (proxy `/api/*` al gateway).
 
-> **Redis:** con perfil `dev`, **catalog-service** usa caché Redis; el contenedor debe estar en marcha antes de arrancarlo.
-
-| Flujo | Compose (además de Postgres/Keycloak) | Servicios en host (`dev`; la SPA usa `/api` vía **api-gateway** :8080) |
+**Dependencias por flujo**
+| Flujo | Compose (además de Postgres/Keycloak) | Servicios levantados |
 |-------|----------------------------------------|------------------------------------------------------------------------|
 | Cualquier flujo vía SPA | — | **api-gateway** (obligatorio) |
 | Consulta pública | — | api-gateway, catalog-service |
@@ -863,9 +865,7 @@ proyecto/
 
 ### **3.4. Infraestructura y despliegue**
 
-**Desarrollo:**
-
-**Infraestructura:** en desarrollo se necesita tener siempre arrancado `docker-compose.yml`, que levanta la infraestructura compartida: **un** PostgreSQL/PostGIS (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO, Kafka, Keycloak, **Mailpit** (SMTP de prueba para notificaciones en local), **Prometheus** (`prom/prometheus:v3.2.1`) y **Grafana** (`grafana/grafana:11.5.2`) para métricas y dashboards ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)).
+**Infraestructura:** se necesita tener siempre arrancado `docker-compose.yml`, que levanta la infraestructura compartida: **un** PostgreSQL/PostGIS (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO, Kafka, Keycloak, **Mailpit** (SMTP de prueba para notificaciones en local), **Prometheus** (`prom/prometheus:v3.2.1`) y **Grafana** (`grafana/grafana:11.5.2`) para métricas y dashboards ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)).
 
 ```bash
 cd infra\compose
@@ -876,7 +876,7 @@ Grafana queda disponible en `http://localhost:3000`. Detalle de servicios, puert
 
 **Aplicación:** con la infraestructura anterior levantada, la aplicación puede arrancarse de dos formas:
 
-- **Contenedores de aplicación:** usar el overlay `docker-compose.apps.yml` para levantar la SPA, el API Gateway y los microservicios como contenedores. Antes, construir las imágenes con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1). La SPA queda disponible en `http://localhost:8088/`; Prometheus usa los targets internos definidos en `prometheus-docker.yml`.
+- **Contenedores de aplicación:** usar el overlay `docker-compose.apps.yml` para levantar la SPA, el API Gateway y los microservicios como contenedores. Antes de arrancar se deben construir las imágenes de la SPA y los microservicios con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1). La SPA queda disponible en `http://localhost:8088/`; Prometheus usa los targets internos definidos en `prometheus-docker.yml`.
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
@@ -918,7 +918,7 @@ flowchart TB
             PRd["📊 Prometheus"]:::service
             GRd["📈 Grafana"]:::service
 
-            PGd[("🐘 Postgres + PostGIS")]:::db
+            PGd[("🐘 PostgreSQL + PostGIS")]:::db
             MGd[("🍃 MongoDB")]:::db
             Rd[("🚀 Redis")]:::db
             S3d[("📦 MinIO")]:::db
@@ -963,17 +963,23 @@ flowchart TB
 
 **Test de integración** — capas reales contra dependencias gestionadas.
 - **Frontend:** componentes y vistas con stores/servicios mockeados o reales.
-- **Backend:** repositorios y endpoints por capa (Testcontainers: PostGIS/Mongo/Kafka).
+- **Backend:** repositorios y endpoints por capa (Testcontainers: PostgreSQL/Mongo/Kafka).
 
 **Test E2E en tres niveles:**
-- **Contenedores de prueba (manual):** stack efímero autocontenido en Docker, lanzado bajo demanda por el coste de levantar contenedores en cada PR.
-- **Docker Compose (entorno levantado):**
-  - **UI front + back (Playwright):** flujo de usuario completo por el navegador.
-  - **REST del back (`system-e2e-tests`):** contrato HTTP/JWT por el gateway, sin navegador.
+
+1. **Levantando contenedores en el proceso de prueba** — levanta stack efímero autocontenido en Docker (PostgreSQL, Mongo, Kafka, Keycloak, microservicios y front en contenedor). No se ejecuta automáticamente en cada PR por el coste de levantar contenedores. Ejecuta en secuencia `system-e2e-tests` (HTTP) y Playwright (UI). Se puedde ejecutar de dos modos:
+   - **CI:** workflow manual [E2E Playwright (alta de ejemplar)](.github/workflows/e2e-playwright.yml) en GitHub Actions → *Run workflow*.
+   - **Local:** `.\scripts\dev\test-e2e.ps1` (compila jars, levanta `infra/compose/docker-compose.e2e.yml`, ejecuta ambas suites y baja el stack con `down -v`). Atajos: `-SkipBuild`, `-KeepStack` — [scripts/README.md](scripts/README.md).
+
+2. **UI front + back (Playwright)** — flujo de usuario completo por el navegador contra un **entorno ya levantado** (infra + microservicios + front en dev o Docker; §3.4).
+   - **Local:** `.\scripts\dev\test-e2e.ps1 -Local` (por defecto `http://localhost:5173`; opcional `-Ui`, `-BaseUrl`).
+
+3. **REST del back (`system-e2e-tests`)** — contrato HTTP/JWT por el gateway, sin navegador, contra el **mismo entorno levantado** que el nivel 2.
+   - **Local:** con el stack arriba, desde `services/`: `$env:MTL_E2E_AUTO_KEYCLOAK_TOKEN = "true"; mvn -pl system-e2e-tests verify` (detalle de variables y escenarios en [system-e2e-tests](services/system-e2e-tests/README.md)).
 
 **Documentación:** [testing-frontend.md](docs/engineering/testing-frontend.md) · [testing-java.md](docs/engineering/testing-java.md) · [testing-e2e.md](docs/engineering/testing-e2e.md) · módulos [system-e2e-tests](services/system-e2e-tests/README.md) · [e2e/](e2e/README.md).
 
-*Atajos locales (PowerShell):* `scripts/dev/test-backend.ps1`, `test-frontend.ps1` y `test-e2e.ps1` — [scripts/README.md](scripts/README.md). Infra local con **Docker Compose**: §3.4.
+*Atajos locales (PowerShell) para unitarios/integración:* `scripts/dev/test-backend.ps1`, `test-frontend.ps1` — [scripts/README.md](scripts/README.md). Infra local con **Docker Compose**: §3.4.
 
 ---
 
@@ -1202,7 +1208,7 @@ Para el alta de ejemplar, los valores admitidos son:
 
 #### **4.2.2 MongoDB (catalog-service; modelo en mongo.md)**
 
-Almacén de **enriquecimiento** (*system of enrichment*): no sustituye a PostgreSQL. Dos colecciones principales — `especie_detalle` (datos ampliados de especie, p. ej. vía LLM en **HU-016**) y `ejemplar_detalle` (medidas, etiquetas y observaciones del ejemplar; `ejemplar_pg_id` = `catalog.ejemplar.ejemplar_id`). Desnormalización controlada de nombres de especie para búsqueda sin join obligatorio con SQL. Diseño, índices y validación: [mongo.md](docs/data-model/mongo.md). Implementado en **catalog-service** y consumido desde el **frontend** (**HU-015**, **Cerrada**).
+Almacén de **enriquecimiento** (*system of enrichment*): no sustituye a PostgreSQL. Dos colecciones principales — `especie_detalle` (datos ampliados de especie; persistencia en **HU-015**, con origen orientativo posible vía consulta IA en **HU-016**) y `ejemplar_detalle` (medidas, etiquetas y observaciones del ejemplar; `ejemplar_pg_id` = `catalog.ejemplar.ejemplar_id`). Desnormalización controlada de nombres de especie para búsqueda sin join obligatorio con SQL. Diseño, índices y validación: [mongo.md](docs/data-model/mongo.md). Implementado en **catalog-service** y consumido desde el **frontend** (**HU-015**, **Cerrada**).
 
 ```mermaid
 erDiagram
@@ -1365,10 +1371,10 @@ Backlog generado a partir de los casos de uso (§2.2.2) y del modelo de datos. D
 | HU-010 | Chat asistido | Próxima versión |
 | HU-011 | Maestros de catálogo | Cerrada |
 | HU-012 | Gestión de suscripciones | Cerrada |
-| HU-013 | Navegación y guardas por rol | Cerrada |
+| HU-013 | Estructura de páginas, navegación y guardas por rol (MVP) | Cerrada |
 | HU-014 | Consulta de fotografías del árbol | Cerrada |
 | HU-015 | Proyección y enriquecimiento Mongo | Cerrada |
-| HU-016 | Consulta IA características de especie (ADMIN) | Cerrada |
+| HU-016 | Consulta de características de especie (ADMIN, MVP) | Cerrada |
 
 Detalle del refinamiento y desglose de cada HU:
 - 1.- Generación de la Historia de Usuario a partir del backlog con `hu-refinement-mtl`

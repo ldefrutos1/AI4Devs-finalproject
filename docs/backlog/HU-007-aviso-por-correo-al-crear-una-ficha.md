@@ -9,6 +9,7 @@
 | **Título** | Aviso por correo al crear una ficha |
 | **Estimación de complejidad** | M |
 | **Prioridad** | Alta |
+| **Estado** | **Cerrada** |
 
 **Historia de usuario**
 

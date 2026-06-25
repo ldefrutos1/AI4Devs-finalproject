@@ -6,6 +6,7 @@
 | **Refinamiento** | [HU-005-alta-de-ficha-de-arbol.md](HU-005-alta-de-ficha-de-arbol.md) |
 | **Épica** | Catálogo colaborador |
 | **Título HU** | Alta de ficha de árbol |
+| **Estado HU** | **Cerrada** (11/11 tickets **Hecho**) |
 
 **Convención de ID de ticket:** `TASK-HU-005-<nn>`.
 

@@ -9,6 +9,7 @@
 | **Título** | Estructura de páginas, navegación y guardas por rol (MVP) |
 | **Estimación de complejidad** | M |
 | **Prioridad** | Alta |
+| **Estado** | **Cerrada** |
 
 **Historia de usuario**
 

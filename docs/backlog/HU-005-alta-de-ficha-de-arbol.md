@@ -9,6 +9,7 @@
 | **Título** | Alta de ficha de árbol |
 | **Estimación de complejidad** | L |
 | **Prioridad** | Alta |
+| **Estado** | **Cerrada** |
 
 **Historia de usuario**
 

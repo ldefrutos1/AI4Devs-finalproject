@@ -6,6 +6,7 @@
 | **Refinamiento** | [HU-002-fichas-publicadas-lista-y-detalle.md](HU-002-fichas-publicadas-lista-y-detalle.md) |
 | **Épica** | Consulta pública |
 | **Título HU** | Fichas publicadas (lista y detalle) |
+| **Estado HU** | **Cerrada** (10/10 tickets **Hecho**) |
 
 **Convención de ID de ticket:** `TASK-HU-002-<nn>`.
 

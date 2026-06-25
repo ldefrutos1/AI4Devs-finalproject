@@ -6,6 +6,7 @@
 | **Refinamiento** | [HU-013-estructura-de-paginas-navegacion-y-guardas-por-rol-mvp.md](HU-013-estructura-de-paginas-navegacion-y-guardas-por-rol-mvp.md) |
 | **Épica** | Acceso e identidad |
 | **Título HU** | Estructura de páginas, navegación y guardas por rol (MVP) |
+| **Estado HU** | **Cerrada** (11/11 tickets **Hecho**) |
 
 **Convención de ID de ticket:** `TASK-HU-013-<nn>`.
 

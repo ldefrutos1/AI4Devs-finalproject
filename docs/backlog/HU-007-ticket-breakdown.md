@@ -5,6 +5,7 @@
 | **Historia** | [HU-007 en backlog.md](backlog.md) (tabla §3) |
 | **Épica** | Notificaciones |
 | **Título HU** | Aviso por correo al crear una ficha |
+| **Estado HU** | **Cerrada** (5/5 tickets **Hecho**) |
 
 **Convención de ID de ticket:** `TASK-HU-007-<nn>`.
 
