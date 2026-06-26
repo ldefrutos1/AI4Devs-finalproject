@@ -135,7 +135,7 @@ A continuación se incluye el diagrama de casos de uso del sistema.
 
 ### **2.3. Diseño y experiencia de usuario:**
 
-La aplicación está diseñada para facilitar el alta de ejemplares a partir de fotografías; el usuario selecciona que fotografias desea subir y la aplicación extrae la ubicación del ejemplar (latitud y longitud) de los metadatos EXIF de la primera fotografia la ubicación del ejemplar. En caso de que las imagenes no tengan metadatos de ubicación el usuario puede seleccionar la posición del ejemplar directamente en el mapa (componente OpenStreetMap).
+El sistema está diseñada para facilitar el alta de ejemplares a partir de fotografías; el usuario selecciona que fotografias desea subir y la aplicación extrae la ubicación del ejemplar (latitud y longitud) de los metadatos EXIF de la primera fotografia la ubicación del ejemplar. En caso de que las imagenes no tengan metadatos de ubicación el usuario puede seleccionar la posición del ejemplar directamente en el mapa (componente OpenStreetMap).
 
 ![Alta](./docs/Alta.jpg)
 
@@ -195,12 +195,17 @@ La aplicación implementa una navegación simple por roles con una **página de 
 | Maestros `/admin/masters` | — | — | ✅ |
 | Suscripciones `/admin/subscriptions` | — | — | ✅ |
 
+Inicio
 ![Inicio](./docs/Inicio.jpg)
-![Catalogo](./docs/Catalogo.jpg)
-![Detalle](./docs/Detalle.jpg)
-![Carrusel](./docs/Carrusel.jpg)
-![Alta](./docs/Alta.jpg)
 
+Catálogo (/ejemplares)
+![Catalogo](./docs/Catalogo.jpg)
+
+Detalle (/ejemplares/:id)
+![Detalle](./docs/Detalle.jpg)
+
+Carrusel
+![Carrusel](./docs/Carrusel.jpg)
 
 ### **2.4. Instrucciones de instalación entorno de Desarrollo:**
 
