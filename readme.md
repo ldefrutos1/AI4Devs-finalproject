@@ -82,7 +82,7 @@ La solución ofrece un sistema de notificaciones para comunicar novedades a usua
 
 #### Integración con IA
 
-En el **MVP**, usuarios con rol **ADMIN** pueden consultar de forma **orientativa** las características ampliadas de una especie (**HU-016**): la IA precarga la pantalla de enriquecimiento; la persistencia en Mongo corresponde a **HU-015**. En **próximas versiones** se prevén la identificación orientativa por imagen (**HU-009**) y el chat asistido (**HU-010**).
+En el **MVP**, usuarios con rol de administrador pueden consultar las características de una especie, para futuras versiones se incorporará la identificación orientativa por imagen y un chat.
 
 ### **2.2.1 Diagrama de contexto del sistema (C1)**
 
@@ -98,7 +98,7 @@ flowchart TB
 
     KC["🔐 Keycloak<br>Autenticación"]:::soporte
     SMTP["📧 Servidor SMTP<br>Notificaciones"]:::soporte
-    PIA["🧠 Proveedor IA<br>Enriquecimiento especie (MVP)<br>Identificación y chat (futuro)"]:::externo
+    PIA["🧠 Proveedor IA<br>Características especie (MVP)<br>Identificación y chat (futuro)"]:::externo
     MAP["🗺️ OpenStreetMap<br>Geolocalización"]:::externo
 
     U -->|Usa la aplicación| S
@@ -210,7 +210,15 @@ La aplicación implementa una navegación simple por roles con una **página de 
    `npm install` 
    `npm run dev`
    ``` 
-   → UI en **http://localhost:5173** (proxy `/api/*` al gateway).
+
+Una vez levantados los contenedores y la parte front y back de la aplicación estarán disponibles estas url: 
+   → UI de la aplicación: **http://localhost:5173**
+   → API Gateway: **http://localhost:8080**
+   → Microservicios: **:8081-8084**
+   → Keycloak consola: **http://localhost:8180/** (usuario: admin. NOTA: los usuarios de la aplicación definidos en el realm son admin_mtl, colaborador)
+   → MinIO consola: **http://localhost:9001/login** (usuario: minio)
+   → Grafana: **http://localhost:3000/** (usuario: admin)
+   → Prometheus: **http://localhost:9090/targets**
 
 **Dependencias por flujo**
 | Flujo | Compose (además de Postgres/Keycloak) | Servicios levantados |
@@ -223,7 +231,10 @@ La aplicación implementa una navegación simple por roles con una **página de 
 | Admin (maestros / suscripciones) | — | api-gateway, catalog-service; notification-service (suscripciones) |
 | Consulta IA especie (ADMIN, stub) | — | api-gateway, ai-assistant-service + **catalog-service** para pantallas de alta/edición con popup de especie |
 
+**Detalle infraestructura local:** [infra/compose/README.md](infra/compose/README.md).
 **Detalle operativo** (puertos, usuarios Keycloak, Flyway, incidencias): [local-setup-guide.md](docs/onboarding/local-setup-guide.md).
+
+
 
 ---
 
@@ -277,6 +288,7 @@ La aplicación se desarrolla en microservicios con Spring en la parte de backend
 - **Almacenamiento de imágenes:** Compatible S3 (MinIO)
 - **Observabilidad:** Prometheus + Grafana; métricas vía Actuator/Micrometer en cada microservicio
 
+**Decisiones documentadas ADR:** el Registro de Deciones de Arquitectura se encuentra en la carpeta `/docs/adr` cabe destacar que el descubrimiento de servicios y configuración de los microservicios se hace **sin Eureka ni Spring Cloud Config** ( las labores son asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md).
 
 
 #### C2 — Diagrama de contenedores (nivel 2)
@@ -868,28 +880,27 @@ proyecto/
 
 ### **3.4. Infraestructura y despliegue**
 
-**Infraestructura:** se necesita tener siempre arrancado `docker-compose.yml`, que levanta la infraestructura compartida: **un** PostgreSQL/PostGIS (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO, Kafka, Keycloak, **Mailpit** (SMTP de prueba para notificaciones en local), **Prometheus** (`prom/prometheus:v3.2.1`) y **Grafana** (`grafana/grafana:11.5.2`) para métricas y dashboards ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)).
+**Infraestructura:** el sistema se necesita tener arrancada la infraestructura definida en `docker-compose.yml`, que levanta: **un** PostgreSQL/PostGIS (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO, Kafka, Keycloak, **Mailpit** (SMTP de prueba para notificaciones en local), **Prometheus** (`prom/prometheus:v3.2.1`) y **Grafana** (`grafana/grafana:11.5.2`) para métricas y dashboards ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)).
 
 ```bash
 cd infra\compose
 docker compose up -d
 ```
 
-Grafana queda disponible en `http://localhost:3000`. Detalle de servicios, puertos y arranque en Compose: [infra/compose/README.md](infra/compose/README.md).
+Grafana queda disponible en `http://localhost:3000` accediendo con usuario admin. El dahsboard del proyecto se en cuentra en la ruta: Dashboards - MyTreeLibrary - MTL Microservices.
 
-**Aplicación:** con la infraestructura anterior levantada, la aplicación puede arrancarse de dos formas:
+![Dashboard Grafana MyTreeLibrary](./docs/Grafana.jpg)
 
-- **Contenedores de aplicación:** usar el overlay `docker-compose.apps.yml` para levantar la SPA, el API Gateway y los microservicios como contenedores. Antes de arrancar se deben construir las imágenes de la SPA y los microservicios con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1). La SPA queda disponible en `http://localhost:8088/`; Prometheus usa los targets internos definidos en `prometheus-docker.yml`.
+Detalle de servicios, puertos y arranque en Compose: [infra/compose/README.md](infra/compose/README.md).
+
+**Aplicación:** para levantar los contenedores propios de la aplicación hay que usar `docker-compose.apps.yml` para levantar la SPA, el API Gateway y los microservicios como contenedores. Antes de arrancar se deben construir las imágenes de la SPA y los microservicios con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1). La SPA queda disponible en `http://localhost:8088/`; Prometheus usa los targets internos definidos en `prometheus-docker.yml`.
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
 ```
 
-- **IDE / Maven en host:** ejecutar la SPA y los microservicios desde el host para desarrollo habitual; ver [frontend/README.md](frontend/README.md) y [services/README.md](services/README.md). La SPA Vite usa `:5173`; el API Gateway usa `:8080`; los microservicios Spring Boot usan `:8081-8084`; Prometheus hace scrape vía `host.docker.internal`.
-
 **Despliegue Producción:** en entornos productivos el sistema se puede desplegar en un orquestador de contenedores (Kubernetes), se deben definir secretos externos, Keycloak y Kafka en HA según entorno, bases de datos gestionadas y almacenamiento de objetos S3 en nube.
 
-**Decisiones documentadas:** el descubrimiento de servicios y configuración de los microservicios se hace **sin Eureka ni Spring Cloud Config** (asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md).
 
 ```mermaid
 flowchart TB
