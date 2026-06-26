@@ -195,16 +195,16 @@ La aplicación implementa una navegación simple por roles con una **página de 
 | Maestros `/admin/masters` | — | — | ✅ |
 | Suscripciones `/admin/subscriptions` | — | — | ✅ |
 
-Inicio
+**Inicio**
 ![Inicio](./docs/Inicio.jpg)
 
-Catálogo (/ejemplares)
+**Catálogo (/ejemplares)**
 ![Catalogo](./docs/Catalogo.jpg)
 
-Detalle (/ejemplares/:id)
+**Detalle (/ejemplares/:id)**
 ![Detalle](./docs/Detalle.jpg)
 
-Carrusel
+**Carrusel de fotografías**
 ![Carrusel](./docs/Carrusel.jpg)
 
 ### **2.4. Instrucciones de instalación entorno de Desarrollo:**
