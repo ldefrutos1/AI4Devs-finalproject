@@ -207,6 +207,12 @@ La aplicación implementa una navegación simple por roles con una **página de 
 **Carrusel de fotografías**
 ![Carrusel](./docs/Carrusel.jpg)
 
+**Administrador**
+![Carrusel](./docs/Admin.jpg)
+
+**Datos semiestructurados (Mongo)**
+![Carrusel](./docs/Mongo.jpg)
+
 ### **2.4. Instrucciones de instalación entorno de Desarrollo:**
 
 1. **Infraestructura:** para poder ejecutar la aplicación en desarrollo se necesita arrancar los contenedores que tienen la infraestructura (PostgreSQL, Mongo, ...) definidos en [`infra/compose/docker-compose.yml`](infra/compose/docker-compose.yml) siguiendo estos pasos:
