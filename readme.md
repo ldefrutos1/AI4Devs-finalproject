@@ -212,13 +212,13 @@ La aplicación implementa una navegación simple por roles con una **página de 
    ``` 
 
 Una vez levantados los contenedores y la parte front y back de la aplicación estarán disponibles estas url: 
-   → UI de la aplicación: **http://localhost:5173**
-   → API Gateway: **http://localhost:8080**
-   → Microservicios: **:8081-8084**
-   → Keycloak consola: **http://localhost:8180/** (usuario: admin. NOTA: los usuarios de la aplicación definidos en el realm son admin_mtl, colaborador)
-   → MinIO consola: **http://localhost:9001/login** (usuario: minio)
-   → Grafana: **http://localhost:3000/** (usuario: admin)
-   → Prometheus: **http://localhost:9090/targets**
+   - → **UI** de la aplicación: **http://localhost:5173**
+   - → **API Gateway**: **http://localhost:8080**
+   - → **Microservicios**: **http://localhost:8081-8084**
+   - → **Keycloak** consola: **http://localhost:8180/** (usuario: admin. NOTA: los usuarios de la aplicación definidos en el realm son admin_mtl, colaborador)
+   - → **MinIO** consola: **http://localhost:9001/login** (usuario: minio)
+   - → **Grafana**: **http://localhost:3000/** (usuario: admin)
+   - → **Prometheus**: **http://localhost:9090/targets**
 
 **Dependencias por flujo**
 | Flujo | Compose (además de Postgres/Keycloak) | Servicios levantados |
@@ -232,6 +232,7 @@ Una vez levantados los contenedores y la parte front y back de la aplicación es
 | Consulta IA especie (ADMIN, stub) | — | api-gateway, ai-assistant-service + **catalog-service** para pantallas de alta/edición con popup de especie |
 
 **Detalle infraestructura local:** [infra/compose/README.md](infra/compose/README.md).
+
 **Detalle operativo** (puertos, usuarios Keycloak, Flyway, incidencias): [local-setup-guide.md](docs/onboarding/local-setup-guide.md).
 
 
@@ -288,7 +289,7 @@ La aplicación se desarrolla en microservicios con Spring en la parte de backend
 - **Almacenamiento de imágenes:** Compatible S3 (MinIO)
 - **Observabilidad:** Prometheus + Grafana; métricas vía Actuator/Micrometer en cada microservicio
 
-**Decisiones documentadas ADR:** el Registro de Deciones de Arquitectura se encuentra en la carpeta `/docs/adr` cabe destacar que el descubrimiento de servicios y configuración de los microservicios se hace **sin Eureka ni Spring Cloud Config** ( las labores son asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md).
+**Decisiones documentadas ADR:** el Registro de Deciones de Arquitectura se encuentra en la carpeta `/docs/adr` caben destacar la decisión de descubrimiento y configuración de microservicios **sin Eureka ni Spring Cloud Config** ( las labores son asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md) y la implementación de **observabilidad** ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)).
 
 
 #### C2 — Diagrama de contenedores (nivel 2)
@@ -362,8 +363,8 @@ A continuación se detallan los componentes del diagrama C2 (§3.1), propios del
 
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
-| **SPA** (`frontend/`) | Vue 3, Vite, TypeScript | Frontal de la aplicación. |
-| **API Gateway** (`api-gateway`) | Spring Cloud Gateway (WebFlux), Spring Boot 4 | Puerta de entrada: enruta a los microservicios, aplica filtros de seguridad y correlación |
+| **SPA** | Vue 3, Vite, TypeScript | Frontal de la aplicación. |
+| **API Gateway** | Spring Cloud Gateway (WebFlux), Spring Boot 4 | Puerta de entrada: enruta a los microservicios, aplica filtros de seguridad y correlación |
 
 #### Capa de Microservicios de dominio
 
@@ -378,8 +379,8 @@ A continuación se detallan los componentes del diagrama C2 (§3.1), propios del
 
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
-| **Prometheus** | `prom/prometheus:v3.2.1` (Compose) | Métricas vía `/actuator/prometheus`. |
-| **Grafana** | `grafana/grafana:11.5.2` (Compose) | Dashboard **MTL Microservices**; UI **http://localhost:3000** |
+| **Prometheus** | Prometheus 3 (Compose) | Métricas vía `/actuator/prometheus`. |
+| **Grafana** | Grafana 11 (Compose) | Dashboard **MTL Microservices**|
 
 #### Esquemas en PostgreSQL
 
@@ -880,7 +881,7 @@ proyecto/
 
 ### **3.4. Infraestructura y despliegue**
 
-**Infraestructura:** el sistema se necesita tener arrancada la infraestructura definida en `docker-compose.yml`, que levanta: **un** PostgreSQL/PostGIS (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO, Kafka, Keycloak, **Mailpit** (SMTP de prueba para notificaciones en local), **Prometheus** (`prom/prometheus:v3.2.1`) y **Grafana** (`grafana/grafana:11.5.2`) para métricas y dashboards ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)).
+**Infraestructura:** el sistema necesita tener arrancada la infraestructura definida en `docker-compose.yml`, que levanta: **un** PostgreSQL/PostGIS (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO, Kafka, Keycloak, Mailpit (SMTP de prueba para notificaciones en local), Prometheus y Grafana para métricas y dashboards.
 
 ```bash
 cd infra\compose
