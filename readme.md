@@ -7,7 +7,7 @@
    - [2.2.1 Diagrama de contexto (C1)](#221-diagrama-de-contexto-del-sistema-c1)
    - [2.2.2 Diagrama de casos de uso del sistema](#222-diagrama-de-casos-de-uso-del-sistema)
    - [2.3 Diseño y experiencia de usuario](#23-diseño-y-experiencia-de-usuario)
-   - [2.4 Instrucciones de instalación](#24-instrucciones-de-instalación)
+   - [2.4 Instalación (entorno de desarrollo)](#24-instrucciones-de-instalación-entorno-de-desarrollo)
    - [2.5 Demo del MVP](#25-demo-del-mvp)
 3. 🏗️ [Arquitectura del sistema](#3-arquitectura-del-sistema)
    - [3.1 Diagrama de arquitectura](#31-diagrama-de-arquitectura)
@@ -56,7 +56,9 @@ MyTreeLibrary es una solución digital para crear y gestionar tu colección pers
 
 #### Propósito
 
-Desarrollar una plataforma web que permita registrar, organizar y consultar fotografías, ubicaciones y datos relevantes de árboles de tu ciudad, facilitando al usuario la creación de una biblioteca personal digital y la posibilidad de compartir esa información de forma pública.
+Desarrollar una plataforma en microservicios que permita registrar, organizar y consultar fotografías, ubicaciones y datos relevantes de árboles de tu ciudad, facilitando al usuario la creación de una biblioteca personal digital y la posibilidad de compartir esa información de forma pública.
+
+Además del producto, el proyecto tiene un objetivo formativo en el stack tecnológico empleado.
 
 #### Valor aportado (qué soluciona)
 
@@ -135,7 +137,7 @@ A continuación se incluye el diagrama de casos de uso del sistema.
 
 ### **2.3. Diseño y experiencia de usuario:**
 
-El sistema está diseñada para facilitar el alta de ejemplares a partir de fotografías; el usuario selecciona que fotografias desea subir y la aplicación extrae la ubicación del ejemplar (latitud y longitud) de los metadatos EXIF de la primera fotografia la ubicación del ejemplar. En caso de que las imagenes no tengan metadatos de ubicación el usuario puede seleccionar la posición del ejemplar directamente en el mapa (componente OpenStreetMap).
+El sistema está diseñado para facilitar el alta de ejemplares a partir de fotografías; el usuario selecciona las fotografías que desea subir y la aplicación extrae la ubicación del ejemplar (latitud y longitud) de los metadatos EXIF de la primera fotografía. En caso de que las imágenes no tengan metadatos de ubicación, el usuario puede seleccionar la posición del ejemplar directamente en el mapa (componente OpenStreetMap).
 
 ![Alta](./docs/Alta.jpg)
 
@@ -208,12 +210,12 @@ La aplicación implementa una navegación simple por roles con una **página de 
 ![Carrusel](./docs/Carrusel.jpg)
 
 **Administrador**
-![Carrusel](./docs/Admin.jpg)
+![Administrador](./docs/Admin.jpg)
 
 **Datos semiestructurados (Mongo)**
-![Carrusel](./docs/Mongo.jpg)
+![Mongo](./docs/Mongo.jpg)
 
-### **2.4. Instrucciones de instalación entorno de Desarrollo:**
+### **2.4. Instrucciones de instalación (entorno de desarrollo):**
 
 1. **Infraestructura:** para poder ejecutar la aplicación en desarrollo se necesita arrancar los contenedores que tienen la infraestructura (PostgreSQL, Mongo, ...) definidos en [`infra/compose/docker-compose.yml`](infra/compose/docker-compose.yml) siguiendo estos pasos:
 - Copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario: `infra/compose/.env.example` → `infra/compose/.env`.
@@ -230,11 +232,11 @@ La aplicación implementa una navegación simple por roles con una **página de 
 - Copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario  `frontend/.env.example` → `frontend/.env`. 
 - Desde `frontend/`, ejecutar:
    ```bash
-   `npm install` 
-   `npm run dev`
-   ``` 
+   npm install
+   npm run dev
+   ```
 
-Una vez levantados los contenedores y la parte front y back de la aplicación estarán disponibles estas url: 
+Una vez levantados los contenedores y la parte front y back de la aplicación estarán disponibles estas URLs: 
    - → **UI** de la aplicación: **http://localhost:5173**
    - → **API Gateway**: **http://localhost:8080**
    - → **Microservicios**: **http://localhost:8081-8084**
@@ -244,6 +246,7 @@ Una vez levantados los contenedores y la parte front y back de la aplicación es
    - → **Prometheus**: **http://localhost:9090/targets**
 
 **Dependencias por flujo**
+
 | Flujo | Compose (además de Postgres/Keycloak) | Servicios levantados |
 |-------|----------------------------------------|------------------------------------------------------------------------|
 | Cualquier flujo vía SPA | — | **api-gateway** (obligatorio) |
@@ -312,7 +315,7 @@ La aplicación se desarrolla en microservicios con Spring en la parte de backend
 - **Almacenamiento de imágenes:** Compatible S3 (MinIO)
 - **Observabilidad:** Prometheus + Grafana; métricas vía Actuator/Micrometer en cada microservicio
 
-**Decisiones documentadas ADR:** el Registro de Deciones de Arquitectura se encuentra en la carpeta [docs/adr](docs/adr/README.md); caben destacar la decisión de descubrimiento y configuración de microservicios **sin Eureka ni Spring Cloud Config** ( las labores son asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md) y la implementación de **observabilidad** ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)).
+**Decisiones documentadas ADR:** el Registro de Decisiones de Arquitectura se encuentra en la carpeta [docs/adr](docs/adr/README.md); caben destacar la decisión de descubrimiento y configuración de microservicios **sin Eureka ni Spring Cloud Config** ( las labores son asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md) y la implementación de **observabilidad** ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)).
 
 
 #### C2 — Diagrama de contenedores (nivel 2)
@@ -446,7 +449,7 @@ En las pantallas que exigen identificarse, la SPA controla que se inicie sesión
 <details>
 <summary><strong>Desplegar</strong> — Diagramas C3/C4 del flujo de autenticación</summary>
 
-A continuación se muestra la implementeción de seguridad del sistema que tiene como objetivo mantener rutas protegidas con sesión válida, renovar token de forma transparente y centralizar el manejo de `401` en cliente HTTP.
+A continuación se muestra la implementación de seguridad del sistema que tiene como objetivo mantener rutas protegidas con sesión válida, renovar token de forma transparente y centralizar el manejo de `401` en cliente HTTP.
 
 #### C3 — Componentes (nivel 3): autenticación en el contenedor SPA Vue
 
@@ -911,7 +914,7 @@ cd infra\compose
 docker compose up -d
 ```
 
-Grafana queda disponible en `http://localhost:3000` accediendo con usuario admin. El dahsboard del proyecto se en cuentra en la ruta: Dashboards - MyTreeLibrary - MTL Microservices.
+Grafana queda disponible en `http://localhost:3000` accediendo con usuario admin. El dashboard del proyecto se encuentra en la ruta: Dashboards - MyTreeLibrary - MTL Microservices.
 
 ![Dashboard Grafana MyTreeLibrary](./docs/Grafana.jpg)
 
@@ -923,7 +926,7 @@ Detalle de servicios, puertos y arranque en Compose: [infra/compose/README.md](i
 docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
 ```
 
-**Despliegue Producción:** en entornos productivos el sistema se puede desplegar en un orquestador de contenedores (Kubernetes), se deben definir secretos externos, Keycloak y Kafka en HA según entorno, bases de datos gestionadas y almacenamiento de objetos S3 en nube.
+**Despliegue Producción:** en entornos productivos el sistema se puede desplegar en un orquestador de contenedores (Kubernetes), se deben definir secretos externos, Keycloak y Kafka en HA según entorno, bases de datos gestionadas y almacenamiento de objetos S3 en nube. También es necesario un servidor SMTP y un proveedor de servicios IA.
 
 
 ```mermaid
