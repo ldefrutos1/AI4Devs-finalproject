@@ -189,6 +189,10 @@ La aplicación implementa una navegación simple por roles con una **página de 
 | Maestros `/admin/masters` | — | — | ✅ |
 | Suscripciones `/admin/subscriptions` | — | — | ✅ |
 
+![Inicio](./docs/Inicio.jpg)
+![Catalogo](./docs/Catalogo.jpg)
+![Detalle](./docs/Detalle.jpg)
+![Carrusel](./docs/Carrusel.jpg)
 
 ### **2.4. Instrucciones de instalación entorno de Desarrollo:**
 
@@ -289,7 +293,7 @@ La aplicación se desarrolla en microservicios con Spring en la parte de backend
 - **Almacenamiento de imágenes:** Compatible S3 (MinIO)
 - **Observabilidad:** Prometheus + Grafana; métricas vía Actuator/Micrometer en cada microservicio
 
-**Decisiones documentadas ADR:** el Registro de Deciones de Arquitectura se encuentra en la carpeta `/docs/adr` caben destacar la decisión de descubrimiento y configuración de microservicios **sin Eureka ni Spring Cloud Config** ( las labores son asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md) y la implementación de **observabilidad** ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)).
+**Decisiones documentadas ADR:** el Registro de Deciones de Arquitectura se encuentra en la carpeta [docs/adr](docs/adr/README.md); caben destacar la decisión de descubrimiento y configuración de microservicios **sin Eureka ni Spring Cloud Config** ( las labores son asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md) y la implementación de **observabilidad** ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)).
 
 
 #### C2 — Diagrama de contenedores (nivel 2)
