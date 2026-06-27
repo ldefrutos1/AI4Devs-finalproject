@@ -15,13 +15,13 @@
 
 Como visitante o usuario autenticado quiero ver las fotografías almacenadas en el sistema y asociadas a un árbol para valorar el ejemplar con material visual cuando corresponda.
 
-- **Entregable de la historia:** Flujo de **lectura** coherente con **media-service** y **API Gateway**: listado o consulta de **metadatos** de fotografías por árbol (filtrado por permisos y visibilidad), y obtención de **acceso al binario** (p. ej. URL prefirmada de descarga/visualización de corta duración) sin exponer credenciales de bucket al cliente. Integración mínima en **consulta pública** (detalle alineado con **HU-002** / **HU-003**) para fotos **PUBLIC** en fichas publicadas, y en contexto **autenticado** (colaborador / **ADMIN**) para incluir **PRIVATE** cuando la matriz lo permita.
+- **Entregable de la historia:** Flujo de **lectura** coherente con **media-service** y **API Gateway**: listado o consulta de **metadatos** de fotografías por árbol (filtrado por permisos y visibilidad), y obtención del **binario** vía proxy (`GET /api/media/trees/{treeId}/photos/{photoId}/content` u homólogo para foto principal), sin exponer credenciales de bucket al cliente. Integración mínima en **consulta pública** (detalle alineado con **HU-002** / **HU-003**) para fotos **PUBLIC** en fichas publicadas, y en contexto **autenticado** (colaborador / **ADMIN**) para incluir **PRIVATE** cuando la matriz lo permita.
 
 ### Alcance
 
 #### Incluye
 
-- Endpoints acordados en [docs/api/openapi.yaml](../api/openapi.yaml) bajo `/api/media` para **listar metadatos visibles por árbol** y obtener URL de lectura para visualización en cliente.
+- Endpoints acordados en [docs/api/openapi.yaml](../api/openapi.yaml) bajo `/api/media` para **listar metadatos visibles por árbol** y servir el binario vía gateway (`.../photos/{photoId}/content`; campo `url` de galería = ruta relativa a ese endpoint).
 - El endpoint de galería por árbol devuelve, como mínimo, los campos `id`, `url`, `isPrimary`, `order`, `mimeType`, `width`, `height` y `category`.
 - El campo `category` se expresa en contrato como literal de negocio (`PUBLIC` | `PRIVATE`).
 - Aplicación de reglas **R4–R5** y matriz de [docs/data-model/data-model.md](../data-model/data-model.md): público anónimo solo ve **PUBLIC**; usuario autenticado ve **PUBLIC + PRIVATE** según permisos de negocio.
@@ -51,11 +51,12 @@ Como visitante o usuario autenticado quiero ver las fotografías almacenadas en 
 
 - **Contrato HTTP** de listado y de URL de lectura incompleto o desalineado con el de subida (**HU-006**).
 - **Filtrado en backend** obligatorio: no confiar solo en la UI para ocultar **PRIVATE**.
-- **Rendimiento y caché** de URLs prefirmadas de lectura (ventana, reintentos, CDN futura).
+- **Rendimiento y caché** del proxy de lectura (latencia media-service → MinIO, reintentos, CDN futura).
 
 ### Aclaraciones pendientes (refinamiento)
 
 - **Listado de metadatos por árbol**: resuelto en `GET /api/media/trees/{treeId}/photos` (galería visible para el solicitante con orden principal+ascendente).
+- **Binario por foto**: resuelto en `GET /api/media/trees/{treeId}/photos/{photoId}/content` (misma visibilidad que la galería; **404** si no visible).
 - Criterio de ausencia de fotos en API de galería: respuesta **200** con **lista vacía**.
 - Sin pendientes funcionales adicionales para pasar a cierre documental del corte.
 
@@ -96,7 +97,7 @@ Como visitante o usuario autenticado quiero ver las fotografías almacenadas en 
 
 ## 4. Esfuerzo estimado de implementación
 
-Orden de magnitud **medio (M)**: contrato de lectura, autorización en **media-service**, prefirmadas de descarga si procede, pruebas y UI mínima en detalle (y opcionalmente en edición). Cifra en persona-días: **no fijada en fuentes**.
+Orden de magnitud **medio (M)**: contrato de lectura, autorización en **media-service**, proxy de binario vía gateway si procede, pruebas y UI mínima en detalle (y opcionalmente en edición). Cifra en persona-días: **no fijada en fuentes**.
 
 ## 5. Estado de implementación en código (corte HU-014, 2026)
 
@@ -105,9 +106,10 @@ Objetivo: dejar trazada en documentación lo ya construido frente a la HU comple
 | Pieza | Estado | Notas |
 |-------|--------|--------|
 | **Contrato galería** `GET /api/media/trees/{treeId}/photos` | Hecho | [docs/api/openapi.yaml](../api/openapi.yaml): `200` con lista (vacía cuando aplica), campos mínimos `id/url/isPrimary/order/mimeType/width/height/category`, `category` literal `PUBLIC`/`PRIVATE`. |
+| **Contrato binario por foto** `GET /api/media/trees/{treeId}/photos/{photoId}/content` | Hecho | Proxy vía gateway; `MediaTreePhotoGalleryItem.url` apunta a esta ruta relativa; JWT opcional; `404/502` según contrato. |
 | **Contrato foto principal binaria** `GET /api/media/public/trees/{treeId}/primary-photo` | Hecho | Se mantiene para miniatura/listado público; respuestas binaria `image/*` y `404/502` según contrato. |
 | **Visibilidad por rol en backend** | Hecho | Público anónimo recibe solo `PUBLIC`; autenticado recibe `PUBLIC + PRIVATE` según permisos de negocio; orden estable principal+ascendente. |
-| **Lectura segura de objetos** | Hecho | URLs de galería emitidas como lectura firmada (evita acceso directo no autorizado al bucket privado). |
+| **Lectura segura de objetos** | Hecho | El cliente no accede a MinIO directamente: **media-service** valida visibilidad y sirve bytes desde el bucket privado (proxy `/content`). |
 | **UI listado (HU-002)** | Hecho | Tarjeta con fotografía principal o fallback; proporción contenida en bloque fijo del lado izquierdo; enlace a detalle desde imagen y botón. |
 | **UI detalle + mapa (HU-003)** | Hecho | Carrusel y mapa en layout 50/50 en escritorio, variante de imagen única sin controles, y fallback cuando no hay coordenadas válidas. |
 | **Vista ampliada fullscreen** | Hecho | Visor dedicado con zoom/pan, reset, indicador de zoom y paginación anterior/siguiente. |

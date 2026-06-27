@@ -12,8 +12,8 @@ actor "Sistema\n(MyTreeLibrary)" as Sistema
 actor "Proveedor\nde IA" as ProvIA
 actor "Servidor\nSMTP" as SMTP
 
-Publico <|-- Colaborador : generalización\n(rol)
-Colaborador <|-- Admin : generalización\n(rol)
+Publico <|-- Colaborador
+Colaborador <|-- Admin
 
 rectangle "MyTreeLibrary" #LightBlue {
   usecase "UC-01\nConsultar árboles\npublicados y mapa" as UC1
@@ -29,6 +29,8 @@ rectangle "MyTreeLibrary" #LightBlue {
   usecase "UC-08\nGestionar solicitudes\nde notificación\n(ACTIVA / CANCELADA)" as UC8
 
   usecase "UC-09\nNotificar por correo\na suscriptores" as UC9
+
+  usecase "UC-10\nConsultar asistente IA características especie" as UC10
 }
 
 ' --- Público (sin autenticación) ---
@@ -40,60 +42,30 @@ Colaborador --> UC3
 Colaborador --> UC4
 Colaborador --> UC6
 
-UC5 .> UC3 : <<extend>>\nPunto de extensión:\ndisponible al aportar\nimagen en el alta
-UC5 .> UC4 : <<extend>>\nPunto de extensión:\ndisponible al editar\ncon imagen
+UC5 .> UC3 : <<extend>>
+UC5 .> UC4 : <<extend>>
 
 note right of UC4
-  **HU-008 (cerrada):** **COLABORADOR**
+  **COLABORADOR**
   solo fichas propias; **ADMIN**
-  cualquier ficha. Listado con filtros,
-  edición (**PUT**), baja (**DELETE**)
-  con cascada media→SQL; sin UC-09.
-  Ver [HU-008-edicion-de-mis-arboles.md]
+  cualquier ficha.
 end note
 
 ' --- ADMIN (requiere autenticación; hereda Colaborador) ---
 Admin --> UC7
 Admin --> UC8
+Admin --> UC10
 
-UC7 ..> ProvIA : <<extend>>\nConsulta orientativa\nenriquecimiento especie\n(MVP HU-016)
-
-note right of UC7
-  Maestros **familia**, **género**, **especie**.
-  MVP incluye consulta IA orientativa
-  de enriquecimiento de especie (HU-016).
-end note
-
-note bottom of Colaborador
-  **Restricción:** todos los casos
-  propios del Colaborador
-  exigen **usuario autenticado**
-  (rol Colaborador).
-end note
-
-note bottom of Admin
-  **Restricción:** UC-07 y UC-08
-  exigen **usuario autenticado**
-  (rol ADMIN).
-  Por generalización, puede ejecutar
-  también UC-01 … UC-06.
-end note
 
 ' --- Notificaciones automáticas (sistema) ---
 Sistema --> UC9
 UC3 ..> UC9 : <<include>>
 
-note right of UC9
-  MVP: solo tras **alta** (creación)
-  de ficha de árbol (regla R7).
-  Las modificaciones (UC-04)
-  **no** disparan notificación.
-end note
-
 UC9 --> SMTP
 
 UC5 --> ProvIA
 UC6 --> ProvIA
+UC10 --> ProvIA
 
 note right of UC5
   **Próxima versión** (HU-009):
@@ -105,5 +77,6 @@ note right of UC6
   **Próxima versión** (HU-010):
   chat asistido.
 end note
+
 
 @enduml

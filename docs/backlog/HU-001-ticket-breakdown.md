@@ -51,7 +51,7 @@
 
 | ID | Título | Descripción breve | Estado |
 |----|--------|-------------------|--------|
-| **TASK-HU-001-09** | CORS explícito en el gateway | Definir en `api-gateway` orígenes, métodos y cabeceras necesarias para el SPA; coherente con [docs/security/jwt-gateway-strategy.md](../security/jwt-gateway-strategy.md) y readme §2.5. | **Hecho** |
+| **TASK-HU-001-09** | CORS explícito en el gateway | Definir en `api-gateway` orígenes, métodos y cabeceras necesarias para el SPA; coherente con [docs/security/jwt-gateway-strategy.md](../security/jwt-gateway-strategy.md) y readme §3.5. | **Hecho** |
 | **TASK-HU-001-10** | Correlación `X-Correlation-Id` | Normalizar en gateway (`CorrelationIdWebFilter`) y reenviar cabecera al upstream en proxy; microservicios MVC leen MDC desde la misma cabecera; coherente con [jwt-gateway-strategy.md](../security/jwt-gateway-strategy.md) §6. | **Hecho** |
 
 ### Backend (cierre funcional con sesión)
@@ -68,7 +68,7 @@
 |----|--------|-------------------|--------|
 | **TASK-HU-001-14** | Checklist E2E manual | Login SPA → llamada autenticada al gateway → microservicio; logout; usuario sin rol en ruta admin → **403** esperado. | **Hecho** |
 | **TASK-HU-001-15** | Errores 401/403 y mensaje al cliente | Sin fugas de detalle interno; alineación con RFC 9457 donde el contrato ya lo defina. | **Hecho** |
-| **TASK-HU-001-16** | Documentación de arranque y variables | Actualizar `services/README`, variables `VITE_*` / env del front, y enlaces en readme §2.5 o jwt-gateway-strategy si cambia el flujo. | **Hecho** |
+| **TASK-HU-001-16** | Documentación de arranque y variables | Actualizar `services/README`, variables `VITE_*` / env del front, y enlaces en readme §3.5 o jwt-gateway-strategy si cambia el flujo. | **Hecho** |
 
 **Evidencia TASK-HU-001-14:** checklist manual (SPA/OIDC). Complemento back: `services/system-e2e-tests` — `Hu001Scenario02…` (200 + correlación), `03…` (401), `04…` (403); ver [system-e2e-tests/README.md](../../services/system-e2e-tests/README.md).
 

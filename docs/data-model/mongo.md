@@ -330,6 +330,8 @@ Nombre común: {{nombre_comun}}
 | `referencias[].url` | Verificar formato URL válido. **No asumir que la URL es accesible o correcta.** |
 | `referencias[].año` | Entero de 4 dígitos, no futuro. |
 
+**Contrato HTTP (wire):** la validación en **ai-assistant-service** (**HU-016**) usa claves camelCase en el JSON de respuesta (`altitudMinM`, `clima`, `growthRate`, …); `growthRate`/`leafType` se normalizan a enums **ingleses** en la salida IA. **catalog-service** (`SpeciesEcologicalData`, **HU-015**) y documentos Mongo pueden usar enums en **español** (`lento`, `caduca`, …). Matiz completo: [ADR-0007](../adr/0007-english-http-spanish-persistence.md) regla 10.
+
 ### 6.4 Riesgos conocidos
 
 **Alucinación de referencias bibliográficas.** Es el riesgo más relevante. Los LLM pueden generar títulos, autores y URLs con apariencia válida pero inexistentes. Las referencias deben tratarse siempre como datos no verificados hasta que el usuario las contraste con las fuentes originales.

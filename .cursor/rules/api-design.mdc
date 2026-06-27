@@ -11,8 +11,8 @@ alwaysApply: false
 - Diseñar endpoints orientados a recursos.
 - **Contrato HTTP en inglés** (`camelCase`): rutas de recurso y propiedades JSON homogéneas en inglés; **mapeo explícito** desde columnas SQL en español (DTO, no entidades JPA en REST). Decisión: [ADR-0007](../../docs/adr/0007-english-http-spanish-persistence.md). Recurso ficha: `/trees`, `treeId` — [ADR-0006](../../docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md).
 - **Persistencia:** columnas en español (`snake_case`); ver [naming-conventions.md](../../docs/engineering/naming-conventions.md).
-- Un concepto = un nombre en OpenAPI, DTO y cliente; **no** mezclar propiedades inglés y español en el mismo schema ni en query params del mismo endpoint.
-- Parámetros de consulta y valores de `sort` en **inglés** (`species`, `publicationState`, `species,asc`); los **valores** de enum de dominio pueden seguir en español técnico (`BORRADOR`, `PUBLICADO`).
+- Un concepto = un nombre en OpenAPI, DTO y cliente; **no** mezclar propiedades inglés y español en el mismo schema ni en query params del mismo endpoint, salvo **excepciones cerradas** en [ADR-0007](../../docs/adr/0007-english-http-spanish-persistence.md) (reglas 7–10).
+- Parámetros de consulta en **inglés** (`speciesId`, `publicationState`, `createdFrom`, …). **`sort`:** por defecto inglés (regla 7). Admin suscripciones (regla 8). **`ecologicalData`** en enriquecimiento de especie: dialecto híbrido documentado (regla 10; ver `SpeciesEcologicalData` vs `AiSpeciesEcologicalData` en OpenAPI).
 - Versionar la API si aparece una necesidad real.
 - Usar DTOs separados para request y response.
 

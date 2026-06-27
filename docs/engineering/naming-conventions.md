@@ -55,8 +55,13 @@ Regla transversal: **un solo idioma por frontera** (no mezclar español e inglé
 | **Producto y UI visible** | Español | Lenguaje de negocio: «ejemplar», «árbol», «ficha» | `vue-i18n`, títulos de HU | Identificadores técnicos en pantalla |
 | **PostgreSQL** (tablas, columnas, Flyway) | Español | Tabla y columnas **`ejemplar`** | `catalog.ejemplar`, `ejemplar_id`, `nombre_comun`, `estado_publicacion` | `arbol`, columnas en inglés |
 | **MongoDB** (diseño y documentos) | Español | Colección **`ejemplar_detalle`**; enlace **`ejemplar_pg_id`** | [mongo.md](../data-model/mongo.md) | `arbol_*`, `enriquecimientos_arbol` |
-| **Kafka** (topic y payload interno) | Español | **`catalog.ejemplar.evento`**, campo **`ejemplar_id`** | [kafka-events.md](../events/kafka-events.md) | `catalog.arbol.evento`, `arbol_id` |
-| **Contrato HTTP — propiedades JSON** | Inglés | Propiedad **`treeId`** (mapeo desde `ejemplar_id`); resto inglés homogéneo | `commonName`, `speciesId`, `publicationState` | `nombreComun` + `speciesId` en el mismo schema; **`treeId`** en JSON (legacy) |
+| **Kafka** (topic y payload interno) | Español (`snake_case` en dominio) | **`catalog.ejemplar.evento`**, **`ejemplar_id`**, **`evento_id`**, …; metadato **`schemaVersion`** según [kafka-events.md](../events/kafka-events.md) (N5.3) | [kafka-events.md](../events/kafka-events.md) | `catalog.arbol.evento`, `arbol_id` |
+| **Contrato HTTP — propiedades JSON** | Inglés | Propiedad **`treeId`** (mapeo desde `ejemplar_id`); resto inglés homogéneo | `commonName`, `speciesId`, `publicationState`, `modifiedAt` | `nombreComun` + `speciesId` en el mismo schema; **`treeId`** en JSON (legacy) |
+| **Contrato HTTP — query `sort`** | Inglés (por defecto) | Alineado a props JSON (`species`, `publicationState`, …) | Listado público `GET /api/catalog/public/trees` | Mezclar tokens inglés y español en el **mismo** endpoint |
+| **Contrato HTTP — query `sort` (excepción)** | Columna SQL | Solo `GET /api/catalog/trees` (colaborador): `modificado_en`, `creado_en` | `modificado_en,desc` (OpenAPI + implementación) | Reutilizar en endpoints nuevos sin ADR |
+| **Contrato HTTP — admin suscripciones (excepción)** | camelCase ↔ columna SQL | Solo `/api/notifications/subscriptions` admin (**HU-012**): `estadoSuscripcion`, `altaEn`, … | Ver OpenAPI `NotificationSubscriptionAdminItem` | Español suelto en otros recursos |
+| **Contrato HTTP — permiso media (excepción)** | Histórico MVP | Solo `MediaSubmissionPermissionResponse.actorUsuarioAppId` | Trazabilidad `usuario_app_id` en media | Generalizar el prefijo `actor*` + español |
+| **Contrato HTTP — `ecologicalData` especie (excepción)** | Híbrido Mongo / HU-015–016 | Catálogo: `SpeciesEcologicalData`; IA: `AiSpeciesEcologicalData` | `clima`/`suelo`; enums ES en catálogo, EN en IA para `growthRate`/`leafType` | Asumir inglés homogéneo en todo el subobjeto |
 | **Contrato HTTP — rutas y paths** | Inglés | Segmento de ficha **`/trees`** en catálogo y media ([ADR-0006](../adr/0006-ejemplar-aggregate-http-kafka-naming.md)) | `/api/catalog/trees`, `/api/media/trees/{treeId}/photos` | **`/ejemplares`**, `/arboles` (legacy API) |
 | **Backend Java** (paquetes, servicios, DTO REST) | Inglés | Servicios de dominio sobre entidad `Ejemplar`; DTO REST con **`treeId`** y rutas `/trees`. Columnas JPA en español vía `@Column` | `PublicEjemplarQueryMapper` → SQL `especie` | Mezclar props JSON españolas en DTO expuesto |
 | **Frontend** (Vue, TS, composables, ficheros) | Inglés | Símbolos **`Tree`/`Trees`**; API con **`treeId`** y `/api/.../trees`. Rutas SPA en español (`/ejemplares`, `/mis-ejemplares`) por UX | `CreateTreeView`, `PublicTreeListItem` | `EjemplarView`; llamar API con `/ejemplares` |
@@ -74,8 +79,8 @@ Regla transversal: **un solo idioma por frontera** (no mezclar español e inglé
 | Código | Regla |
 |--------|--------|
 | P1 | **Dominio y persistencia:** español (`ejemplar`, `especie`, …); sin `arbol` en SQL ni Mongo. |
-| P2 | **Contrato HTTP (JSON y query):** inglés homogéneo; mapeo desde BD en DTO/mapper ([ADR-0007](../adr/0007-english-http-spanish-persistence.md)). |
-| P3 | **Un concepto, un nombre por frontera;** sin mezcla inglés/español en el mismo schema JSON ni en la misma fila SQL. |
+| P2 | **Contrato HTTP (JSON y query):** inglés homogéneo; mapeo desde BD en DTO/mapper ([ADR-0007](../adr/0007-english-http-spanish-persistence.md)). Excepciones cerradas MVP: reglas 7–10. |
+| P3 | **Un concepto, un nombre por frontera;** sin mezcla inglés/español **ad hoc** en el mismo schema JSON ni en la misma fila SQL (excepciones documentadas en ADR-0007 reglas 7–10). |
 | P4 | Valores de enumeración: códigos de dominio (`BORRADOR`, `PUBLICADO`, …), sin traducir. |
 | P5 | **Frontend (código TS/Vue):** agregado **`Tree`/`Trees`**; API con **`treeId`** y `/api/.../trees`. Rutas SPA `/ejemplares` por UX. **Backend:** dominio `Ejemplar`, DTO con **`treeId`**. |
 | P6 | **Legacy prohibido en producto:** `arbol`, rutas API `/api/.../ejemplares`, `ejemplarId` en contrato HTTP, `catalog.arbol.evento`, prefijo MinIO `ejemplares/`. |
@@ -142,7 +147,8 @@ Lista completa (catálogo + media): ADR-0007.
 | Código | Regla |
 |--------|--------|
 | N5.1 | Topics: `catalog.ejemplar.evento`, … |
-| N5.2 | Payload: `snake_case` **español** (contrato interno, alineado a BD). |
+| N5.2 | Payload: `snake_case` **español** para campos de **dominio** (`evento_id`, `tipo_evento`, `ejemplar_id`, `ocurrido_en`, `resumen_cambio`, …). Contrato canónico: [kafka-events.md](../events/kafka-events.md). |
+| N5.3 | **Excepción cerrada (metadato de versión):** único campo técnico en **camelCase inglés** `schemaVersion` (string opcional, p. ej. `"1.0"`). No es dato de negocio; versiona el contrato del mensaje. **No** generalizar camelCase inglés a otros campos Kafka sin actualizar [kafka-events.md](../events/kafka-events.md). |
 
 ---
 
@@ -161,7 +167,7 @@ Lista completa (catálogo + media): ADR-0007.
 |--------|--------|
 | N7.1 | Paquetes y clases en inglés; agregado de catálogo **`Ejemplar*`** alineado a OpenAPI (`EjemplarService`, `EjemplarRepository`). |
 | N7.2 | Entidades: columnas español; atributos Java pueden reflejar dominio español o mapearse en DTO. |
-| N7.3 | DTO REST: propiedades JSON y query de entrada en **inglés** según OpenAPI; mapper a criterios de persistencia en español/dominio. |
+| N7.3 | DTO REST: propiedades JSON y query de entrada en **inglés** según OpenAPI; mapper a criterios de persistencia en español/dominio. Excepciones cerradas: [ADR-0007](../adr/0007-english-http-spanish-persistence.md) reglas 7–10. |
 | N7.4 | Tests: `*Test` / `*IT`. |
 
 ---
@@ -171,7 +177,7 @@ Lista completa (catálogo + media): ADR-0007.
 | Código | Regla |
 |--------|--------|
 | N8.1 | Componentes, composables y vistas: inglés; ficha = **`Tree` / `Trees`** (`useCreateTreeForm`, `CreateTreeView`, `TreesListView`). |
-| N8.2 | Tipos TS: nombres de interfaz en inglés (`CreateTreeRequest`, `PublicTreeListItem`); **propiedades** iguales al OpenAPI (`treeId`, `commonName`, …). El nombre del schema OpenAPI puede ser `CreateEjemplarRequest` mientras el tipo TS sea `CreateTreeRequest`. |
+| N8.2 | Tipos TS: nombres de interfaz en inglés (`CreateTreeRequest`, `PublicTreeListItem`); **propiedades** iguales al OpenAPI (`treeId`, `commonName`, …). OpenAPI y TypeScript usan los mismos nombres de schema (`CreateTreeRequest`, …). En Java (`catalog-service`), las clases DTO pueden llamarse aún `CreateEjemplarRequest` mientras el JSON en wire coincida con OpenAPI ([ADR-0004](../adr/0004-catalog-rest-write-and-audit.md), [ADR-0006](../adr/0006-ejemplar-aggregate-http-kafka-naming.md)). |
 | N8.3 | Texto visible: español vía **vue-i18n**. |
 | N8.4 | `VITE_*`: inglés, sin secretos. |
 

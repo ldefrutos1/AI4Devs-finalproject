@@ -10,7 +10,7 @@ export interface AiSpeciesEnrichmentSuggestionRequest {
   commonName: string
 }
 
-/** Salida orientativa de la consulta IA (HU-016); misma forma que `SpeciesEnrichmentReplaceRequest`. */
+/** Salida orientativa de la consulta IA (HU-016); forma estructural de SpeciesEnrichmentReplaceRequest; ecologicalData según ADR-0007 regla 10. */
 export type AiSpeciesEnrichmentSuggestionResponse = SpeciesEnrichmentReplaceRequest & {
   synonyms?: string[]
   distribution?: SpeciesDistribution

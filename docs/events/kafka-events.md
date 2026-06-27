@@ -10,7 +10,7 @@ Contrato orientativo para el MVP. Los nombres de topic y el payload deben manten
 | Formato mensaje | **JSON** en el valor (UTF-8). |
 | Clave del mensaje | Preferible **`ejemplar_id`** (stringificación del long) para partición estable por ejemplar cuando aplique. |
 | Idempotencia | Los consumidores deben tolerar **reentrega**: usar `evento_id` u otro idempotency key persistido. |
-| Versión de esquema | Campo opcional recomendado `schemaVersion` (string, p. ej. `1.0`) en el cuerpo del evento. |
+| Versión de esquema | Campo opcional recomendado **`schemaVersion`** (string, p. ej. `1.0`); única excepción de nomenclatura frente al `snake_case` español del resto del payload (véase [naming-conventions.md](../engineering/naming-conventions.md) N5.3). |
 
 ---
 

@@ -77,7 +77,7 @@ flowchart LR
 | ID | Título | Descripción breve | Estado |
 |----|--------|-------------------|--------|
 | **TASK-HU-005-08** | Pruebas de integración | Testcontainers: Postgres (y Kafka si el entorno de test lo permite) para verificar creación + mensaje publicado al menos una vez con payload mínimo; convención [testing-java.md](../engineering/testing-java.md). | Hecho |
-| **TASK-HU-005-09** | OpenAPI y README | [openapi.yaml](../api/openapi.yaml): esquema **CreateEjemplarRequest** / **CreatedEjemplarResponse**, descripción JWT/`email` en **POST**, códigos 201/400/401/403. [services/README.md](../../services/README.md): arranque, Flyway, **Keycloak** `scope=openid profile email` y enlace a **ADR-0004**. Variables `SPRING_KAFKA_*` del **catalog-service**: documentar al implementar **TASK-05**. | Hecho |
+| **TASK-HU-005-09** | OpenAPI y README | [openapi.yaml](../api/openapi.yaml): schemas **`CreateTreeRequest`** / **`CreatedTreeResponse`** (clases Java `CreateEjemplarRequest` / `CreatedEjemplarResponse` mientras el JSON coincida — [ADR-0004](../adr/0004-catalog-rest-write-and-audit.md), [ADR-0006](../adr/0006-ejemplar-aggregate-http-kafka-naming.md)); descripción JWT/`email` en **POST**, códigos 201/400/401/403. [services/README.md](../../services/README.md): arranque, Flyway, **Keycloak** `scope=openid profile email` y enlace a **ADR-0004**. Variables `SPRING_KAFKA_*` del **catalog-service**: documentar al implementar **TASK-05**. | Hecho |
 
 ### Frontend (Vue 3 + HTML/CSS)
 

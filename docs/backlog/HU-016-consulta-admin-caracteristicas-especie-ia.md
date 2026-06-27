@@ -7,7 +7,7 @@
 | **ID** | HU-016 | Coherente | Correcto |
 | **Épica** | Inteligencia artificial | readme §2.2 (Integración con IA), §3.2.4; backlog §2 | Correcto |
 | **Título** | Consulta de características de especie (ADMIN, MVP) | Épica IA; enriquecimiento `especie_detalle` vía **HU-015** (no UC-07; maestros en **HU-011**) | Correcto |
-| **Historia** | Como usuario administrador, quiero consultar a la IA las características de una especie… | Debe acotarse a rol **ADMIN**, IA **orientativa** y precarga de datos en la pantalla ya existente de edición de características de especie ([product-context](../../.cursor/rules/product-context.mdc)) | Refinada en §2 |
+| **Historia** | Como usuario administrador, quiero consultar a la IA las características de una especie… | Caso de uso **UC-10**; acotar a rol **ADMIN**, IA **orientativa** y precarga en la pantalla ya existente de edición de características de especie ([product-context](../../.cursor/rules/product-context.mdc)) | Refinada en §2 |
 | **Estimación** | M | Sin contradicción | **Se mantiene M** |
 | **Prioridad** | Media | Sin contradicción | **Se mantiene Media** |
 | **Estado** | **Cerrada** | Breakdown [HU-016-ticket-breakdown.md](HU-016-ticket-breakdown.md); tickets 01–09 **Hecho** |
@@ -36,7 +36,7 @@
 
 **Historia de usuario**
 
-Como usuario con rol **ADMIN**, quiero consultar a la IA las características ampliadas de una especie ya registrada en el catálogo taxonómico, para precargar con esa información la pantalla ya existente de edición de características de especie y apoyar así la gestión de maestros con datos orientativos sobre hábitat, distribución, datos ecológicos y referencias, sin que el sistema presente la respuesta como veredicto científico ni exponga esta función a colaboradores en el MVP.
+Como usuario con rol **ADMIN**, quiero consultar a la IA las características ampliadas de una especie ya registrada en el catálogo taxonómico (**UC-10**), para precargar con esa información la pantalla ya existente de edición de características de especie y apoyar así la gestión de maestros con datos orientativos sobre hábitat, distribución, datos ecológicos y referencias, sin que el sistema presente la respuesta como veredicto científico ni exponga esta función a colaboradores en el MVP.
 
 - **Entregable de la historia:** acción disponible solo para **ADMIN** en la pantalla ya existente de edición de características de especie: el **frontend** invoca **ai-assistant-service** (`/api/ai/**`) enviando **nombre científico** y **nombre común** de la especie, recibe un **JSON validado** compatible con los campos editables de esa pantalla y lo usa para **precargarlos**. La historia **no** incluye guardar esos datos en Mongo ni invocar a **catalog-service**; la persistencia del enriquecimiento ya pertenece a **HU-015**. Trazabilidad en **AUDITORIA_USO_IA** al invocar la IA.
 
@@ -99,7 +99,7 @@ Como usuario con rol **ADMIN**, quiero consultar a la IA las características am
 
 ### Referencias
 
-readme §2.2 (Integración con IA), §3.2.4; [mongo.md](../data-model/mongo.md) (`especie_detalle`, §6.3); [data-model.md](../data-model/data-model.md) **R3**; **HU-011**, **HU-015**; [product-context.mdc](../../.cursor/rules/product-context.mdc).
+readme §2.2 (Integración con IA), §3.2.4; [use-case-summary.md](../use-cases/use-case-summary.md) (**UC-10**); [mongo.md](../data-model/mongo.md) (`especie_detalle`, §6.3); [data-model.md](../data-model/data-model.md) **R3**; **HU-011**, **HU-015**; [product-context.mdc](../../.cursor/rules/product-context.mdc).
 
 ### Escenario 1 — ADMIN solicita IA y se precargan los campos
 
@@ -148,3 +148,5 @@ readme §2.2 (Integración con IA), §3.2.4; [mongo.md](../data-model/mongo.md) 
 ## 5. Esfuerzo estimado de implementación
 
 Orden de magnitud **M**: **ai-assistant-service** (LLM, validación §6.3, respuesta al cliente, auditoría **AUDITORIA_USO_IA**, OpenAPI `/api/ai/**`) y **frontend** en la pantalla ya existente de edición de características de especie (disparo de la consulta, precarga de campos y manejo de errores). La persistencia Mongo y los endpoints de guardado quedan fuera y pertenecen a **HU-015**. Cifra en persona-días: **no fijada en fuentes**.
+
+**Nota contractual (post-cierre):** el JSON de salida comparte la forma estructural de `SpeciesEnrichmentReplaceRequest`; `ecologicalData` en IA (`AiSpeciesEcologicalData`) difiere del schema de catálogo en enums `growthRate`/`leafType` (inglés tras validación vs español en Mongo/catálogo). Claves `clima`/`suelo` en ambos. Ver [ADR-0007](../adr/0007-english-http-spanish-persistence.md) regla 10 y [openapi.yaml](../api/openapi.yaml).

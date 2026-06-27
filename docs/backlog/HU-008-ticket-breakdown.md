@@ -62,7 +62,7 @@ flowchart LR
 
 | ID | Título | Descripción breve | Estado |
 |----|--------|-------------------|--------|
-| **TASK-HU-008-01** | Cierre OpenAPI catálogo y media (HU-008) | En [openapi.yaml](../api/openapi.yaml): `GET /api/catalog/trees` con filtros y paginación; `GET`/`PUT`/`DELETE` en `/api/catalog/trees/{treeId}` con **`UpdateEjemplarRequest`**, **`CollaboratorEjemplarDetailResponse`**, **`CollaboratorEjemplarPageResponse`**; **`DELETE /api/media/trees/{treeId}/photos`** (todas las fotos); **`DELETE /api/media/photos/{photoId}`** (una foto, TASK-HU-006-14); **`GET /api/catalog/trees/{treeId}/media-submission-permission`**. Eliminado **`PATCH`** del contrato (MVP solo **PUT**). Códigos Problem 400/401/403/404/502 donde aplica. | Hecho |
+| **TASK-HU-008-01** | Cierre OpenAPI catálogo y media (HU-008) | En [openapi.yaml](../api/openapi.yaml): `GET /api/catalog/trees` con filtros y paginación; `GET`/`PUT`/`DELETE` en `/api/catalog/trees/{treeId}` con schemas **`UpdateTreeRequest`**, **`CollaboratorTreeDetailResponse`**, **`CollaboratorTreePageResponse`** (nombres Java en catalog-service pueden seguir `*Ejemplar*` mientras el JSON coincida — [ADR-0004](../adr/0004-catalog-rest-write-and-audit.md), [ADR-0006](../adr/0006-ejemplar-aggregate-http-kafka-naming.md)); **`DELETE /api/media/trees/{treeId}/photos`** (todas las fotos); **`DELETE /api/media/photos/{photoId}`** (una foto, TASK-HU-006-14); **`GET /api/catalog/trees/{treeId}/media-submission-permission`**. Eliminado **`PATCH`** del contrato (MVP solo **PUT**). Códigos Problem 400/401/403/404/502 donde aplica. | Hecho |
 
 ### Catalog-service (backend)
 
@@ -118,7 +118,7 @@ flowchart LR
 ## Dependencias externas a esta HU
 
 - **HU-001:** JWT y roles **COLABORADOR** / **ADMIN**.
-- **HU-005:** contrato **CreateEjemplarRequest**, maestros especie/provincia, formulario de referencia.
+- **HU-005:** contrato OpenAPI **`CreateTreeRequest`** / **`CreatedTreeResponse`** (alta); maestros especie/provincia; formulario de referencia.
 - **HU-013:** rutas protegidas `/mis-ejemplares`, `/ejemplares/:id/edit`.
 - **HU-006:** **cerrada**; galería en edición (**TASK-HU-006-14**) entregada.
 - **HU-015:** **TASK-HU-015-01** (borrado Mongo real) **cerrado**; el hook de baja lo invoca desde **HU-008**.

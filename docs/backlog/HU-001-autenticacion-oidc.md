@@ -25,19 +25,18 @@ Como colaborador o usuario con rol **ADMIN**, quiero autenticarme mediante el pr
 - Configuración del realm `mtl` en entorno local con cliente SPA `mtl-spa` (Authorization Code + PKCE) y usuarios de prueba colaborador / **ADMIN** ([infra/compose/README.md](../../infra/compose/README.md)).
 - Integración OIDC en frontend: discovery, login, callback, estado de sesión reactivo (`oidc-client-ts`), `automaticSilentRenew`, logout; rutas `/login`, `/auth/callback`, `/auth/error`.
 - Envío de `Authorization: Bearer` en llamadas autenticadas al gateway; gestión de **401** con `signinSilent` y reintento o redirect a login con `returnPath`.
-- Validación JWT en **api-gateway** (lista blanca de rutas públicas según [openapi.yaml](../api/openapi.yaml)) y en **catalog-service** con el mismo `issuer-uri` y conversión de `realm_access.roles` a `ROLE_*`.
+- Validación JWT en **api-gateway** (lista blanca de rutas públicas según [openapi.yaml](../api/openapi.yaml)) y **revalidación en los microservicios** (`catalog-service`, `media-service`, `notification-service`, `ai-assistant-service`) con el mismo `issuer-uri` y conversión de `realm_access.roles` a `ROLE_*` (`catalog-service` fue el piloto inicial).
 - Piloto de autorización por rol: rutas que exigen **COLABORADOR** o **ADMIN** según matriz de producto (p. ej. maestros solo **ADMIN**).
-- **CORS** explícito en gateway para orígenes del SPA en local (`localhost:5173`, `127.0.0.1:5173`), alineado con [jwt-gateway-strategy.md](../security/jwt-gateway-strategy.md).
-- **Correlación** `X-Correlation-Id`: normalización en gateway, reenvío al upstream en proxy y lectura en MDC de microservicios MVC (**TASK-HU-001-10**).
+- **CORS** explícito en gateway para orígenes del SPA en local (`localhost:5173`, `127.0.0.1:5173`, `localhost:8088`, `127.0.0.1:8088`), alineado con [jwt-gateway-strategy.md](../security/jwt-gateway-strategy.md).
+- **Correlación** `X-Correlation-Id`: normalización en gateway, reenvío al upstream en proxy y lectura en MDC de microservicios (`catalog-service`, `media-service`, `notification-service`, `ai-assistant-service`; **TASK-HU-001-10**).
 - Mensajes de error de acceso o sesión en frontend sin filtrar detalle interno del backend.
 - Tests automatizados del resource server sin depender de Keycloak manual en cada ejecución (JWT de prueba / decoder stub).
-- Documentación de variables (`VITE_*`, `MTL_JWT_ISSUER_URI`, etc.) y flujo de arranque en [services/README.md](../../services/README.md), [frontend/README.md](../../frontend/README.md) y readme §2.5 / §3.2.1.
+- Documentación de variables (`VITE_*`, `MTL_JWT_ISSUER_URI`, etc.) y flujo de arranque en [services/README.md](../../services/README.md), [frontend/README.md](../../frontend/README.md) y readme §3.2.1 / §3.5.
 
 #### Queda fuera de esta historia
 
 - **Mapa de rutas, menú global y guardas de router** por perfil (**HU-013**): esta HU aporta identidad y token; HU-013 aplica `requiresAuth` / `requiredRoles` en Vue Router.
 - Envío opcional de **`X-Correlation-Id`** desde la SPA (el gateway genera uno si el cliente no lo envía).
-- Correlación en **`ai-assistant-service`** cuando exponga API REST (stub sin filtro MDC aún).
 - Endurecimiento de CORS y políticas de producción (orígenes reales, TLS, secretos) fuera del corte de desarrollo local.
 - SSO multiaplicación, MFA, federación avanzada o políticas IAM enterprise.
 - Cierre funcional de todos los casos de uso de negocio (alta de árbol, notificaciones, IA, etc.): esta HU solo **habilita** el acceso autenticado que consumen otras historias.
@@ -89,7 +88,7 @@ Ver [HU-001-ticket-breakdown.md](HU-001-ticket-breakdown.md) (`TASK-HU-001-01` �
 
 ### Referencias
 
-Backlog `HU-001` (tabla §3); [HU-001-ticket-breakdown.md](HU-001-ticket-breakdown.md); [infra/compose/README.md](../../infra/compose/README.md); [jwt-gateway-strategy.md](../security/jwt-gateway-strategy.md); [readme.md](../../readme.md) §2.3 (matriz de páginas por rol), §2.5 y §3.2.1 (autenticación en front); [frontend/README.md](../../frontend/README.md) (flujo OIDC).
+Backlog `HU-001` (tabla §3); [HU-001-ticket-breakdown.md](HU-001-ticket-breakdown.md); [infra/compose/README.md](../../infra/compose/README.md); [jwt-gateway-strategy.md](../security/jwt-gateway-strategy.md); [readme.md](../../readme.md) §2.3 (matriz de páginas por rol), §3.2.1 (autenticación en front) y §3.5 (seguridad); [frontend/README.md](../../frontend/README.md) (flujo OIDC).
 
 ### Escenario 1 — Login y sesión válida por OIDC
 

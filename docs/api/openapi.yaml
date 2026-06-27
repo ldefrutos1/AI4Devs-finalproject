@@ -7,6 +7,11 @@ info:
     (`application/problem+json`). Reglas de diseño y convención de rutas en `.cursor/rules/api-design.mdc`.
     Los clientes pueden enviar la cabecera opcional `X-Correlation-Id` en peticiones; el servidor puede
     devolver el mismo identificador en la propiedad `correlationId` del cuerpo Problem.
+    Las rutas `.../enrichment` de **catalog-service** (**HU-015**) solo se registran con
+    `mtl.catalog.mongo.enabled=true` (habitual en perfil `dev`/Compose; por defecto `false` en el
+    properties base del servicio). Con Mongo desactivado responden **404**; el alta/edición de fichas
+    y `enrichmentWarning` en POST/PUT de árboles pueden seguir operativos vía proyección `NoOp`.
+    Ver [services/README.md](../../services/README.md) (Mongo / HU-015).
   version: 0.1.0
 
 servers:
@@ -15,7 +20,9 @@ servers:
 
 tags:
   - name: catalog
-    description: Catálogo de árboles (catalog-service)
+    description: >
+      Catálogo de árboles (catalog-service). Sub-recursos `.../enrichment` (**HU-015**) requieren
+      `mtl.catalog.mongo.enabled=true`.
   - name: catalog-public
     description: Consulta pública sin autenticación
   - name: notifications
@@ -368,6 +375,9 @@ paths:
           $ref: "#/components/responses/ProblemConflict"
 
   /api/catalog/species/{speciesId}/enrichment:
+    description: >
+      **Disponibilidad:** activo solo con `mtl.catalog.mongo.enabled=true` en catalog-service. Con Mongo
+      desactivado (valor por defecto del properties base) la ruta no se registra y el cliente recibe **404**.
     parameters:
       - $ref: "#/components/parameters/TaxonomySpeciesId"
     get:
@@ -431,10 +441,10 @@ paths:
       summary: Listar árboles del colaborador (HU-008)
       description: >
         Listado paginado de fichas visibles para el actor. **COLABORADOR:** solo árboles con
-        `usuario_app_id` del JWT. **ADMIN:** puede listar cualquier ficha; filtro opcional
-        `createdByUserId` para acotar por colaborador creador. Orden por defecto: `modificado_en`
-        descendente. Filtro de fechas: `createdFrom`/`createdTo` en **UTC** (formato `date`);
-        debe cumplirse `createdFrom` ≤ `createdTo`.
+        `usuario_app_id` del JWT; si envía `createdByUserId` en query → **403**. **ADMIN:** puede
+        listar cualquier ficha; filtro opcional `createdByUserId` para acotar por colaborador creador.
+        Orden por defecto: `modificado_en` descendente. Filtro de fechas: `createdFrom`/`createdTo`
+        en **UTC** (formato `date`); debe cumplirse `createdFrom` ≤ `createdTo`.
       security:
         - bearerAuth: []
       parameters:
@@ -597,6 +607,9 @@ paths:
           $ref: "#/components/responses/ProblemNotFound"
 
   /api/catalog/trees/{treeId}/enrichment:
+    description: >
+      **Disponibilidad:** activo solo con `mtl.catalog.mongo.enabled=true` en catalog-service. Con Mongo
+      desactivado (valor por defecto del properties base) la ruta no se registra y el cliente recibe **404**.
     parameters:
       - $ref: "#/components/parameters/TreeId"
     get:
@@ -661,8 +674,15 @@ paths:
       description: >
         Filtros de texto (`species`, `province`, `municipality`) son búsqueda por subcadena (insensible a
         mayúsculas/acentos; `%` y `_` literales). Para poblar un desplegable de provincia con nombres
-        canónicos del maestro, usar `GET /api/catalog/public/provinces` (`nombres`).
-      security: []
+        canónicos del maestro, usar `GET /api/catalog/public/provinces` (propiedad `names`).
+        **Sin JWT** (visitante anónimo): solo fichas con `publicationState=PUBLICADO` y
+        `publicMapVisibility=PUBLICO`; los query `publicationState` y `publicMapVisibility` se ignoran.
+        **Con JWT** de realm **COLABORADOR** o **ADMIN**: esos filtros de estado/visibilidad son
+        opcionales (omitidos = sin acotar por ese campo). El gateway no exige token en esta ruta pero
+        reenvía `Authorization` si el cliente lo envía.
+      security:
+        - {}
+        - bearerAuth: []
       parameters:
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Size"
@@ -686,7 +706,14 @@ paths:
     get:
       tags: [catalog-public]
       summary: Obtener detalle público de árbol publicado
-      security: []
+      description: >
+        **Sin JWT:** solo árboles con `publicationState=PUBLICADO` y `publicMapVisibility=PUBLICO`
+        (**404** en caso contrario). **Con JWT** de realm **COLABORADOR** o **ADMIN:** cualquier ficha
+        existente por `treeId` (incluye borradores y mapa privado). JWT opcional en gateway; se reenvía
+        si el cliente lo envía.
+      security:
+        - {}
+        - bearerAuth: []
       parameters:
         - $ref: "#/components/parameters/PublicTreeId"
       responses:
@@ -700,6 +727,9 @@ paths:
           $ref: "#/components/responses/ProblemNotFound"
 
   /api/catalog/public/trees/{treeId}/enrichment:
+    description: >
+      **Disponibilidad:** activo solo con `mtl.catalog.mongo.enabled=true` en catalog-service. Con Mongo
+      desactivado (valor por defecto del properties base) la ruta no se registra y el cliente recibe **404**.
     get:
       tags: [catalog-public]
       summary: Consultar enriquecimiento público de árbol publicado (HU-015)
@@ -707,9 +737,12 @@ paths:
         Respuesta **compuesta** con bloques opcionales `speciesEnrichment` y `treeEnrichment` para
         popup de especie y bloque colapsable del ejemplar en detalle público (**HU-002**). Misma
         regla de visibilidad que `GET /api/catalog/public/trees/{treeId}`. **404** si el árbol no
-        existe o no es publicable. **200** con uno o ambos bloques ausentes si no hay documentos
-        Mongo. No existe `GET` público de enriquecimiento por `speciesId` aislado.
-      security: []
+        existe o no es accesible en el contexto del solicitante. **200** con uno o ambos bloques
+        ausentes si no hay documentos Mongo. No existe `GET` público de enriquecimiento por `speciesId`
+        aislado. JWT opcional (**COLABORADOR** / **ADMIN** amplían alcance como en detalle público).
+      security:
+        - {}
+        - bearerAuth: []
       parameters:
         - $ref: "#/components/parameters/PublicTreeId"
       responses:
@@ -853,6 +886,42 @@ paths:
           $ref: "#/components/responses/ProblemUnauthorized"
         "403":
           $ref: "#/components/responses/ProblemForbidden"
+        "404":
+          $ref: "#/components/responses/ProblemNotFound"
+        "502":
+          $ref: "#/components/responses/ProblemBadGateway"
+
+  /api/media/trees/{treeId}/photos/{photoId}/content:
+    parameters:
+      - $ref: "#/components/parameters/PublicTreeId"
+      - $ref: "#/components/parameters/PhotoId"
+    get:
+      tags: [media]
+      summary: Binario de una fotografía visible (HU-014)
+      description: >
+        Sirve el cuerpo de la imagen referenciado por `MediaTreePhotoGalleryItem.url`. Misma
+        visibilidad que `GET /api/media/trees/{treeId}/photos`: sin token solo fotos `PUBLIC`; con
+        JWT, `PUBLIC` + `PRIVATE` según permisos de negocio. **404** si la foto no existe o no es
+        visible para el solicitante.
+      security:
+        - {}
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Cuerpo binario (Content-Type según MIME registrado, p. ej. image/jpeg)
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/webp:
+              schema:
+                type: string
+                format: binary
         "404":
           $ref: "#/components/responses/ProblemNotFound"
         "502":
@@ -1036,12 +1105,14 @@ paths:
       description: >
         Solo **ADMIN** (rol de realm; **403** para **COLABORADOR**). Invoca al proveedor de IA externo con
         `scientificName` y `commonName` y devuelve un JSON **orientativo** validado estructuralmente según
-        [mongo.md](../data-model/mongo.md) §6.3. Propiedades y enums del cuerpo de respuesta en **inglés**
-        homogéneo ([ADR-0007](../adr/0007-english-http-spanish-persistence.md)); compatible con la precarga en
-        `SpeciesEnrichmentPopup` (**HU-015**; mismos campos que `SpeciesEnrichmentReplaceRequest`). **No** persiste
-        en Mongo ni consulta **catalog-service**. La UI decide si la acción está disponible (sin enriquecimiento
-        previo) vía catálogo. **404** si la IA no devuelve contenido utilizable antes de validación. Copy de producto:
-        resultado orientativo, no veredicto científico ([product-context](../../.cursor/rules/product-context.mdc)).
+        [mongo.md](../data-model/mongo.md) §6.3. Misma **forma estructural** de nivel raíz que
+        `SpeciesEnrichmentReplaceRequest` para precarga en `SpeciesEnrichmentPopup` (**HU-015**); el subobjeto
+        `ecologicalData` sigue el schema **`AiSpeciesEcologicalData`** (dialecto documentado en
+        [ADR-0007](../adr/0007-english-http-spanish-persistence.md) regla 10: claves `clima`/`suelo`;
+        enums `growthRate`/`leafType` en **inglés**). **No** persiste en Mongo ni consulta **catalog-service**.
+        La UI decide si la acción está disponible (sin enriquecimiento previo) vía catálogo. **404** si la IA
+        no devuelve contenido utilizable antes de validación. Copy de producto: resultado orientativo, no veredicto
+        científico ([product-context](../../.cursor/rules/product-context.mdc)).
       security:
         - bearerAuth: []
       parameters:
@@ -1128,7 +1199,8 @@ components:
       required: false
       schema:
         $ref: "#/components/schemas/NotificationSubscriptionEstadoEnum"
-      description: Filtro opcional por estado de suscripción.
+      description: >
+        Filtro opcional por estado de suscripción. Nombre alineado a columna SQL (ADR-0007 regla 8).
     NotificationSubscriptionEmailFilter:
       name: email
       in: query
@@ -1182,7 +1254,7 @@ components:
       description: >
         Filtro por subcadena en el nombre de provincia visible (insensible a mayúsculas y acentos;
         metacaracteres % y _ se tratan de forma literal). Valores alineados al maestro: lista ordenada
-        de nombres en `GET /api/catalog/public/provinces` (propiedad `nombres`).
+        de nombres en `GET /api/catalog/public/provinces` (propiedad `names`).
     PublicTreeMunicipality:
       name: municipality
       in: query
@@ -1199,7 +1271,9 @@ components:
       schema:
         type: string
         enum: [BORRADOR, PUBLICADO]
-      description: Filtro por estado de publicación.
+      description: >
+        Filtro por estado de publicación. Solo tiene efecto con JWT de realm **COLABORADOR** o **ADMIN**;
+        visitantes anónimos ven siempre el subconjunto `PUBLICADO`.
     PublicTreeVisibility:
       name: publicMapVisibility
       in: query
@@ -1207,7 +1281,9 @@ components:
       schema:
         type: string
         enum: [PRIVADO, PUBLICO]
-      description: Filtro por visibilidad en mapa público.
+      description: >
+        Filtro por visibilidad en mapa público. Solo tiene efecto con JWT de realm **COLABORADOR** o
+        **ADMIN**; visitantes anónimos ven siempre el subconjunto `PUBLICO`.
     PublicTreeSort:
       name: sort
       in: query
@@ -1265,8 +1341,8 @@ components:
         type: integer
         format: int64
       description: >
-        Filtro por colaborador creador (`usuario_app_id` del autor de la ficha). Solo tiene efecto
-        para rol **ADMIN**; ignorado u opcionalmente **403** para **COLABORADOR** según implementación.
+        Filtro por colaborador creador (`usuario_app_id` del autor de la ficha). Solo **ADMIN** puede
+        usarlo; si un **COLABORADOR** lo envía, el servidor responde **403** (`ProblemForbidden`).
     CollaboratorTreeSort:
       name: sort
       in: query
@@ -1279,7 +1355,10 @@ components:
           - modificado_en,desc
           - creado_en,asc
           - creado_en,desc
-      description: Orden del listado colaborador. Por defecto `modificado_en,desc`.
+      description: >
+        Orden del listado colaborador. Por defecto `modificado_en,desc`. Tokens admitidos alineados
+        a columnas SQL (excepción documentada en [ADR-0007](../adr/0007-english-http-spanish-persistence.md)
+        regla 7); la respuesta JSON expone `modifiedAt` / `createdAt`.
 
   schemas:
     MediaTreePhotoGalleryItem:
@@ -1300,8 +1379,9 @@ components:
           description: Identificador único de la fotografía.
         url:
           type: string
-          format: uri
-          description: URL de lectura de la fotografía para visualización.
+          description: >
+            Ruta relativa vía gateway hacia `GET /api/media/trees/{treeId}/photos/{photoId}/content`
+            (mismo origen que la SPA; no es URL prefirmada de bucket).
         isPrimary:
           type: boolean
           description: Indica si la foto es la principal del árbol.
@@ -1636,6 +1716,9 @@ components:
             MongoDB (HU-015). Ausente si el enriquecimiento inicial se persistió correctamente.
     MediaSubmissionPermissionResponse:
       type: object
+      description: >
+        Respuesta de permiso de subida (**HU-006**). `actorUsuarioAppId` es excepción de nomenclatura
+        MVP ([ADR-0007](../adr/0007-english-http-spanish-persistence.md) regla 9).
       required: [treeId, actorUsuarioAppId]
       properties:
         treeId:
@@ -1856,9 +1939,11 @@ components:
     AiSpeciesEnrichmentSuggestionResponse:
       type: object
       description: >
-        Salida orientativa de la consulta IA (**HU-016**). Misma forma que `SpeciesEnrichmentReplaceRequest`
-        para precarga directa en `SpeciesEnrichmentPopup` (HU-015). Validación estructural en
-        ai-assistant-service según [mongo.md](../data-model/mongo.md) §6.3; no implica veracidad de referencias.
+        Salida orientativa de la consulta IA (**HU-016**). Misma forma **estructural** de nivel raíz que
+        `SpeciesEnrichmentReplaceRequest` (sin `speciesId`) para precarga en `SpeciesEnrichmentPopup`
+        (**HU-015**). `ecologicalData` usa `AiSpeciesEcologicalData`, no el schema de catálogo. Validación
+        en ai-assistant-service según [mongo.md](../data-model/mongo.md) §6.3 ([ADR-0007](../adr/0007-english-http-spanish-persistence.md)
+        regla 10).
       additionalProperties: false
       properties:
         synonyms:
@@ -1878,9 +1963,11 @@ components:
     AiSpeciesEcologicalData:
       type: object
       description: >
-        `ecologicalData` de la respuesta IA (**HU-016**). Propiedades en **camelCase** e idioma **inglés**
-        en el wire HTTP ([ADR-0007](../adr/0007-english-http-spanish-persistence.md)). El servicio puede
-        aceptar valores en español en la salida cruda del LLM y normalizarlos antes de responder.
+        `ecologicalData` de la respuesta IA (**HU-016**, [ADR-0007](../adr/0007-english-http-spanish-persistence.md)
+        regla 10). Claves de dominio Mongo en español (`clima`, `suelo`) conviven con props en inglés
+        (`habitat`, `altitudMinM`, `longevityMaxYears`, …). Tras validación, `growthRate` y `leafType` usan
+        enums en **inglés** (`slow`, `deciduous`, …); el LLM puede aportar equivalentes en español que el
+        servicio normaliza.
       additionalProperties: true
       properties:
         habitat:
@@ -1929,9 +2016,11 @@ components:
     SpeciesEcologicalData:
       type: object
       description: >
-        Datos ecológicos semiestructurados en **camelCase** (contrato HTTP). Campos documentados alineados
-        con `datos_ecologicos` en [mongo.md](../data-model/mongo.md) §5.1 y validación §6.3. El editor guiado
-        de la UI (HU-015) usa `habitat`, `altitudMinM`, `altitudMaxM` y `clima`; el resto se edita en modo JSON.
+        Datos ecológicos semiestructurados en **camelCase** (contrato HTTP catálogo, **HU-015**). Alineado a
+        `datos_ecologicos` en [mongo.md](../data-model/mongo.md) §5.1 y §6.3 ([ADR-0007](../adr/0007-english-http-spanish-persistence.md)
+        regla 10): claves `clima`, `suelo`, …; enums `growthRate`/`leafType` documentados en **español**
+        (`lento`, `caduca`, …). El editor guiado usa `habitat`, `altitudMinM`, `altitudMaxM` y `clima`; el resto
+        en modo JSON. Distinto de `AiSpeciesEcologicalData` (**HU-016**), que normaliza algunos enums al inglés.
       additionalProperties: true
       properties:
         habitat:
@@ -2388,6 +2477,9 @@ components:
       description: Valores de estado_suscripcion (MVP, data-model §2).
     NotificationSubscriptionAdminItem:
       type: object
+      description: >
+        Ítem admin (**HU-012**). Propiedades temporales en camelCase español alineadas a `suscriptor`
+        (excepción [ADR-0007](../adr/0007-english-http-spanish-persistence.md) regla 8).
       required:
         - subscriptionId
         - email
