@@ -28,31 +28,29 @@
 
 ## 1. 📋 Ficha del proyecto
 
-### **1.1. Tu nombre completo:**
+### **1.1. Alumno**
 
 Luís María de Frutos Redondo.
 
-### **1.2. Nombre del proyecto:**
+### **1.2. Proyecto**
 
 MyTreeLibrary.
 
-### **1.3. Descripción breve del proyecto:**
+### **1.3. Descripción breve**
 
-MyTreeLibrary es una solución digital para crear y gestionar tu colección personal de árboles singulares, almacenando fotografías, localización geográfica y datos relevantes de cada ejemplar. Diseñada para aficionados, permite compartir información públicamente y fomentar una comunidad colaborativa. En el MVP, la IA apoya la consulta de características de especie por administradores; la identificación por imagen y el chat se prevén en versiones posteriores.
+MyTreeLibrary es una plataforma colaborativa para registrar árboles singulares con fotos, ubicación y datos de interés, y consultarlos de forma pública. En el MVP, la IA orienta (no determina) la consulta de características de especie para administradores; identificación por imagen y chat quedan para versiones posteriores.
 
-### **1.4. URL del proyecto:**
+### **1.4. Repositorio**
 
-[https://github.com/ldefrutos1/AI4Devs-finalproject](https://github.com/ldefrutos1/AI4Devs-finalproject)
+[github.com/ldefrutos1/AI4Devs-finalproject](https://github.com/ldefrutos1/AI4Devs-finalproject)
 
-### **1.5. URL o archivo comprimido del repositorio**
-
-[https://github.com/ldefrutos1/AI4Devs-finalproject](https://github.com/ldefrutos1/AI4Devs-finalproject)
+Documentación del repo: [§2 Descripción del producto](#2-descripción-general-del-producto) · [§2.4 Arranque local](#24-instrucciones-de-instalación-entorno-de-desarrollo) · [§3 Arquitectura](#3-arquitectura-del-sistema) · [§5 API](#5-especificación-de-la-api) · [Guía operativa local](docs/onboarding/local-setup-guide.md)
 
 ---
 
 ## 2. 🌳 Descripción general del producto
 
-### **2.1. Objetivo:**
+### **2.1. Objetivo**
 
 #### Propósito
 
@@ -68,7 +66,7 @@ La solución combina la catalogación personal con la posibilidad de compartir y
 
 La solución está dirigida a aficionados a la naturaleza en general y puede resultar de especial utilidad para docentes y monitores de tiempo libre.
 
-### **2.2. Características y funcionalidades principales:**
+### **2.2. Características y funcionalidades principales**
 
 #### Registro y publicación de árboles
 
@@ -86,7 +84,7 @@ La solución ofrece un sistema de notificaciones para comunicar novedades a usua
 
 En el **MVP**, usuarios con rol de administrador pueden consultar las características de una especie, para futuras versiones se incorporará la identificación orientativa por imagen y un chat.
 
-### **2.2.1 Diagrama de contexto del sistema (C1)**
+### **2.2.1. Diagrama de contexto del sistema (C1)**
 
 ```mermaid
 flowchart TB
@@ -111,7 +109,7 @@ flowchart TB
 ```
 
 
-### **2.2.2 Diagrama de Casos de Uso del sistema**
+### **2.2.2. Diagrama de Casos de Uso del sistema**
 
 A continuación se incluye el diagrama de casos de uso del sistema.
 
@@ -135,7 +133,7 @@ A continuación se incluye el diagrama de casos de uso del sistema.
 
 *El Modelo completo se puede consultar en:* [resumen de casos de uso](docs/use-cases/use-case-summary.md) · [modelo PlantUML](docs/use-cases/use-case-model.puml)
 
-### **2.3. Diseño y experiencia de usuario:**
+### **2.3. Diseño y experiencia de usuario**
 
 El sistema está diseñado para facilitar el alta de ejemplares a partir de fotografías; el usuario selecciona las fotografías que desea subir y la aplicación extrae la ubicación del ejemplar (latitud y longitud) de los metadatos EXIF de la primera fotografía. En caso de que las imágenes no tengan metadatos de ubicación, el usuario puede seleccionar la posición del ejemplar directamente en el mapa (componente OpenStreetMap).
 
@@ -145,7 +143,7 @@ La aplicación implementa una navegación simple por roles con una **página de 
 
 
 
-### Navegación de la aplicación
+### **Navegación de la aplicación**
 
 ---
 
@@ -183,7 +181,7 @@ La aplicación implementa una navegación simple por roles con una **página de 
 
 ---
 
-### Resumen de permisos
+### **Resumen de permisos**
 
 | Página | Público | Colaborador | Admin |
 |---|:---:|:---:|:---:|
@@ -215,7 +213,7 @@ La aplicación implementa una navegación simple por roles con una **página de 
 **Datos semiestructurados (Mongo)**
 ![Mongo](./docs/Mongo.jpg)
 
-### **2.4. Instrucciones de instalación (entorno de desarrollo):**
+### **2.4. Instrucciones de instalación (entorno de desarrollo)**
 
 1. **Infraestructura:** para poder ejecutar la aplicación en desarrollo se necesita arrancar los contenedores que tienen la infraestructura (PostgreSQL, Mongo, ...) definidos en [`infra/compose/docker-compose.yml`](infra/compose/docker-compose.yml) siguiendo estos pasos:
 - Copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario: `infra/compose/.env.example` → `infra/compose/.env`.
@@ -223,20 +221,20 @@ La aplicación implementa una navegación simple por roles con una **página de 
   ```bash
   docker compose up -d
   ```
-2. **Backend:** los servicios de backend se arrancan desde la raíz del repo, hay que arrancar **una terminal por microservicio**, con perfil **`dev`** (siempre se debe arrancar **api-gateway** además de los microservicios a probar; ver tabla). Ejemplo con api-gateway y catalog-service:
+2. **Backend:** los servicios de backend se arrancan desde la raíz del repo, hay que arrancar **una terminal por microservicio**, con perfil **`dev`** (siempre se debe arrancar **api-gateway** además de los microservicios a probar; qué levantar según el flujo: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#qué-levantar-según-el-flujo)). Ejemplo con api-gateway y catalog-service:
    ```bash
    mvn -f services/pom.xml -pl api-gateway spring-boot:run -Dspring-boot.run.profiles=dev
    mvn -f services/pom.xml -pl catalog-service spring-boot:run -Dspring-boot.run.profiles=dev
    ```
-3. **Frontend:** para ejecutar el frontend se deben seguir los siguientes pasos
-- Copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario  `frontend/.env.example` → `frontend/.env`. 
+3. **Frontend:** para ejecutar el frontend se deben seguir los siguientes pasos:
+- Copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario: `frontend/.env.example` → `frontend/.env`.
 - Desde `frontend/`, ejecutar:
    ```bash
    npm install
    npm run dev
    ```
 
-Una vez levantados los contenedores y la parte front y back de la aplicación estarán disponibles estas URLs: 
+Una vez levantados los contenedores y la parte front y back de la aplicación estarán disponibles estas URLs (modo **dev en host**; la UI en contenedor usa `:8088` — ver [§3.4](#34-infraestructura-y-despliegue)):
    - → **UI** de la aplicación: **http://localhost:5173**
    - → **API Gateway**: **http://localhost:8080**
    - → **Microservicios**: **http://localhost:8081-8084**
@@ -244,28 +242,17 @@ Una vez levantados los contenedores y la parte front y back de la aplicación es
    - → **MinIO** consola: **http://localhost:9001/login** (usuario: minio)
    - → **Grafana**: **http://localhost:3000/** (usuario: admin)
    - → **Prometheus**: **http://localhost:9090/targets**
+   - → **Mailpit** (correo de prueba): **http://localhost:8025**
 
-**Dependencias por flujo**
+En desarrollo lo habitual es **infra en Docker** y **aplicación en host** (pasos anteriores). Existe un segundo modo con **toda la app en contenedores** (SPA en `:8088`); ver [§3.4 Infraestructura y despliegue](#34-infraestructura-y-despliegue).
 
-| Flujo | Compose (además de Postgres/Keycloak) | Servicios levantados |
-|-------|----------------------------------------|------------------------------------------------------------------------|
-| Cualquier flujo vía SPA | — | **api-gateway** (obligatorio) |
-| Consulta pública | — | api-gateway, catalog-service |
-| Alta / edición de árbol | Redis, Kafka | api-gateway, catalog-service (+ **media-service** si hay fotos) |
-| Fotos (subida) | MinIO | api-gateway, media-service (+ **catalog-service** si aún no existe la ficha) |
-| Aviso por correo (alta de ejemplar) | Kafka, Mailpit | api-gateway, catalog-service, notification-service |
-| Admin (maestros / suscripciones) | — | api-gateway, catalog-service; notification-service (suscripciones) |
-| Consulta IA especie (ADMIN, stub) | — | api-gateway, ai-assistant-service + **catalog-service** para pantallas de alta/edición con popup de especie |
-
-**Detalle infraestructura local:** [infra/compose/README.md](infra/compose/README.md).
-
-**Detalle operativo** (puertos, usuarios Keycloak, Flyway, incidencias): [local-setup-guide.md](docs/onboarding/local-setup-guide.md).
+**Detalle operativo** (tabla de flujos, accesos en ambos modos, usuarios Keycloak, Flyway, incidencias): [local-setup-guide.md](docs/onboarding/local-setup-guide.md#accesos). **Compose e infra:** [infra/compose/README.md](infra/compose/README.md).
 
 
 
 ---
 
-### **2.5. Demo del MVP:**
+### **2.5. Demo del MVP**
 
 **Vídeo** (~10 min): *pendiente* — se añadirá el enlace en este apartado tras la grabación.
 
@@ -277,7 +264,7 @@ Una vez levantados los contenedores y la parte front y back de la aplicación es
 | 4 | Un usuario **ADMIN** entra en maestros taxonómicos o en la gestión de suscripciones |
 | 5 | Como **ADMIN**, se pide una sugerencia IA de enriquecimiento de especie (modo `stub`): precarga el popup; la persistencia sigue siendo manual al guardar |
 
-Usuarios de prueba: [infra/compose/README.md](infra/compose/README.md). Historias de usuario implicadas: [§6](#6-historias-de-usuario) · [backlog.md](docs/backlog/backlog.md).
+Usuarios de prueba: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#usuarios-de-prueba-keycloak-solo-local) · [infra/compose/README.md](infra/compose/README.md). Arranque previo a la demo: [§2.4](#24-instrucciones-de-instalación-entorno-de-desarrollo) (Mailpit en `:8025`, también en la lista de URLs). Historias de usuario implicadas: [§6](#6-historias-de-usuario) · [backlog.md](docs/backlog/backlog.md).
 
 ---
 
@@ -294,7 +281,7 @@ En esta sección:
 - [3.5 Seguridad](#35-seguridad)
 - [3.6 Tests](#36-tests)
 
-### **3.1. Diagrama de arquitectura:**
+### **3.1. Diagrama de arquitectura**
 
 La aplicación se desarrolla en microservicios con Spring en la parte de backend y Vue como tecnología frontend.
 
@@ -401,6 +388,12 @@ A continuación se detallan los componentes del diagrama C2 (§3.1), propios del
 | **notification-service** | Spring Boot 4, JPA, Flyway, Spring Kafka, JavaMail | Notificación de novedades. |
 | **ai-assistant-service** | Spring Boot 4 | Comunicación con proveedor IA. |
 
+#### Capa de Seguridad e Identificación
+
+| Componente | Tecnología | Responsabilidad |
+| --- | --- | --- |
+| **Keycloak** | Keycloak 26 (Compose) | IdP OIDC/JWT: autenticación, emisión de tokens JWT. |
+
 #### Capa de Observabilidad y herramientas de desarrollo local
 
 | Componente | Tecnología | Responsabilidad |
@@ -408,7 +401,11 @@ A continuación se detallan los componentes del diagrama C2 (§3.1), propios del
 | **Prometheus** | Prometheus 3 (Compose) | Métricas vía `/actuator/prometheus`. |
 | **Grafana** | Grafana 11 (Compose) | Dashboard **MTL Microservices**|
 
-#### Esquemas en PostgreSQL
+#### Capa de almacenamiento: base de datos relacional (PostgreSQL)
+
+| Componente | Tecnología | Responsabilidad |
+| --- | --- | --- |
+| **PostgreSQL** | PostgreSQL 16 + PostGIS | Base de datos relacional; almacenamiento de datos estructurados. |
 
 **C2 (detalle) — un servidor PostgreSQL con PostGIS, cuatro esquemas, un esquema por servicio:**
 
@@ -442,7 +439,37 @@ flowchart TB
     AIS --> SCH_I
 ```
 
-### **3.2.1 Autenticación en Front (Vue):**
+#### Capa de almacenamiento: base de datos no relacional (NoSQL)
+
+| Componente | Tecnología | Responsabilidad |
+| --- | --- | --- |
+| **MongoDB** | MongoDB 7 | Base de datos NoSQL; almacenamiento de datos semiestructurados. |
+
+#### Capa de almacenamiento: ficheros
+
+| Componente | Tecnología | Responsabilidad |
+| --- | --- | --- |
+| **MinIO** | MinIO (S3-compatible) | Almacenamiento de ficheros. |
+
+#### Capa de mensajería (Kafka)
+
+| Componente | Tecnología | Responsabilidad |
+| --- | --- | --- |
+| **Kafka** | Kafka 3.7 (Compose) | Bus de eventos. |
+
+#### Capa de caché (Redis)
+
+| Componente | Tecnología | Responsabilidad |
+| --- | --- | --- |
+| **Redis** | Redis 7.4 (Compose) | Caché en memoria. |
+
+#### Correo en desarrollo (Mailpit)
+
+| Componente | Tecnología | Responsabilidad |
+| --- | --- | --- |
+| **Mailpit** | Mailpit 1.22 (Compose) | SMTP de prueba local: captura avisos por correo sin salida a Internet. |
+
+### **3.2.1. Autenticación en Front (Vue)**
 
 En las pantallas que exigen identificarse, la SPA controla que se inicie sesión con **Keycloak** (OIDC, flujo *Authorization Code + PKCE*); por su parte **Vue Router** impide acceder a rutas protegidas si no hay sesión válida o si el usuario no tiene el rol necesario. Cada petición al backend lleva el **JWT** en la cabecera `Authorization`. Si el servidor responde **401** "No autorizado", el cliente intenta **renovar el token en silencio**; solo si esa renovación falla redirige al login. Más detalle en [jwt-gateway-strategy.md](docs/security/jwt-gateway-strategy.md) y [vue-development-guide.md](docs/onboarding/vue-development-guide.md).
 
@@ -572,7 +599,7 @@ sequenceDiagram
 
 </details>
 
-### **3.2.2 Kafka:**
+### **3.2.2. Kafka**
 
 Para el envío de notificaciones a suscriptores el sistema implementa una arquitectura de eventos (Event-Driven Architecture) con Kafka.
 
@@ -773,7 +800,7 @@ sequenceDiagram
 
 </details>
 
-### **3.2.3 Almacenamiento de fotografías:**
+### **3.2.3. Almacenamiento de fotografías**
 
 Los archivos binarios (fotografías de ejemplares) se guardan en un almacén compatible con S3 (MinIO en local) y los **datos descriptivos** (árbol, orden, tamaño, etc.) se almacenan en PostgreSQL, dentro del esquema `media`. Para subir una imagen, la aplicación pide al backend una URL temporal de subida, envía el fichero directamente al almacén —sin exponer las credenciales del bucket en el navegador— y, al terminar, confirma en la API para registrar la foto en base de datos. Detalle en [media-upload-hu006.md](docs/engineering/media-upload-hu006.md) y [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md).
 
@@ -823,7 +850,7 @@ sequenceDiagram
 
 </details>
 
-### **3.2.4 Uso de IA: características de especie (MVP) e identificación/chat (futuro)**
+### **3.2.4. Uso de IA: características de especie (MVP) e identificación/chat (futuro)**
 
 En el MVP la invocación a un LLM externo se ha restringido a la consulta de características de especie, función accesible para usuarios con rol **ADMIN**. El **frontend** invoca **ai-assistant-service** (`POST /api/ai/species/enrichment-suggestions`) pasando el nombre científico y el común; el servicio valida el JSON recibido del LLM (referencia [mongo.md](docs/data-model/mongo.md) §6.3) y devuelve un resultado **orientativo** para precargar el popup de enriquecimiento de especie. 
 
@@ -907,27 +934,30 @@ proyecto/
 
 ### **3.4. Infraestructura y despliegue**
 
-**Infraestructura:** el sistema necesita tener arrancada la infraestructura definida en `docker-compose.yml`, que levanta: **un** PostgreSQL/PostGIS (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO, Kafka, Keycloak, Mailpit (SMTP de prueba para notificaciones en local), Prometheus y Grafana para métricas y dashboards.
+**Infraestructura:** el sistema necesita la siguiente infraestructura: **un** PostgreSQL/PostGIS (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO/S3, Kafka, Keycloak, servidor SMTP (Mailpit en local), Prometheus y Grafana para métricas y dashboards. Todo está definido en [`infra/compose`](infra/compose/); detalle de servicios y ficheros Compose: [infra/compose/README.md](infra/compose/README.md).
 
-```bash
-cd infra\compose
-docker compose up -d
-```
+**Modos de ejecución en local:**
 
-Grafana queda disponible en `http://localhost:3000` accediendo con usuario admin. El dashboard del proyecto se encuentra en la ruta: Dashboards - MyTreeLibrary - MTL Microservices.
+| Modo | Cuándo | Infra | Aplicación | UI | Arranque |
+|------|--------|-------|------------|-----|----------|
+| **Dev en host** (habitual) | Desarrollo diario, debug en IDE | `docker-compose.yml` | Maven + Vite en el host | `:5173` | [§2.4](#24-instrucciones-de-instalación-entorno-de-desarrollo) |
+| **Todo en Docker** | Validar imágenes, demo sin IDE | `docker-compose.yml` + `docker-compose.apps.yml` | Contenedores (SPA, gateway, microservicios) | `:8088` | Ver bloque siguiente y [infra/compose/README.md](infra/compose/README.md) |
 
-![Dashboard Grafana MyTreeLibrary](./docs/Grafana.jpg)
+Accesos, puertos en ambos modos y qué servicios levantar por flujo: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#accesos).
 
-Detalle de servicios, puertos y arranque en Compose: [infra/compose/README.md](infra/compose/README.md).
-
-**Aplicación:** para levantar los contenedores propios de la aplicación hay que usar `docker-compose.apps.yml` para levantar la SPA, el API Gateway y los microservicios como contenedores. Antes de arrancar se deben construir las imágenes de la SPA y los microservicios con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1). La SPA queda disponible en `http://localhost:8088/`; Prometheus usa los targets internos definidos en `prometheus-docker.yml`.
+**Modo todo en Docker:** generar previamente las imágenes con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1). Atajo desde la raíz: `.\scripts\dev\start-docker-stack.ps1` (build + infra + apps). Manual, desde `infra/compose/`:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
 ```
 
-**Despliegue Producción:** en entornos productivos el sistema se puede desplegar en un orquestador de contenedores (Kubernetes), se deben definir secretos externos, Keycloak y Kafka en HA según entorno, bases de datos gestionadas y almacenamiento de objetos S3 en nube. También es necesario un servidor SMTP y un proveedor de servicios IA.
+Prometheus en este modo usa los targets internos de `prometheus-docker.yml`.
 
+**Observabilidad:** con la infra levantada (en cualquiera de los dos modos), métricas vía Actuator en cada microservicio; Prometheus las scrapea y Grafana muestra el dashboard **MTL Microservices** (acceso en [§2.4](#24-instrucciones-de-instalación-entorno-de-desarrollo)). Detalle: [platform/observability/README.md](platform/observability/README.md).
+
+![Dashboard Grafana MyTreeLibrary](./docs/Grafana.jpg)
+
+**Despliegue en producción:** en entornos productivos el sistema se puede desplegar en un orquestador de contenedores (Kubernetes); se deben definir secretos externos, Keycloak y Kafka en HA según entorno, bases de datos gestionadas y almacenamiento de objetos S3 en nube. También es necesario un servidor SMTP y un proveedor de servicios IA.
 
 ```mermaid
 flowchart TB
@@ -955,7 +985,7 @@ flowchart TB
 
             KCd["🔐 Keycloak"]:::service
             Kd["⚡ Kafka"]:::service
-            MPd["📧 Mailpit"]:::service
+            MPd["📧 SMTP/Mailpit"]:::service
             PRd["📊 Prometheus"]:::service
             GRd["📈 Grafana"]:::service
 
@@ -983,20 +1013,19 @@ flowchart TB
 
 ### **3.5. Seguridad**
 
+La autenticación se basa en **OIDC** con **Keycloak** como IdP (realm `mtl`): la SPA no gestiona contraseñas, sino que redirige al usuario y obtiene un **access token** mediante **Authorization Code + PKCE** — el flujo recomendado para SPAs, sin secretos de cliente en el navegador. Ese token es un **JWT firmado** que la SPA envía en cada petición API como `Authorization: Bearer`; el **API Gateway** y los microservicios lo validan (firma, caducidad y emisor). Para que la validación funcione, el **`issuer-uri`** de Spring (`MTL_JWT_ISSUER_URI`, p. ej. `http://localhost:8180/realms/mtl`) debe coincidir con el claim `iss` del token; si el host o puerto difieren entre el navegador y el backend al resolver JWKS, la autenticación falla por *issuer mismatch*.
 
-| Práctica                  | Descripción                                                                                                                                                                             |
-| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Autenticación OIDC        | Keycloak como IdP; SPA con **Authorization Code + PKCE**; JWT firmados; `issuer-uri` alineado con el realm                                                                              |
-| Autorización              | Roles de realm `COLABORADOR` y `ADMIN`; políticas en recursos sensibles                                                                                                                 |
-| Gateway                   | Validación de JWT en el gateway (`spring-boot-starter-oauth2-resource-server`); rutas públicas según OpenAPI; **correlación** `X-Correlation-Id` (gateway → microservicios, Problem y MDC) |
-| Almacenamiento de objetos | Buckets privados; **URLs prefirmadas** de corta duración; sin credenciales en el cliente                                                                                                |
-| Transporte                | TLS en producción; CORS restringido al origen del SPA                                                                                                                                   |
-| Observabilidad            | Actuator + Prometheus scrape + Grafana ([platform/observability/README.md](platform/observability/README.md)) |
+Tras autenticar, la **autorización** aplica roles de realm **`COLABORADOR`** y **`ADMIN`** en recursos sensibles; las rutas públicas siguen el contrato OpenAPI y el resto exige JWT válido. El gateway actúa como resource server, reenvía el Bearer a los microservicios en modo *token relay* y propaga **`X-Correlation-Id`** hacia el upstream para correlación en logs y respuestas Problem (MDC).
 
+Las fotografías residen en buckets **privados** (MinIO en local, S3 en producción): la SPA **nunca** recibe credenciales del almacén. **media-service** comprueba permisos y política de subida (MIME, tamaño, límite por ejemplar) antes de emitir **URLs prefirmadas** PUT/GET de **corta duración**; el cliente sube el binario directamente al bucket y confirma metadatos en la API. Flujo presign → PUT → confirm: [media-upload-hu006.md](docs/engineering/media-upload-hu006.md).
+
+En **producción**, el tráfico expuesto (SPA, API e IdP) debe ir cifrado con **TLS**; en desarrollo local la API puede servirse en HTTP. El **gateway** aplica **CORS** restrictivo al origen del SPA en local (`http://localhost:5173`, `http://127.0.0.1:5173`), con métodos y cabeceras acordados (`Authorization`, `Content-Type`, `X-Correlation-Id`, etc.) y sin credenciales cross-origin innecesarias.
 
 **Implementación y normativa:** [docs/security/jwt-gateway-strategy.md](docs/security/jwt-gateway-strategy.md) · `.cursor/rules/api-security.mdc` · [docs/api/openapi.yaml](docs/api/openapi.yaml) · Keycloak: [infra/compose/README.md](infra/compose/README.md).
 
 ### **3.6. Tests**
+
+La estrategia de tests del sistema contempla los siguientes niveles:
 
 **Test unitarios** — lógica aislada, sin dependencias externas.
 - **Frontend (Vitest):** composables y componentes con lógica relevante.
@@ -1006,21 +1035,27 @@ flowchart TB
 - **Frontend:** componentes y vistas con stores/servicios mockeados o reales.
 - **Backend:** repositorios y endpoints por capa (Testcontainers: PostgreSQL/Mongo/Kafka).
 
-**Test E2E en tres niveles:**
+**Test E2E en dos niveles:**
+1. **E2E completo (Playwright)** — pruebas de flujo de usuario que ejercitan frontend y backend de forma conjunta.
 
-1. **Levantando contenedores en el proceso de prueba** — levanta stack efímero autocontenido en Docker (PostgreSQL, Mongo, Kafka, Keycloak, microservicios y front en contenedor). No se ejecuta automáticamente en cada PR por el coste de levantar contenedores. Ejecuta en secuencia `system-e2e-tests` (HTTP) y Playwright (UI). Se puede ejecutar de dos modos:
+2. **E2E REST del backend** — pruebas HTTP/JWT de los servicios REST de backend aisladas del UI; cubren el recorrido completo (gateway, microservicios, Kafka) y resultan más robustas ante cambios de interfaz.
+
+**Ejecución:**
+1. **Ejecución automática en PR y push a `main`** — en cada pull request hacia `main` y en cada push a `main` se ejecuta automáticamente el workflow de GitHub [ci.yml](.github/workflows/ci.yml), que incluye tests unitarios de backend (Maven/Surefire), calidad y tests del frontend (ESLint, typecheck, Vitest) y detección de secretos con Gitleaks. Los tests de integración (`*IT`) y los E2E no forman parte de este pipeline.
+
+2. **UI front + back (Playwright)** — flujo de usuario completo por el navegador contra un **entorno ya levantado** (infra + microservicios + front en dev o Docker; [§3.4](#34-infraestructura-y-despliegue)).
+   - **Local:** `.\scripts\dev\test-e2e.ps1 -Local` (por defecto `http://localhost:5173` en dev en host; con app en Docker, `-BaseUrl http://localhost:8088`; opcional `-Ui`).
+
+3. **REST del back (`system-e2e-tests`)** — contrato HTTP/JWT por el gateway, sin navegador, contra el **mismo entorno levantado** descrito en el punto 2.
+   - **Local:** con el stack arriba, desde `services/`: `$env:MTL_E2E_AUTO_KEYCLOAK_TOKEN = "true"; mvn -pl system-e2e-tests verify` (detalle de variables y escenarios en [system-e2e-tests](services/system-e2e-tests/README.md)).
+
+4. **Levantando contenedores en el proceso de prueba** — levanta un stack efímero autocontenido en Docker (PostgreSQL, Mongo, Kafka, Keycloak, microservicios y front en contenedor). Tiene un coste elevado de computación, motivo por el cual no se ejecuta automáticamente en cada PR; existe un workflow de GitHub que permite su ejecución manual. Ejecuta en secuencia `system-e2e-tests` (HTTP) y Playwright (UI). Se puede ejecutar de dos modos:
    - **CI:** workflow manual [E2E Playwright (alta de ejemplar)](.github/workflows/e2e-playwright.yml) en GitHub Actions → *Run workflow*.
    - **Local:** `.\scripts\dev\test-e2e.ps1` (compila jars, levanta `infra/compose/docker-compose.e2e.yml`, ejecuta ambas suites y baja el stack con `down -v`). Atajos: `-SkipBuild`, `-KeepStack` — [scripts/README.md](scripts/README.md).
 
-2. **UI front + back (Playwright)** — flujo de usuario completo por el navegador contra un **entorno ya levantado** (infra + microservicios + front en dev o Docker; §3.4).
-   - **Local:** `.\scripts\dev\test-e2e.ps1 -Local` (por defecto `http://localhost:5173`; opcional `-Ui`, `-BaseUrl`).
-
-3. **REST del back (`system-e2e-tests`)** — contrato HTTP/JWT por el gateway, sin navegador, contra el **mismo entorno levantado** que el nivel 2.
-   - **Local:** con el stack arriba, desde `services/`: `$env:MTL_E2E_AUTO_KEYCLOAK_TOKEN = "true"; mvn -pl system-e2e-tests verify` (detalle de variables y escenarios en [system-e2e-tests](services/system-e2e-tests/README.md)).
-
 **Documentación:** [testing-frontend.md](docs/engineering/testing-frontend.md) · [testing-java.md](docs/engineering/testing-java.md) · [testing-e2e.md](docs/engineering/testing-e2e.md) · módulos [system-e2e-tests](services/system-e2e-tests/README.md) · [e2e/](e2e/README.md).
 
-*Atajos locales (PowerShell) para unitarios/integración:* `scripts/dev/test-backend.ps1`, `test-frontend.ps1` — [scripts/README.md](scripts/README.md). Infra local con **Docker Compose**: §3.4.
+*Atajos locales (PowerShell) para unitarios/integración:* `scripts/dev/test-backend.ps1`, `test-frontend.ps1` — [scripts/README.md](scripts/README.md). Infra local con **Docker Compose**: [§3.4](#34-infraestructura-y-despliegue).
 
 ---
 
@@ -1037,7 +1072,7 @@ En esta sección:
 
 ### **4.1. Modelo lógico del sistema completo**
 
-Vista unificada de las entidades principales del sistema y sus relaciones, independientemente del almacén o microservicio (§4.2). Las referencias entre dominios se expresan como **FK lógicas** sin una implementación de una restricción física real entre los distintos esquemas.
+El modelo lógico presenta una vista unificada de las entidades principales del sistema y sus relaciones, independientemente del almacén o microservicio (§4.2). Las referencias entre dominios se expresan como **FK lógicas** sin que esto conlleve la implementación de una restricción física real entre los distintos esquemas.
 
 **Usuario de aplicación:** La auditoría de la aplicación se implementa en torno al usuario proporcionado por el token generado por Keycloak como proveedor OIDC. Para evitar duplicidades los diversos esquemas almacenan el identificador estable del proveedor (`sub`) que se guarda en el campo **`subject_oidc`**. En el caso de catalog-service este campo se guarda en una tabla USUARIO_APP con unicidad, no como clave primaria; esto permite trazabilidad sin duplicar la información; las FK de los campos de auditoría `creado_por` y `modificado_por` referencian a la clave primaria de esta tabla.
 
@@ -1153,7 +1188,7 @@ En esta subsección:
 - [4.2.4 PostgreSQL notification_service](#424-postgresql-notification_service)
 - [4.2.5 PostgreSQL ai_assistant_service (esquema ai)](#425-postgresql-ai_assistant_service-esquema-ai)
 
-#### **4.2.1 PostgreSQL: catalog_service:**
+#### **4.2.1. PostgreSQL: catalog_service**
 
 Esquema con los datos generales de cada árbol y auditoria del usuario que los registró.
 
@@ -1247,7 +1282,7 @@ Para el alta de ejemplar, los valores admitidos son:
 - `estado_publicacion`: `BORRADOR` o `PUBLICADO`.
 - `visibilidad_mapa_publico`: `PRIVADO` o `PUBLICO`.
 
-#### **4.2.2 MongoDB (catalog-service; modelo en mongo.md)**
+#### **4.2.2. MongoDB (catalog-service; modelo en mongo.md)**
 
 Almacén de **enriquecimiento** (*system of enrichment*): no sustituye a PostgreSQL. Dos colecciones principales — `especie_detalle` (datos ampliados de especie; persistencia en **HU-015**, con origen orientativo posible vía consulta IA en **HU-016**) y `ejemplar_detalle` (medidas, etiquetas y observaciones del ejemplar; `ejemplar_pg_id` = `catalog.ejemplar.ejemplar_id`). Desnormalización controlada de nombres de especie para búsqueda sin join obligatorio con SQL. Diseño, índices y validación: [mongo.md](docs/data-model/mongo.md). Implementado en **catalog-service** y consumido desde el **frontend** (**HU-015**, **Cerrada**).
 
@@ -1285,7 +1320,7 @@ erDiagram
   EJEMPLAR_DETALLE ||--|{ OBSERVACION : "embebe"
 ```
 
-#### **4.2.3 PostgreSQL media_service:**
+#### **4.2.3. PostgreSQL media_service**
 
 Metadatos de fotografías en esquema `media`. `ejemplar_id` referencia lógicamente a `catalog.ejemplar` (sin FK entre esquemas). **UK compuesta** `uq_fotografia_objeto` sobre `(bucket_almacenamiento, clave_objeto)`.
 
@@ -1311,7 +1346,7 @@ erDiagram
     }
 ```
 
-#### **4.2.4 PostgreSQL notification_service:**
+#### **4.2.4. PostgreSQL notification_service**
 
 Avisos de nuevas altas en el sistema a los suscriptores. En **`notificacion`**, `ejemplar_id` y `tipo_evento` se obtienen vía **`evento_catalogo`** (3FN; no hay columnas duplicadas en la tabla).
 
@@ -1355,7 +1390,7 @@ erDiagram
     SUSCRIPTOR ||--o{ ENVIO_NOTIFICACION : recibe
 ```
 
-#### **4.2.5 PostgreSQL ai_assistant_service (esquema `ai`):**
+#### **4.2.5. PostgreSQL ai_assistant_service (esquema `ai`)**
 
 Tabla **AUDITORIA_USO_IA** en esquema `ai`, creada por Flyway **`V2__create_auditoria_uso_ia.sql`** (HU-016; `V1__baseline.sql` solo inicializa el esquema). Entidad JPA `AuditoriaUsoIa`; cada consulta IA exitosa inserta una fila vía `SpeciesEnrichmentSuggestionService`. **`subject_oidc`** persiste el claim `sub` del JWT (Keycloak) en el momento de la consulta; **`ejemplar_id`** referencia lógicamente a `catalog.ejemplar` (nullable en enriquecimiento de especie). Sin FK entre esquemas ni dependencia de `catalog.usuario_app`: la trazabilidad del actor se toma directamente del token. Coherente con §4.1 y R3.
 
@@ -1392,7 +1427,7 @@ Además de la API REST, algunos flujos usan mensajes en Kafka. Hoy el caso princ
 
 El desarrollo no se apoya en prompts sueltos, sino en **artefactos repetibles** y reglas del repositorio. Flujo habitual: **reglas Cursor** ([`.cursor/rules/`](.cursor/rules/)) → refinamiento de HU con [hu-refinement-mtl](.cursor/skills/hu-refinement-mtl/SKILL.md) → desglose en tickets con [hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md) (incluye **Reglas aplicables por capa** en el breakdown) → implementación por TASK con [encargo-mtl](.cursor/skills/encargo-mtl/SKILL.md) → **validación explícita** de que el cambio cumple esas reglas y [devsecops-ci.md](docs/engineering/devsecops-ci.md) → PR con trazabilidad (plantilla en [`.github/pull_request_template.md`](.github/pull_request_template.md)) → cierre en breakdown y [backlog.md](docs/backlog/backlog.md) §3. Detalle del paso de validación: [ai-development-playbook.md](docs/onboarding/ai-development-playbook.md) § «Validación contra reglas del proyecto»; contexto del monorepo: [AGENTS.md](AGENTS.md).
 
-La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada `docs/backlog/HU-*.md`, redactar y revisar la especificación de cada TASK antes de implementar, pedir al agente una **revisión explícita** tras cada TASK (contra las reglas citadas en el breakdown), y confirmar tests y PR antes del merge. En §6–§8 y en [prompts.md](prompts.md) hay **ejemplos históricos** de mensajes al agente (evidencia del curso); la fuente de verdad de cada historia es su fichero en `docs/backlog/` y su breakdown.
+La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada `docs/backlog/HU-*.md`, redactar y revisar la especificación de cada TASK antes de implementar, pedir al agente una **revisión explícita** tras cada TASK (contra las reglas citadas en el breakdown), y confirmar tests y PR antes del merge. **Evidencia ampliada del curso** (diálogos de refinamiento, desglose/encargos y PRs de ejemplo): [docs/ai-process-evidence/](docs/ai-process-evidence/README.md). Muestra representativa por fase del ciclo de vida: [prompts.md](prompts.md). La fuente de verdad de cada historia es su fichero en `docs/backlog/` y su breakdown.
 
 En esos ejemplos suelen mezclarse dos cosas distintas: un **comando corto** que invoca una skill (p. ej. `/hu-breakdown-mtl HU-016`, sin modificar la plantilla de la skill) y, al implementar un ticket, un **texto largo** con objetivo, alcance y definición de hecho de **ese TASK concreto**, redactado siguiendo la estructura de [encargo-mtl](.cursor/skills/encargo-mtl/SKILL.md) — no la plantilla vacía, sino el encargo ya rellenado para la tarea.
 
@@ -1425,66 +1460,7 @@ Detalle del refinamiento y desglose de cada HU:
 
 Por operativa práctica, al comienzo de la historia se hacen unas comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.
 
-> El diálogo de refinamiento de HU-008 (evidencia del curso) está en el bloque **Desplegar** siguiente.
-
-<details>
-<summary><strong>Desplegar</strong> — Ejemplo histórico HU-008 (prompts de refinamiento)</summary>
-
-> *Registro histórico:* los prompts siguientes reproducen el diálogo de refinamiento de HU-008 tal como ocurrió; pueden reflejar decisiones intermedias que no coinciden con el diseño final. Fuente de verdad: [HU-008-edicion-de-mis-arboles.md](docs/backlog/HU-008-edicion-de-mis-arboles.md) y [HU-008-ticket-breakdown.md](docs/backlog/HU-008-ticket-breakdown.md).
-
-**Ejemplo del proceso: Historia de Usuario — HU-008 (Edición y baja de mis árboles)**
-
-**Prompt 1:**
-
-Vamos a desarrollar la historia HU-008@.cursor/skills/hu-refinement-mtl
-
-**Prompt 2:**
-
-Vamos a revisar los puntos que quedan fuera de la historia. 
-- 1.- Añade en HU-006 el ticket para incluir la posibilidad de añadir y borrar fotografías desde la pantalla de edición de Mis árboles 
-- 2.- Incluye en el Backlog una nueva historia para abordar Proyección o enriquecimiento Mongo 3.- Incluye en la historia que estamos abordando la posibilidad de borrar árboles
-
-**Prompt 3:**
-
-El borrado será físico; cuando se borre un árbol se deben eliminar sus fotografías y su ampliación en Mongo; dado que aún no tenemos implementado en Mongo se necesitará un ticket solo para implementar esta acción que por ahora quedará como pendiente. Revisa si con estas aclaraciones podemos cerrar este punto y abordar los dos siguientes que serán Riesgos y Aclaraciones pendientes
-
-**Prompt 4:**
-
-Respecto al riesgo de Listado sin filtros vamos a añadir en la historia el filtro por especie y por fecha de creación: desde - hasta. Para el borrado de todas las fotos de un árbol vamos a incluir un nuevo endpoint en media-service que será consumido por el microservicio de catálogo; déjalo anotado en esta historia como ticket que debe modificar los dos microservicios. Ante un fallo parcial del borrado en cascada se producirá un Rollback (no se usará un patrón sagas en el MVP). Dime si queda algo pendiente antes de abordar el desglose de la historia en ticket, no abordes este desglose hasta que yo te lo diga
-
-**Prompt 5:**
-
-- 1.- Path de borrado: `DELETE /api/media/trees/{treeId}/photos` 
-- 2.- Si un ejemplar tiene fotografías primero se invoca al servicio de borrado de todas las fotografías; si el servicio da error se para el proceso; si se han borrado todas las fotografías se elimina el ejemplar en PostgreSQL 3.- Fechas en formato date a ser posible en UTC 4.- Para ADMIN se añade un filtro más para poder seleccionar los ejemplares dados de alta por un usuario determinado
-
-</details>
-
-> El diálogo de refinamiento de HU-016 (evidencia del curso) está en el bloque **Desplegar** siguiente.
-
-<details>
-<summary><strong>Desplegar</strong> — Ejemplo histórico HU-016 (prompts de refinamiento)</summary>
-
-> *Registro histórico:* los prompts siguientes reproducen el diálogo de refinamiento de HU-016 tal como ocurrió; pueden reflejar decisiones intermedias que no coinciden con el diseño final. Fuente de verdad: [HU-016-consulta-admin-caracteristicas-especie-ia.md](docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md) y [HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md).
-
-**Ejemplo del proceso: Historia de Usuario — HU-016 (Consulta de características de especie, ADMIN, MVP)**
-
-**Prompt 1:**
-/hu-refinement-mtl HU-016
-
-**Prompt 2:**
-respecto a las incoherencias detectadas: 
-- 1.- usuario administrador y ADMIN son terminos equivalentes 
-- 2.- las historias HU-009 y HU-010 están planificaas para versiones futudas, ver backlog, revisar texto de readme para comprobar que es coherente con lo indicado 
-- 3.- la historia no aplica a la persistencia de Mongo, solo a la consulta de datos a la IA. El funcionamiento será permitir desde la pantalla de alta actual una consulta a la IA que cargará los campos de dicha pantalla. Queda fuera ded esta historia la persistencia con Mongo 
-- 4.- El API a incluir es exclusivamente la consulta a la IA de datos de una especie: como entrada se pasará el nombre comun y cientifico de la especie, como respuesta se espera un json que se pueda precargar en la pantalla ya existente de edición de estos datos. Por tanto es importante fijar el formato de lo que debe devolver el LLM: datos que se puedan cargar en la pantalla de edición de caracteristicas de la especie. La historia por tanto solo invoca al servicio ai-assistant-service para obtener el JSON de enrequecimiento de especie y carga los datos en la pantalla ya existente. La funcionalidad solo estará activa si aún no hay datos de enriquecimiento en Mongo. Dime si tienes alguna duda más
-
-**Prompt 3:**
-
-el contrado exacto JSON se cerrará al implementar los ticker, por ahora simplemente ten en cuenta que se deba añadir un ticket al respecto al hacer el breakdown de la historia. Dime si está todo claro para pasar al breakdown en ticket de trabajo
-
-</details>
-
-
+**Evidencia (refinamiento):** diálogos HU-008 y HU-016 en [hu-refinement-dialogues.md](docs/ai-process-evidence/hu-refinement-dialogues.md).
 
 ---
 
@@ -1494,115 +1470,9 @@ Como se ha comentado en el punto anterior, para mantener formato homogéneo se u
 
 En la generación de tickets de trabajo se incluye explícitamente una sección con las reglas de Cursor que debe aplicar el agente de IA al implementarlos.
 
-> El desglose en tickets de HU-008 (evidencia del curso) está en el bloque **Desplegar** siguiente.
+Desgloses vigentes: ficheros `docs/backlog/HU-*-ticket-breakdown.md` · convención: [backlog/README.md](docs/backlog/README.md).
 
-<details>
-<summary><strong>Desplegar</strong> — Ejemplo histórico HU-008 (prompts de desglose en tickets)</summary>
-
-> *Registro histórico:* los prompts siguientes documentan el desglose de HU-008 en su momento; el contenido puede no reflejar el breakdown final ([HU-008-ticket-breakdown.md](docs/backlog/HU-008-ticket-breakdown.md)).
-
-**Ejemplo del proceso: Ticket 1 — HU-008**
-
-**Prompt 1:**
-
-Vamos a generar los tickets de la historia; a partir de aquí incluye mis prompts, utiliza la información que tienes en el contexto y a partir de la sección **Ejemplo del proceso: Ticket 1 — HU-008** (§7) solo incluye mi parte, no tu respuesta al prompt. Usa la información que hemos definido y /hu-breakdown-mtl HU-008
-
-**Prompt 2:**
-
-Vamos con TASK-HU-008-01, Cierre OpenAPI catálogo y media (HU-008). Además de las operaciones que propone el ticket vamos a incluir además del endpoint de borrado de todas las fotografías el endpoint del borrado de una fotografía (va también dentro de /api/media)
-
-**Prompt 3** (TASK-HU-008-02 — Listado colaborador con filtros)
-
-así está bien, implementa el endpoint del Listado de TASK-HU-008-02, si tienes alguna duda preguntame antes; recuerda las reglas que se deben seguir ya indicadas en @docs/backlog/HU-008-ticket-breakdown.md para la parte back
-
-</details>
-
-<details>
-<summary><strong>Desplegar</strong> — Ejemplo histórico HU-016 (prompts de desglose en tickets)</summary>
-
-> *Registro histórico:* los prompts siguientes documentan el desglose de HU-016 en su momento; el contenido puede no reflejar el breakdown final ([HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md)).
-
-**Ejemplo del proceso: desglose e implementación — HU-016**
-
-**Prompt 1** (invocación de skill; no modifica la plantilla):
-
-/hu-breakdown-mtl HU-016.
-
-**Prompt 2** (arranque de implementación):
-
-ok empieza con TASK-HU-016-01, si tienes alguna duda preguntame
-
-**Encargo TASK-HU-016-02** (especificación enviada al agente para implementar ese ticket; estructura `encargo-mtl`, rellena para esta tarea):
-
-## Objetivo
-Integrar **OpenAI Responses API** en `ai-assistant-service` para HU-016 (enriquecimiento orientativo de especie por ADMIN), sustituyendo el adaptador HTTP genérico actual, manteniendo el modo `stub` para local/tests y dejando una base reutilizable para HU-009 (visión) y HU-010 (chat).
-## Alcance
-- **Incluye:**
-  - Módulo Maven: `services/ai-assistant-service/` únicamente.
-  - Cliente OpenAI con **RestClient** (no WebClient, no RestTemplate) contra la **API oficial** (`POST /v1/responses`).
-  - `@ConfigurationProperties` para OpenAI (`mtl.ai.openai.*`): `apiKey`, `baseUrl` (default `https://api.openai.com`), `model` (enriquecimiento), `connectTimeout`, `readTimeout`, parámetros de retry acotados.
-  - API key **nunca hardcodeada**: `${MTL_OPENAI_API_KEY}` en `application.properties` / `application-prod.properties` (sin valor por defecto en prod).
-  - Implementación `OpenAiSpeciesEnrichmentAiProvider` (`@ConditionalOnProperty` `mtl.ai.provider.mode=openai`) que implemente el puerto existente `SpeciesEnrichmentAiProvider`.
-  - Clase compartida `OpenAiResponsesClient` (+ DTOs wire + parser de `output` → texto/JSON) en `com.mtl.ai.infrastructure.client.openai`.
-  - Timeouts HTTP configurables.
-  - Retry con backoff exponencial **solo** para errores transitorios (429, 502, 503, timeout/conexión); **no** reintentar 400, 401, 403, 404 ni otros 4xx de cliente.
-  - Mapeo diferenciado de errores OpenAI → `AiAssistantException` / HTTP: 502 proveedor no disponible, 404 sin resultado utilizable, 422 respuesta inválida (delegando validación estructural a `SpeciesEnrichmentValidationService` como ahora).
-  - Logging estructurado (SLF4J, ya hay logstash): loguear modelo, duración, correlationId; **no** loguear API key, Authorization ni prompt completo con datos sensibles.
-  - Mantener `AiPromptFactory` (ajustar solo si hace falta para Responses API / JSON mode); el prompt debe seguir exigiendo JSON raíz con claves `synonyms`, `distribution`, `ecologicalData`, `references`; enums `growthRate` y `leafType` en **inglés** (`slow|moderate|fast`, `deciduous|evergreen|marcescent`).
-  - Flujo sin cambios en controller/DTO público: `SpeciesEnrichmentSuggestionService` → provider → `SpeciesEnrichmentValidationService` → `AiSpeciesEnrichmentSuggestionResponse` + auditoría `AUDITORIA_USO_IA`.
-  - Tests: unitarios del parser/cliente (mock RestClient o WireMock), mantener/ajustar tests existentes; no romper `StubSpeciesEnrichmentAiProvider` ni `mode=stub` en `application-test.properties`.
-- **Excluye / no tocar:**
-  - `docs/` salvo que el cambio de variables de entorno lo exija explícitamente en `services/README.md` (máximo una línea en tabla de puertos/env si aplica).
-  - OpenAPI (el contrato HTTP expuesto no cambia).
-  - `api-gateway`, frontend, `catalog-service`, Mongo.
-  - Endpoints de chat o identificación por imagen (solo preparar cliente OpenAI reutilizable).
-  - WebClient / streaming.
-## Documentación de referencia (fuente de verdad)
-- Reglas backend: `.cursor/rules/backend-generation-standard.mdc`, `spring-boot-4-backend.mdc`, `api-security.mdc`, `logging.mdc`, `quality-and-testing.mdc`
-- Tests: `docs/engineering/testing-java.md` §2
-- Contrato HTTP: `docs/api/openapi.yaml` (`POST /api/ai/species/enrichment-suggestions`, schemas `AiSpeciesEnrichmentSuggestion*`)
-- Validación estructural: `docs/data-model/mongo.md` §6.3 (referencia; la implementación vive en `SpeciesEnrichmentValidationService`)
-- HU: `docs/backlog/HU-016-consulta-admin-caracteristicas-especie-ia.md`
-- Producto IA orientativa: `.cursor/rules/product-context.mdc`
-- Código existente a respetar/evolucionar:
-  - `AiPromptFactory`, `SpeciesEnrichmentSuggestionService`, `SpeciesEnrichmentValidationService`
-  - `StubSpeciesEnrichmentAiProvider`, `HttpSpeciesEnrichmentAiProvider` (sustituir/deprecar)
-  - `AiAssistantExceptionHandler`, `AiProviderConfig`
-## Diseño obligatorio
-1. **Separación de capas**
-   - `application`: orquestación, prompt, validación, auditoría (sin HTTP).
-   - `infrastructure.client.openai`: RestClient, request/response OpenAI, retry, parser.
-   - No devolver al frontend el JSON completo de OpenAI; solo DTO validado.
-2. **Configuración**
-   - `mtl.ai.provider.mode=stub|openai` (default `stub` en local).
-   - `mtl.ai.openai.api-key=${MTL_OPENAI_API_KEY:}`.
-   - Validar en arranque (prod): si `mode=openai` y falta API key → fallo claro al boot o al primer uso (preferible `@PostConstruct` / `ApplicationRunner` con mensaje operativo, sin exponer la clave).
-3. **OpenAI Responses API**
-   - Usar endpoint oficial `/v1/responses`.
-   - Instrucciones de sistema + input de usuario desde `AiPromptFactory`.
-   - Preferir salida JSON estructurada si la API lo permite (`text.format` / JSON mode); si no, parsear texto del `output`.
-   - Extraer solo el contenido utilizable antes de pasar a `SpeciesEnrichmentValidationService`.
-4. **Manejo de errores**
-   - Reutilizar `@RestControllerAdvice` existente.
-   - Mensajes al cliente genéricos en 500; detalle técnico solo en logs WARN/ERROR sin PII ni secretos.
-5. **Convenciones del monorepo**
-   - Paquetes lista blanca bajo `com.mtl.ai.*`.
-   - Nombres de test: `*Test` (Surefire), `*IT` (Failsafe).
-   - Jackson Boot 4: `JsonMapper` / `ObjectMapper` según patrón ya usado en el módulo.
-## Definición de hecho
-- `mvn -pl ai-assistant-service test` en verde.
-- `mvn -pl ai-assistant-service verify` en verde (incluye IT existentes).
-- Con `MTL_AI_PROVIDER_MODE=stub`, el flujo actual sigue funcionando sin clave OpenAI.
-- Con `MTL_AI_PROVIDER_MODE=openai` y `MTL_OPENAI_API_KEY` configurada, el provider llama a OpenAI (tests del cliente mockeados; no test de integración real contra OpenAI en CI).
-- Sin API key en código, logs ni respuestas Problem.
-- Sin `System.out.println`.
-## Modo
-**Implementar** (código + tests mínimos por capa según testing-java.md §2).
-## Nota de producto
-La respuesta es **orientativa**, no veredicto científico; el prompt no debe presentar la salida como determinación oficial de especie.
-
-
-</details>
+**Evidencia (desglose e encargos):** HU-008 y HU-016 (incl. encargo TASK-HU-016-02) en [hu-breakdown-and-encargo.md](docs/ai-process-evidence/hu-breakdown-and-encargo.md).
 
 ---
 
@@ -1616,123 +1486,7 @@ En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), cali
 
 Adicionalmente, en cada PR, se lanza una revisión adicional desde **Codex**.
 
+Hay definidos dos **GitHub Actions** adicionales que se lanzan de forma manual: E2E Playwright y auditoría de dependencias ([docs/engineering/devsecops-ci.md](docs/engineering/devsecops-ci.md)).
 
-Hay definidos dos **GitHub Actions** adicionales que se lanzan de forma manual: E2E Playwright y auditoría de dependencias ([docs/engineering/devsecops-ci.md](docs/engineering/devsecops-ci.md)).  
-
-> *Registro histórico:* los ejemplos de pull request siguientes muestran cómo se documentó el trabajo en su momento (resumen, plan de pruebas, notas técnicas). Pueden no coincidir con el diseño final ni con la plantilla o CI actuales; norma vigente en [github-branching.md](docs/onboarding/github-branching.md) y [devsecops-ci.md](docs/engineering/devsecops-ci.md). **Clic en Desplegar** para ver cada PR de ejemplo.
-
-<details>
-<summary><strong>Desplegar</strong> — Pull Request 1 (histórico — HU-004)</summary>
-
-### Resumen
-
-Implementa la **HU-004**: alta de suscripción por correo sin cuenta de colaborador, con API en **notification-service**, exposición vía **gateway**, contrato en **OpenAPI**, pantalla y flujo en **frontend** (formulario, validación, i18n, tests), y documentación de backlog / modelo de datos / onboarding Git.
-
-### Cambios principales
-
-- **Backend (`notification-service`)**: registro de suscriptores, tabla `suscriptor` en Flyway `V1__baseline.sql`, seguridad Keycloak, controlador REST de altas públicas, manejo de errores tipo Problem Details, tests (servicio + WebMvc).
-- **Gateway**: filtro global ante errores de conexión a downstream y utilidades asociadas (con tests).
-- **Frontend**: vista `SubscribeByEmailView`, composable `usePublicSubscriptionForm`, servicio `publicSubscription`, ampliación de `apiClient` (p. ej. cuerpo sin JSON / conflictos), iconos y tiles del home, hero visitante con ilustración `tree_map_illustration_clean.svg`, estilos e i18n (`es.ts`), rutas y tests (Vitest).
-- **Contrato y configuración**: `docs/api/openapi.yaml`, `frontend/.env.example` y README donde aplique.
-- **Documentación**: HU-004 en backlog (historia + desglose de tickets), actualización de `backlog.md`, `data-model.md`, guía de ramas GitHub, revisión de enlaces a reglas (`frontend-vue3.mdc`, etc.).
-
-### Cómo probar (orientativo)
-
-1. **Backend**: arrancar stack local según `services/README.md`; verificar migración y endpoint de alta de suscripción público según OpenAPI.
-2. **Frontend**: `npm run build` / tests en `frontend/`; flujo manual en `/subscriptions/new` con correo válido y casos de error (409/conflicto si aplica).
-3. **Gateway**: comprobar que las peticiones al notification-service y respuestas de error se propagan de forma coherente.
-
-### Referencias
-
-- Historia / desglose: `docs/backlog/HU-004-suscripcion-por-correo-sin-cuenta-colaborador.md`, `docs/backlog/HU-004-ticket-breakdown.md`
-
-### Notas
-
-- Renombrado de regla Cursor `fronted-vue3.mdc` → `frontend-vue3.mdc` y actualización de enlaces en docs y `AGENTS.md`.
-- Commit: `a0ba685` — *Implementación HU-004 Alta suscripción*.
-
-</details>
-
-<details>
-<summary><strong>Desplegar</strong> — Pull Request 2 (histórico — HU-008)</summary>
-
-### Resumen
-
-Cierra **HU-008** (UC-04): el colaborador puede **listar y filtrar** sus fichas, **editarlas** (`PUT`) y **eliminarlas** (`DELETE`) con cascada en media; **ADMIN** opera sobre cualquier ficha. Incluye galería en edición (**HU-006-14**) y cierre documental de la historia.
-
-- Vertical completo: **catalog-service** + **media-service** + **frontend** (`/mis-ejemplares`, `/ejemplares/:id/edit`). Rutas y API actualizadas según [ADR-0006](docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md).
-- Sin notificación ni Kafka en edición/baja (**R7**).
-
-### Alcance
-
-- [x] Frontend
-- [x] Backend
-- [ ] Infraestructura
-- [x] Documentación
-
-### Cambios realizados
-
-**Backend — catalog-service**
-- `GET /api/catalog/trees` (filtros, paginación, scope COLABORADOR/ADMIN).
-- `GET` / `PUT` / `DELETE` `/api/catalog/trees/{treeId}`.
-- Orquestación de baja: media → SQL → hook Mongo (`MongoEjemplarEnrichmentDeletionPort` con **HU-015**; no-op si Mongo desactivado).
-- Cliente `RestMediaEjemplarPhotosClient` (`mtl.media.base-url`).
-- Auditoría R3, `JwtRealmRoles`, materialización `usuario_app`.
-
-**Backend — media-service**
-- `DELETE /api/media/trees/{treeId}/photos` (borrado masivo).
-- `DELETE /api/media/photos/{photoId}` (galería en edición).
-
-**Frontend**
-- `MyTreesListView` (`/mis-ejemplares`) con filtros y peticiones cancelables.
-- `EditTreeView` + `useEditTreeForm` (`/ejemplares/:id/edit`): PUT, DELETE con confirmación, galería añadir/borrar foto.
-- Servicios `collaboratorTreesService`, validación de archivos, `SpeciesAutocompleteInput`.
-
-**Contrato y docs**
-- [docs/api/openapi.yaml](docs/api/openapi.yaml) actualizado.
-- HU-008 **cerrada** en backlog, historia, tickets, UC-04, [readme.md](readme.md), [services/README.md](services/README.md), checklist E2E en [frontend/README.md](frontend/README.md).
-- **TASK-HU-008-11** (IT catalog↔media): **rechazado**; cobertura con tests unitarios/WebMvc + manual.
-
-### Evidencias (opcional)
-
-- _(Añadir capturas de Mis árboles, edición y diálogo de baja si el revisor lo pide.)_
-
-### Plan de pruebas
-
-- [ ] `frontend`: `npm run build`
-- [ ] `frontend`: `npm run test`
-- [ ] `services`: `mvn -f services/pom.xml -pl catalog-service,media-service test`
-- [ ] Prueba manual en local ([frontend/README.md](frontend/README.md) § HU-008): listado/filtros, PUT, galería, DELETE con/sin fotos, media caído → árbol no borrado
-
-### Checklist único de calidad (front/back)
-
-- [x] No se rompe lógica de negocio ni navegación existente
-- [x] Se mantienen nombres claros y responsabilidad única
-- [x] No se introduce duplicación innecesaria (roles JWT centralizados en `JwtRealmRoles`)
-- [x] Manejo básico de errores revisado (ProblemDetail, 403/404/502)
-- [x] Tests añadidos/actualizados según impacto del cambio
-- [x] Contratos y compatibilidad revisados (OpenAPI alineado)
-- [x] Seguridad revisada (JWT, propiedad de ficha, relay a media)
-- [x] **Frontend:** textos en `i18n`, flujos con confirmación en baja/borrado de foto
-- [x] **Backend:** validaciones R1/R2, auditoría, tests por capa
-
-### Riesgos / impacto
-
-- **Riesgo:** borrado distribuido sin **rollback compensatorio** si falla SQL tras borrar fotos en media.
-- **Mitigación:** documentado en HU-008 y `services/README.md`; aborto si falla media **antes** del SQL; mejora futura sin saga.
-
-- **Riesgo:** borrado Mongo omitido si `mtl.catalog.mongo.enabled=false` (perfil test o Mongo caído tras SQL).
-- **Mitigación:** activar Mongo en `dev`/`prod`; ver **HU-015** y `services/README.md` § HU-015.
-
-- **Riesgo:** requiere **catalog** (8081) y **media** (8082) en `dev` para DELETE con fotos.
-- **Mitigación:** `mtl.media.base-url` en `application-dev.properties`; checklist E2E documentada.
-
-### Notas para review
-
-- Revisar orden de cascada en `TreeDeletionService` (media → `commitPhysicalDelete`).
-- Confirmar que **PUT**/**DELETE** no publican en Kafka (solo alta).
-- **TASK-HU-008-11** rechazado a propósito; no esperar IT Failsafe catalog↔media en este PR.
-- Rama: `feature/actualizacion` → `main`.
-
-</details>
+**Evidencia (PRs documentados):** ejemplos HU-004 y HU-008 en [pull-request-examples.md](docs/ai-process-evidence/pull-request-examples.md).
 

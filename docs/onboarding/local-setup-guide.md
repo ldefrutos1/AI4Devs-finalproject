@@ -1,6 +1,6 @@
 # Arranque local (guía operativa)
 
-Complemento de [readme.md §2.4](../../readme.md#24-instrucciones-de-instalación): prerrequisitos, comandos concretos, puertos, usuarios de prueba e incidencias frecuentes. Normativa ampliada del backend: [services/README.md](../../services/README.md). Compose e infra: [infra/compose/README.md](../../infra/compose/README.md). OIDC en la SPA: [frontend/README.md](../../frontend/README.md).
+Referencia canónica de **accesos, puertos y flujos** para desarrollo local. Complemento operativo de [readme.md §2.4](../../readme.md#24-instrucciones-de-instalación-entorno-de-desarrollo) (arranque rápido) y [§3.4](../../readme.md#34-infraestructura-y-despliegue) (modos de despliegue). Normativa ampliada del backend: [services/README.md](../../services/README.md). Compose e infra: [infra/compose/README.md](../../infra/compose/README.md). OIDC en la SPA: [frontend/README.md](../../frontend/README.md).
 
 ## Prerrequisitos
 
@@ -16,7 +16,7 @@ cp .env.example .env          # Windows: copy .env.example .env
 docker compose up -d
 ```
 
-Postgres queda en **`localhost:5433`** por defecto (ver `.env.example`). Keycloak: **http://localhost:8180**. Mailpit UI: **http://localhost:8025**.
+Postgres, Keycloak, Mailpit y el resto de URLs: [Accesos](#accesos).
 
 ## 2. Microservicios (Maven, perfil `dev`)
 
@@ -46,14 +46,15 @@ mvn -pl catalog-service spring-boot:run -Dspring-boot.run.profiles=dev
 
 ### Qué levantar según el flujo
 
-| Flujo | Compose adicional | Terminales Maven (`dev`) |
-|-------|-------------------|---------------------------|
+| Flujo | Compose adicional (además de Postgres/Keycloak) | Terminales Maven (`dev`) |
+|-------|--------------------------------------------------|---------------------------|
+| Cualquier flujo vía SPA | — | **api-gateway** (obligatorio) |
 | Consulta pública | — | api-gateway, catalog-service |
 | Alta / edición de árbol | Redis, Kafka | api-gateway, catalog-service (+ **media-service** si hay fotos) |
-| Fotos (subida) | MinIO | api-gateway, media-service (+ catalog si la ficha ya existe) |
-| Aviso por correo (alta) | Kafka, Mailpit | api-gateway, catalog-service, notification-service |
+| Fotos (subida) | MinIO | api-gateway, media-service (+ **catalog-service** si aún no existe la ficha) |
+| Aviso por correo (alta de ejemplar) | Kafka, Mailpit | api-gateway, catalog-service, notification-service |
 | Admin (maestros / suscripciones) | — | api-gateway, catalog-service; notification-service (suscripciones) |
-| Consulta IA especie (ADMIN, stub) | — | api-gateway, catalog-service, ai-assistant-service |
+| Consulta IA especie (ADMIN, stub) | — | api-gateway, ai-assistant-service + **catalog-service** para pantallas de alta/edición con popup de especie |
 
 > **Redis:** **catalog-service** en `dev` usa caché Redis; el contenedor Redis debe estar en marcha **antes** de arrancarlo.
 
@@ -70,7 +71,28 @@ npm install
 npm run dev
 ```
 
-UI en **http://localhost:5173**. Vite reenvía `/api/*` al gateway (**8080**); no hace falta definir `VITE_GATEWAY_BASE_URL` en el caso habitual.
+Vite reenvía `/api/*` al gateway (**8080**); no hace falta definir `VITE_GATEWAY_BASE_URL` en el caso habitual. UI y resto de accesos: [Accesos](#accesos).
+
+## Accesos
+
+Dos modos locales (detalle en [readme §3.4](../../readme.md#34-infraestructura-y-despliegue)):
+
+- **Dev en host** (habitual): infra en Docker + Maven/Vite en el equipo → UI en **`:5173`**.
+- **Todo en Docker**: overlay `docker-compose.apps.yml` → UI en **`:8088`**.
+
+| Acceso | Dev en host | Todo en Docker |
+|--------|-------------|----------------|
+| UI SPA | [http://localhost:5173](http://localhost:5173) | [http://localhost:8088](http://localhost:8088) |
+| API Gateway | [http://localhost:8080](http://localhost:8080) | [http://localhost:8080](http://localhost:8080) |
+| Microservicios (directo, debug) | `:8081`–`:8084` | vía gateway |
+| Keycloak (consola IdP) | [http://localhost:8180](http://localhost:8180) | igual |
+| MinIO (consola) | [http://localhost:9001/login](http://localhost:9001/login) (`minio` / ver `.env`) | igual |
+| Mailpit (correo de prueba) | [http://localhost:8025](http://localhost:8025) | igual |
+| Grafana | [http://localhost:3000](http://localhost:3000) (`admin` / ver `.env`) | igual |
+| Prometheus (targets) | [http://localhost:9090/targets](http://localhost:9090/targets) | igual |
+| Postgres (JDBC desde host) | `localhost:5433` (por defecto; ver `.env.example`) | igual |
+
+Usuarios de aplicación en el realm (no confundir con admin de consola Keycloak): [Usuarios de prueba](#usuarios-de-prueba-keycloak-solo-local).
 
 ## Usuarios de prueba (Keycloak, solo local)
 

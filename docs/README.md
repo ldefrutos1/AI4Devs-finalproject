@@ -17,6 +17,7 @@
 | [onboarding/](onboarding/cursor-rules-primer.md) | **Inicio rápido**: cómo empezar, orden de lectura y uso práctico (sin duplicar normativa técnica de `engineering/`); **arranque local (Compose + Maven + frontend):** [local-setup-guide.md](onboarding/local-setup-guide.md); **Git, ramas y PR:** [github-branching.md](onboarding/github-branching.md) · **comandos pre-PR (CI):** [devsecops-ci.md](engineering/devsecops-ci.md); guía Vue: [vue-development-guide.md](onboarding/vue-development-guide.md); guía de diseño frontend: [frontend-design-guide.md](onboarding/frontend-design-guide.md); checklist operativo: [frontend-design-checklist.md](onboarding/frontend-design-checklist.md); playbook IA: [ai-development-playbook.md](onboarding/ai-development-playbook.md) |
 | [events/](events/kafka-events.md) | Contrato de eventos Kafka |
 | [security/](security/jwt-gateway-strategy.md) | Estrategia JWT, gateway y realm `mtl` |
+| [ai-process-evidence/](ai-process-evidence/README.md) | Evidencia histórica del curso: diálogos de refinamiento, desglose/encargos y PRs de ejemplo (enlazado desde readme §6–§8) |
 | [software-revisions/](software-revisions/README.md) | Informes puntuales de auditoría/evaluación (archivo histórico; estado actual en backlog y devsecops-ci) |
 | [use-cases/](use-cases/use-case-summary.md) | Resumen y diagrama de casos de uso |
 
