@@ -127,7 +127,8 @@ A continuación se incluye el diagrama de casos de uso del sistema.
 | UC-10 | Consultar asistente IA características especie | ADMIN |
 
 \* UC-05 y UC-06: quedan fuera del MVP (**HU-009**, **HU-010**).
-\* UC-04: **COLABORADOR** solo sobre fichas propias; **ADMIN** (generalización de rol) sobre **cualquier** ficha.
+
+\* UC-04: **COLABORADOR** solo sobre fichas propias; **ADMIN** sobre **cualquier** ficha.
 
 *El Modelo completo se puede consultar en:* [resumen de casos de uso](docs/use-cases/use-case-summary.md) · [modelo PlantUML](docs/use-cases/use-case-model.puml)
 
@@ -1113,7 +1114,6 @@ erDiagram
     NOTIFICACION {
         bigint notificacion_id PK
         bigint evento_id FK
-        bigint ejemplar_id FK
     }
     SUSCRIPTOR {
         bigint suscriptor_id PK
@@ -1151,7 +1151,6 @@ erDiagram
     EJEMPLAR ||--o| EJEMPLAR_DETALLE : enriquece
     EJEMPLAR ||--o{ FOTOGRAFIA : tiene
     EJEMPLAR ||--o{ EVENTO_CATALOGO : origina
-    EJEMPLAR ||--o{ NOTIFICACION : referencia
     EVENTO_CATALOGO ||--o{ NOTIFICACION : genera
     NOTIFICACION ||--o{ ENVIO_NOTIFICACION : produce
     SUSCRIPTOR ||--o{ ENVIO_NOTIFICACION : recibe

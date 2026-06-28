@@ -14,7 +14,7 @@ Checklist rápido para revisar estilo y UX visual en cada ticket de frontend.
 
 ## 2) Tokens y consistencia visual
 
-- [ ] Se usan tokens de `:root` en `frontend/src/style.css` (sin colores hardcodeados).
+- [ ] Se usan tokens de `:root` en `frontend/src/styles/tokens.css` (sin colores hardcodeados).
 - [ ] Se usa la escala de espacios `--space-*` (sin valores aislados innecesarios).
 - [ ] Radios/sombras siguen el sistema (`--radius-*`, `--shadow*`).
 
@@ -56,7 +56,7 @@ Checklist rápido para revisar estilo y UX visual en cada ticket de frontend.
 
 ## Referencias rápidas
 
-- Sistema visual: `frontend/src/style.css`
+- Tokens (`:root`): `frontend/src/styles/tokens.css` · entrada global: `frontend/src/style.css`
 - Shell/layout base: `frontend/src/App.vue`
 - Ejemplo home: `frontend/src/views/HomeView.vue`
 - Ejemplo formulario: `frontend/src/views/CreateTreeView.vue`

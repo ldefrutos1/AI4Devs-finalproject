@@ -83,5 +83,5 @@ La SPA puede enviar `isPrimary: false` en todas las confirmaciones; el servidor 
 ## Enlaces relacionados
 
 - [services/README.md](../../services/README.md) — arranque Maven, puertos, gateway.
-- [readme.md](../../readme.md) — visión de arquitectura (Alta de ejemplar + subida) §3.1.3.
+- [readme.md](../../readme.md) — visión de arquitectura (Alta de ejemplar + subida) §3.2.3.
 - [docs/data-model/data-model.md](../data-model/data-model.md) — visibilidad R4–R5 (herencia desde la ficha).

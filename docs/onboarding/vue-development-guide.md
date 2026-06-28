@@ -361,7 +361,7 @@ Flujo global (rama, plantilla GitHub): [github-branching.md](github-branching.md
 
 | Tema | Documento |
 |------|-------------|
-| Arquitectura SPA + auth (diagramas) | [readme.md](../../readme.md) (sección 2.1.1 Autenticación en Front) |
+| Arquitectura SPA + auth (diagramas) | [readme.md](../../readme.md) (§3.2.1 Autenticación en Front) |
 | Revisión y deuda resuelta | [2026-04-25-frontend-architecture-review.md](../software-revisions/2026-04-25-frontend-architecture-review.md) |
 | OpenAPI / contratos | [docs/api/openapi.yaml](../api/openapi.yaml) |
 | Cursor y reglas `.mdc` | [cursor-rules-primer.md](cursor-rules-primer.md) |

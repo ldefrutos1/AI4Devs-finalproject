@@ -18,7 +18,7 @@ Guía práctica para desarrolladores sobre cómo mantener una interfaz **profesi
 
 ## 2) Tokens de diseño (fuente de verdad)
 
-La fuente canónica de estilos globales está en `frontend/src/style.css`, bloque `:root`.
+La fuente canónica de tokens (`:root`: color, espaciado, tipografía, etc.) está en `frontend/src/styles/tokens.css` (importado por `frontend/src/style.css`).
 
 ### 2.1 Color
 
@@ -168,7 +168,7 @@ Cuando crees una vista nueva en `frontend/src/views`:
 
 ## 10) Ficheros de referencia rápida
 
-- Estilos globales: `frontend/src/style.css`
+- Tokens (`:root`): `frontend/src/styles/tokens.css` · entrada global: `frontend/src/style.css`
 - Shell de app: `frontend/src/App.vue`
 - Ejemplo landing/home: `frontend/src/views/HomeView.vue`
 - Ejemplo formulario: `frontend/src/views/CreateTreeView.vue`

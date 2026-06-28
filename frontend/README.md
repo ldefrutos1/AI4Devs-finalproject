@@ -3,7 +3,7 @@
 Bootstrap inicial del frontend para MyTreeLibrary:
 
 - Vue 3 + TypeScript + Vite
-- Vue Router (ruta protegida para alta de ficha)
+- Vue Router (rutas protegidas por autenticación y rol)
 - OIDC real con Keycloak (Authorization Code + PKCE, cliente `mtl-spa`)
 - Cliente HTTP base para consumir el gateway con Bearer
 - Internacionalización con `vue-i18n` (locale base: `es`)
@@ -33,7 +33,8 @@ El entorno de desarrollo usa proxy de Vite para evitar problemas CORS:
 
 ## Flujo de autenticación
 
-- Ruta protegida: `/ejemplares/new`
+- Rutas con `requiresAuth` (JWT): `/ejemplares/new`, `/ejemplares/:id/edit`, `/mis-ejemplares`
+- Rutas con rol **ADMIN** (`requiredRoles`): `/admin/masters`, `/admin/subscriptions`
 - Callback OIDC: `/auth/callback`
 - Login redirige a Keycloak con `scope=openid profile email`
 

@@ -63,4 +63,4 @@ npx vitest run -t "redirige a auth-error"
 - **E2E de UI (Playwright):** [testing-e2e.md](testing-e2e.md) — flujo de navegador extremo a extremo (carpeta `e2e/`); este documento cubre solo Vitest.
 - Reglas cortas IA: [frontend-security.mdc](../../.cursor/rules/frontend-security.mdc), [frontend-vue3.mdc](../../.cursor/rules/frontend-vue3.mdc), [quality-and-testing.mdc](../../.cursor/rules/quality-and-testing.mdc).
 - Guía de inicio frontend: [docs/onboarding/vue-development-guide.md](../onboarding/vue-development-guide.md).
-- Estrategia general de calidad del proyecto: [readme.md](../../readme.md) (apartado 2.6).
+- Estrategia general de calidad del proyecto: [readme.md](../../readme.md) (§3.6 Tests).

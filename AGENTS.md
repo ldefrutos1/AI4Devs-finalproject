@@ -2,7 +2,7 @@
 
 ## Proyecto (resumen)
 
-MyTreeLibrary: visión de producto, objetivos, stack y arquitectura en [readme.md](readme.md) (§§0–2). Regla de producto detallada: `.cursor/rules/product-context.mdc`.
+MyTreeLibrary: visión de producto, objetivos, stack y arquitectura en [readme.md](readme.md) (§§1–2). Regla de producto detallada: `.cursor/rules/product-context.mdc`.
 
 ## Estructura del repositorio (monorepo)
 

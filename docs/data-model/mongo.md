@@ -270,7 +270,6 @@ El administrador del sistema puede consultar al LLM para generar el documento co
 1. El usuario solicita la información al LLM con `nombre_cientifico` y `nombre_comun`.
 2. La aplicación construye el prompt a partir de estos datos y el esquema de referencia.
 3. El LLM devuelve un documento JSON que la aplicación valida antes de persistir.
-4. Si la validación es correcta, el documento se inserta en MongoDB. Si no, se registra el error y se notifica al usuario para revisión manual.
 
 ### 6.2 Prompt de referencia
 
