@@ -237,7 +237,7 @@ Una vez levantados los contenedores y la parte front y back de la aplicación es
    - → **UI** de la aplicación: **http://localhost:5173**
    - → **API Gateway**: **http://localhost:8080**
    - → **Microservicios**: **http://localhost:8081-8084**
-   - → **Keycloak** consola: **http://localhost:8180/** (usuario: admin. NOTA: los usuarios de la aplicación definidos en el realm son admin_mtl, colaborador)
+   - → **Keycloak** consola: **http://localhost:8180/** (usuario: admin. NOTA: en la configuración del compose está definido el realm mtl con los usuarios admin_mtl -"ADMIN", "COLABORADOR"- y colaborador -"COLABORADOR"-)
    - → **MinIO** consola: **http://localhost:9001/login** (usuario: minio)
    - → **Grafana**: **http://localhost:3000/** (usuario: admin)
    - → **Prometheus**: **http://localhost:9090/targets**
@@ -1409,14 +1409,14 @@ La definición de los mensajes en Kafka, el payload y las reglas de publicación
 
 ### **Desarrollo asistido por IA (gobierno del proceso)**
 
-El desarrollo no se apoya en prompts sueltos, sino en **artefactos repetibles**. Para ello se ha partido definiendo las reglas que aplican a cada aspecto del desarrollo [reglas del repositorio](.cursor/rules/). En el flujo habitual se refinan las HU del Backlog que se ha generado a partir de los casos de uso, del modelo de datos y de la definición del sistema. Después se hace el desglose en tickets  en los que se incluyen las **Reglas aplicables por capa** que deben implementarse en cada TASK del breakdown.
+El desarrollo no se apoya en prompts sueltos, sino en **artefactos repetibles**. Para ello se ha partido definiendo las reglas que aplican a cada aspecto del desarrollo [reglas del repositorio](.cursor/rules/) y el backlog de la aplicación [backlog.md](docs/backlog/backlog.md) a partir de los casos de uso, de la descripción del sistema y del modelo de datos. En el flujo habitual se refinan las HU del Backlog. Después se hace el desglose en tickets  en los que se incluyen las **Reglas aplicables por capa** que deben implementarse en cada TASK del breakdown.
 
 
 El detalle del refinamiento y desglose de cada HU se puede resumir en los siguientes pasos:
-- 1.- Generación de la Historia de Usuario a partir del backlog con `hu-refinement-mtl`
+- 1.- Generación de la Historia de Usuario a partir del backlog con la skill [`hu-refinement-mtl`](.cursor/skills/hu-refinement-mtl/SKILL.md)
 - 2.- Análisis del documento generado
 - 3.- Aclaración, definición y/o corrección de los puntos detectados en los apartados de Riesgos y Aclaraciones pendientes (refinamiento)
-- 4.- Generación de los tickets de trabajo con `hu-breakdown-mtl`
+- 4.- Generación de los tickets de trabajo con la skill [`hu-breakdown-mtl`](.cursor/skills/hu-breakdown-mtl/SKILL.md)
 
 Por operativa práctica, al comienzo de la historia se hacen unas comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.
 
