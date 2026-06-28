@@ -38,7 +38,7 @@ MyTreeLibrary.
 
 ### **1.3. Descripción breve**
 
-MyTreeLibrary es una plataforma colaborativa para registrar árboles singulares con fotos, ubicación y datos de interés, y consultarlos de forma pública. En el MVP, la IA orienta (no determina) la consulta de características de especie para administradores; identificación por imagen y chat quedan para versiones posteriores.
+MyTreeLibrary es una plataforma colaborativa para registrar árboles singulares con fotos, ubicación y datos de interés, y consultarlos de forma pública. En el MVP, se habilita la consulta a la IA de características de especie a los usuarios administradores; identificación por imagen y chat quedan para versiones posteriores.
 
 ### **1.4. Repositorio**
 
@@ -86,17 +86,17 @@ En el **MVP**, usuarios con rol de administrador pueden consultar las caracterí
 
 ```mermaid
 flowchart TB
-    classDef user fill:#E5F0FF,stroke:#2D71A8,stroke-width:1px,color:#2D71A8
-    classDef system fill:#2D71A8,stroke:#1E4B73,stroke-width:2px,color:#FFF,font-weight:bold
-    classDef soporte fill:#E1F5EE,stroke:#0F6E56,stroke-width:1px,color:#085041
-    classDef externo fill:#FAECE7,stroke:#993C1D,stroke-width:1px,color:#712B13
+    classDef user fill:#E5F0FF,stroke:#2D71A8,stroke-width:1px,color:#2D71A8;
+    classDef system fill:#2D71A8,stroke:#1E4B73,stroke-width:2px,color:#FFF;
+    classDef soporte fill:#E1F5EE,stroke:#0F6E56,stroke-width:1px,color:#085041;
+    classDef externo fill:#FAECE7,stroke:#993C1D,stroke-width:1px,color:#712B13;
 
     U(("👤 Usuario")):::user
     S["🖥️ MyTreeLibrary<br>Sistema principal"]:::system
 
     KC["🔐 Keycloak<br>Autenticación"]:::soporte
     SMTP["📧 Servidor SMTP<br>Notificaciones"]:::soporte
-    PIA["🧠 Proveedor IA<br>Características especie (MVP)<br>Identificación y chat (futuro)"]:::externo
+    PIA["🧠 Proveedor IA<br>Características especie MVP<br>Identificación y chat futuro"]:::externo
     MAP["🗺️ OpenStreetMap<br>Geolocalización"]:::externo
 
     U -->|Usa la aplicación| S
@@ -257,13 +257,13 @@ En desarrollo lo habitual es **infra en Docker** y **aplicación en host** (paso
 
 | Paso | Qué se muestra |
 |------|----------------|
-| 1 | Un visitante recorre el catálogo **sin login**: listado, ficha de detalle y mapa |
+| 1 | Un visitante recorre el catálogo **sin login**: listado, ficha de detalle y mapa, alta de suscripción |
 | 2 | Un **colaborador** inicia sesión y da de alta un ejemplar en estado publicado |
 | 3 | Tras el alta, el aviso por correo queda visible en **Mailpit** ([localhost:8025](http://localhost:8025)) |
-| 4 | Un usuario **ADMIN** entra en maestros taxonómicos o en la gestión de suscripciones |
-| 5 | Como **ADMIN**, se pide una sugerencia IA de enriquecimiento de especie (modo `stub`): precarga el popup; la persistencia sigue siendo manual al guardar |
+| 4 | Un usuario **ADMIN** entra en maestros taxonómicos y en la gestión de suscripciones |
+| 5 | Como **ADMIN**, se pide una sugerencia IA de enriquecimiento de especie (modo `stub`) y se añaden datos semiestructurados que se almacenarán en MongoDB |
 
-Usuarios de prueba: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#usuarios-de-prueba-keycloak-solo-local) · [infra/compose/README.md](infra/compose/README.md). Arranque previo a la demo: [§2.4](#24-instrucciones-de-instalación-entorno-de-desarrollo) (Mailpit en `:8025`, también en la lista de URLs). Historias de usuario implicadas: [§6](#6-historias-de-usuario) · [backlog.md](docs/backlog/backlog.md).
+Usuarios de prueba: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#usuarios-de-prueba-keycloak-solo-local) · [infra/compose/README.md](infra/compose/README.md).
 
 ---
 
@@ -376,7 +376,7 @@ A continuación se detallan los componentes del diagrama C2 (§3.1), propios del
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
 | **SPA** | Vue 3, Vite, TypeScript | Frontal de la aplicación. |
-| **API Gateway** | Spring Cloud Gateway (WebFlux), Spring Boot 4 | Puerta de entrada: enruta a los microservicios, aplica filtros de seguridad y correlación |
+| **API Gateway** | Spring Cloud Gateway (WebFlux), Spring Boot 4 | Puerta de entrada: enruta a los microservicios, aplica filtros de seguridad y correlación. |
 
 #### Capa de Microservicios de dominio
 
@@ -941,7 +941,7 @@ Accesos, puertos en ambos modos y qué servicios levantar por flujo: [local-setu
 docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
 ```
 
-**Script arranque completo:** existe un script que lanza todos los pasos anteriores (build de iagenes + levantar infra + levantar aplicación): `.\scripts\dev\start-docker-stack.ps1` (build + infra + apps).
+**Script arranque completo:** existe un script que lanza todos los pasos anteriores (build de iagenes + levantar infra + levantar aplicación): `.\scripts\dev\start-docker-stack.ps1`.
 
 **Observabilidad:** con la aplicación y la infra levantada, Prometheus recoge métricas de cada microservicio vía Actuator y Grafana muestra el dashboard **MTL Microservices**.
 
@@ -1007,7 +1007,7 @@ La autenticación se basa en **OIDC** con **Keycloak** como IdP (realm `mtl`): l
 
 Tras autenticar, la **autorización** aplica roles de realm **`COLABORADOR`** y **`ADMIN`** en recursos sensibles; las rutas públicas siguen el contrato OpenAPI y el resto exige JWT válido.
 
-Las fotografías residen en buckets **privados** (MinIO en local, S3 en producción): la SPA **nunca** recibe credenciales del almacén. **media-service** comprueba permisos y política de subida (MIME, tamaño, límite por ejemplar) antes de emitir **URLs prefirmadas** PUT/GET de **corta duración**; el cliente sube el binario directamente al bucket y confirma metadatos en la API. Flujo presign → PUT → confirm: [media-upload-hu006.md](docs/engineering/media-upload-hu006.md).
+Las fotografías residen en buckets **privados** (MinIO en local, S3 en producción): la SPA **nunca** recibe credenciales del almacén; **media-service** comprueba permisos y política de subida (MIME, tamaño, límite por ejemplar) antes de emitir **URLs prefirmadas** PUT/GET de **corta duración**; el cliente sube el binario directamente al bucket y confirma metadatos en la API. Flujo presign → PUT → confirm: [media-upload-hu006.md](docs/engineering/media-upload-hu006.md).
 
 En **producción**, el tráfico expuesto (SPA, API e IdP) debe ir cifrado con **TLS**; en desarrollo local la API puede servirse en HTTP. El **gateway** aplica **CORS** restrictivo a los orígenes del SPA en local: `http://localhost:5173`, `http://127.0.0.1:5173` (Vite en host) y `http://localhost:8088`, `http://127.0.0.1:8088` (SPA en Docker); métodos y cabeceras acordados (`Authorization`, `Content-Type`, `X-Correlation-Id`, etc.) y sin credenciales cross-origin innecesarias.
 
@@ -1026,7 +1026,7 @@ La estrategia de tests del sistema contempla los siguientes niveles:
 - **Backend:** repositorios y endpoints por capa (Testcontainers: PostgreSQL/Mongo/Kafka).
 
 **Test E2E en dos niveles:**
-- **E2E completo (Playwright)** — pruebas de flujo de usuario que ejercutan frontend y backend de forma conjunta.
+- **E2E completo (Playwright)** — pruebas de flujo de usuario completo, que ejercutan frontend y backend de forma conjunta.
 
 - **E2E REST del backend** — pruebas HTTP/JWT de los servicios REST de backend aisladas del UI; cubren el recorrido backend completo (gateway, microservicios, Kafka) y resultan más robustas ante cambios de interfaz.
 
