@@ -35,9 +35,18 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 class GatewayAiProxyJwtIT {
 
   private static final String ENRICHMENT_PATH = "/api/ai/species/enrichment-suggestions";
+  private static final String CHAT_PATH = "/api/ai/chat/messages";
   private static final String ENRICHMENT_REQUEST_BODY =
       "{\"scientificName\":\"Quercus ilex\",\"commonName\":\"Encina\"}";
   private static final String ENRICHMENT_RESPONSE_BODY = "{\"synonyms\":[\"Encina\"]}";
+  private static final String CHAT_REQUEST_BODY =
+      """
+      {"conversationId":"550e8400-e29b-41d4-a716-446655440000","treeId":42,"messages":[{"role":"user","content":"Hola"}]}
+      """;
+  private static final String CHAT_RESPONSE_BODY =
+      """
+      {"conversationId":"550e8400-e29b-41d4-a716-446655440000","message":{"role":"assistant","content":"Respuesta orientativa.","createdAt":"2026-07-01T10:15:30Z"}}
+      """;
 
   private static volatile WireMockServer wireMock;
 
@@ -107,6 +116,35 @@ class GatewayAiProxyJwtIT {
     wireMock.verify(
         1,
         postRequestedFor(urlPathEqualTo(ENRICHMENT_PATH))
+            .withHeader(AUTHORIZATION, equalTo("Bearer " + token)));
+  }
+
+  @Test
+  void protectedAiChatRoute_withCollaboratorBearer_forwardsTokenAndReturnsUpstreamBody() {
+    String token = JwtTestTokens.accessTokenWithRealmRoles("it-colaborador", List.of("COLABORADOR"));
+    wireMock.stubFor(
+        post(urlPathEqualTo(CHAT_PATH))
+            .willReturn(
+                aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBody(CHAT_RESPONSE_BODY)));
+
+    webTestClient
+        .post()
+        .uri(CHAT_PATH)
+        .headers(h -> h.setBearerAuth(token))
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(CHAT_REQUEST_BODY)
+        .exchange()
+        .expectStatus()
+        .isOk()
+        .expectBody(String.class)
+        .isEqualTo(CHAT_RESPONSE_BODY);
+
+    wireMock.verify(
+        1,
+        postRequestedFor(urlPathEqualTo(CHAT_PATH))
             .withHeader(AUTHORIZATION, equalTo("Bearer " + token)));
   }
 }

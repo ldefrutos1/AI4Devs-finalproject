@@ -5,6 +5,7 @@ import com.mtl.ai.config.OpenAiProperties;
 import com.mtl.ai.exception.AiAssistantException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -47,7 +48,17 @@ public class OpenAiResponsesClient {
 
   /** Invoca OpenAI pidiendo salida JSON (json_object) y devuelve el texto extraído. */
   public String createJsonObjectResponse(String model, String input) {
-    OpenAiResponsesRequest request = OpenAiResponsesRequest.jsonObjectMode(model, input);
+    return invokeResponses(OpenAiResponsesRequest.jsonObjectMode(model, input), model);
+  }
+
+  /** Invoca OpenAI en modo chat (system prompt + hilo) y devuelve texto plano. */
+  public String createTextResponse(
+      String model, String instructions, List<OpenAiResponsesRequest.InputMessage> messages) {
+    return invokeResponses(
+        OpenAiResponsesRequest.textChatMode(model, instructions, messages), model);
+  }
+
+  private String invokeResponses(OpenAiResponsesRequest request, String model) {
     int maxAttempts = Math.max(1, properties.retry().maxAttempts());
     RestClientException lastTransient = null;
 

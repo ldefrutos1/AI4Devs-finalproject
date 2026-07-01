@@ -157,3 +157,29 @@ Prerrequisitos: Compose + Postgres + Keycloak; **api-gateway** **8080**, **catal
 4. **Escenario 4 — Error IA:** simular **422**/**502** (mock o proveedor caído) → mensaje de error en popup; campos **sin** precargar.
 
 Checks automáticos: `npx vitest run src/services/ai src/composables/useTreeFormEnrichment.test.ts src/components/enrichment/SpeciesEnrichmentPopup.test.ts`; backend `mvn -f services/pom.xml -pl ai-assistant-service test verify`.
+
+## Chat asistido (HU-010)
+
+Disparador **Asistente IA** en la cabecera de `EditTreeView` (solo con ficha cargada). Diálogo modal `TreeChatDialog`: hilo conversacional **en memoria del cliente**; se reinicia al cerrar el diálogo, recargar o salir de la edición. Roles **COLABORADOR** y **ADMIN**; fuera de alcance: `CreateTreeView`, consulta pública.
+
+### Piezas principales
+
+| Capa | Ficheros |
+|------|----------|
+| Servicio API | `src/services/ai/chatMessageService.ts`, `aiChatErrors.ts` |
+| Composables | `useTreeChat.ts`, `useAiChatErrorMapper.ts` |
+| Componente | `components/chat/TreeChatDialog.vue` |
+| Vista | `views/EditTreeView.vue` |
+| i18n | `chat.dialog.*`, `chat.ai.errors.*`, `treeEdit.assistantTrigger*` |
+| Estilos | `src/styles/chat.css` |
+
+### Verificación manual (TASK-HU-010-11)
+
+Prerrequisitos: Compose + Postgres + Keycloak; **api-gateway** **8080**, **catalog-service** **8081**, **ai-assistant-service** **8084** (modo **`stub`** por defecto); ejemplar existente editable; `npm run dev` en `frontend/`. Criterios BDD: [HU-010-chat-asistido.md](../docs/backlog/HU-010-chat-asistido.md) §3.
+
+1. **Escenario 1 — Chat desde edición:** login **COLABORADOR** o **ADMIN** → **Mis árboles** → editar ejemplar → **Asistente IA** (cabecera, no en pie sticky) → enviar mensaje → respuesta **orientativa** y aviso en cabecera del diálogo; `POST /api/ai/chat/messages` **200** vía gateway con `treeId` del ejemplar; **Guardar** / **Eliminar** del formulario siguen operativos. Opcional: en BD esquema `ai`, fila **`auditoria_uso_ia`** con `tipo_uso_ia` = `chat-message` y `ejemplar_id` = ese `treeId`.
+2. **Escenario 2 — Hilo no persistente:** tras varios turnos, cerrar el diálogo y reabrirlo, recargar la página o navegar fuera de la edición → hilo vacío (sin recuperación desde `sessionStorage` ni servidor).
+3. **Escenario 3 — No autorizado:** visitante sin sesión o JWT sin rol **COLABORADOR**/**ADMIN** → `POST /api/ai/chat/messages` **401** o **403** (DevTools, curl o IT); no debe crearse auditoría para esa petición rechazada.
+4. **Escenario 4 — Fallo proveedor:** provocar **502** (mock, stub desactivado mal configurado o proveedor caído) → mensaje de error en el diálogo; el turno **user** permanece visible; botón **Reintentar** reenvía el mismo turno; en **429** no hay reintento automático; tras error no se puede enviar un mensaje nuevo encima del turno pendiente (solo reintento 502 o **Cerrar**).
+
+Checks automáticos: `npx vitest run useTreeChat TreeChatDialog EditTreeView chatMessage aiChatErrors`; backend `mvn -f services/pom.xml -pl ai-assistant-service test verify`.

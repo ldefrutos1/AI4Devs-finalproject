@@ -1,0 +1,195 @@
+/* Diálogo de chat asistido (HU-010) */
+
+/* Cabecera EditTreeView: alineado con tree-detail-page__title-row */
+.tree-edit-page__title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.tree-edit-page__title-row .page-header__title {
+  flex: 1;
+  min-width: 0;
+}
+
+.tree-edit-page__assistant-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.tree-edit-page__assistant-trigger-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+}
+
+dialog.mtl-tree-chat-dialog[open] {
+  z-index: 1015;
+  justify-content: center;
+  align-items: center;
+}
+
+.mtl-form-dialog-panel.mtl-tree-chat-dialog-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(60vw, calc(100vw - 2rem));
+  max-width: none;
+  height: min(60dvh, calc(100dvh - 2rem));
+  max-height: min(60dvh, calc(100dvh - 2rem));
+  padding: 0;
+  overflow: hidden;
+}
+
+.mtl-tree-chat-dialog-header {
+  padding: var(--space-5) var(--space-5) var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.mtl-tree-chat-dialog-title {
+  margin: 0 0 var(--space-2);
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.mtl-tree-chat-dialog-intro {
+  margin-bottom: 0;
+}
+
+.mtl-tree-chat-thread {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  -webkit-overflow-scrolling: touch;
+}
+
+.mtl-tree-chat-thread-empty {
+  margin: auto 0;
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-soft);
+}
+
+.mtl-tree-chat-bubble {
+  max-width: 92%;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-soft);
+}
+
+.mtl-tree-chat-bubble--user {
+  align-self: flex-end;
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--border-subtle));
+}
+
+.mtl-tree-chat-bubble--assistant {
+  align-self: flex-start;
+}
+
+.mtl-tree-chat-bubble--loading .mtl-tree-chat-bubble__content {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.mtl-tree-chat-bubble__role {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.mtl-tree-chat-bubble__content {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.mtl-tree-chat-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0 var(--space-5) var(--space-3);
+  flex-shrink: 0;
+}
+
+.mtl-tree-chat-error__message {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.mtl-tree-chat-limit {
+  margin: 0;
+  padding: 0 var(--space-5) var(--space-2);
+  flex-shrink: 0;
+}
+
+.mtl-tree-chat-composer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-5) max(var(--space-5), env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+  background: var(--surface);
+}
+
+.mtl-tree-chat-composer .form-label {
+  margin-bottom: 0;
+}
+
+.mtl-tree-chat-input {
+  resize: vertical;
+  min-height: 4.5rem;
+  max-height: 10rem;
+}
+
+.mtl-tree-chat-composer .mtl-form-dialog-actions {
+  margin-top: var(--space-2);
+  padding-top: 0;
+  border-top: none;
+}
+
+@media (max-width: 640px) {
+  .tree-edit-page__title-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tree-edit-page__assistant-trigger {
+    align-self: flex-start;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .mtl-tree-chat-composer .mtl-form-dialog-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mtl-tree-chat-composer .mtl-form-dialog-actions .tree-form-submit {
+    margin-left: 0;
+    width: 100%;
+  }
+}

@@ -1,18 +1,24 @@
 package com.mtl.ai.controller;
 
+import static com.mtl.ai.integration.support.AiIntegrationFixtures.ENRICHMENT_PATH;
+import static com.mtl.ai.integration.support.AiIntegrationFixtures.ENRICHMENT_REQUEST_BODY;
+import static com.mtl.ai.integration.support.JwtDecoderConfigTest.TOKEN_ADMIN;
+import static com.mtl.ai.integration.support.JwtDecoderConfigTest.TOKEN_COLABORADOR;
+import static com.mtl.ai.integration.support.JwtDecoderConfigTest.TOKEN_ROL_NO_AUTORIZADO;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.mtl.ai.application.SpeciesEnrichmentSuggestionService;
 import com.mtl.ai.config.AiSecurityConfig;
-import com.mtl.ai.config.JwtDecoderConfigTest;
+import com.mtl.ai.controller.support.WebMvcTestJsonMapperConfig;
 import com.mtl.ai.dto.AiSpeciesEnrichmentSuggestionResponse;
 import com.mtl.ai.exception.AiAssistantException;
+import com.mtl.ai.integration.support.JwtDecoderConfigTest;
 import com.mtl.ai.web.CorrelationIdFilter;
 import com.mtl.ai.web.error.AiAssistantExceptionHandler;
 import com.mtl.ai.web.error.ProblemAccessDeniedHandler;
@@ -21,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
@@ -31,7 +36,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import tools.jackson.databind.json.JsonMapper;
 
 @WebMvcTest(controllers = AiSpeciesEnrichmentController.class)
 @Import({
@@ -41,22 +45,11 @@ import tools.jackson.databind.json.JsonMapper;
   AiAssistantExceptionHandler.class,
   CorrelationIdFilter.class,
   JwtDecoderConfigTest.class,
-  AiSpeciesEnrichmentControllerWebMvcTest.JsonMapperWebMvcTestConfiguration.class
+  WebMvcTestJsonMapperConfig.class
 })
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class AiSpeciesEnrichmentControllerWebMvcTest {
-
-  private static final String VALID_REQUEST_BODY =
-      "{\"scientificName\":\"Quercus ilex\",\"commonName\":\"Encina\"}";
-
-  @TestConfiguration
-  static class JsonMapperWebMvcTestConfiguration {
-    @org.springframework.context.annotation.Bean
-    JsonMapper aiWebMvcTestJsonMapper() {
-      return JsonMapper.builder().build();
-    }
-  }
 
   @Autowired private MockMvc mockMvc;
 
@@ -66,9 +59,9 @@ class AiSpeciesEnrichmentControllerWebMvcTest {
   void suggest_withoutBearer_returns401Problem() throws Exception {
     mockMvc
         .perform(
-            post("/api/ai/species/enrichment-suggestions")
+            post(ENRICHMENT_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"scientificName\":\"Quercus ilex\",\"commonName\":\"Encina\"}"))
+                .content(ENRICHMENT_REQUEST_BODY))
         .andExpect(status().isUnauthorized())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
         .andExpect(jsonPath("$.title").value("No autenticado"));
@@ -78,11 +71,10 @@ class AiSpeciesEnrichmentControllerWebMvcTest {
   void suggest_withCollaborator_returns403Problem() throws Exception {
     mockMvc
         .perform(
-            post("/api/ai/species/enrichment-suggestions")
-                .header(
-                    HttpHeaders.AUTHORIZATION, "Bearer " + JwtDecoderConfigTest.TOKEN_COLABORADOR)
+            post(ENRICHMENT_PATH)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN_COLABORADOR)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"scientificName\":\"Quercus ilex\",\"commonName\":\"Encina\"}"))
+                .content(ENRICHMENT_REQUEST_BODY))
         .andExpect(status().isForbidden())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
         .andExpect(jsonPath("$.title").value("Prohibido"));
@@ -100,10 +92,10 @@ class AiSpeciesEnrichmentControllerWebMvcTest {
 
     mockMvc
         .perform(
-            post("/api/ai/species/enrichment-suggestions")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + JwtDecoderConfigTest.TOKEN_ADMIN)
+            post(ENRICHMENT_PATH)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN_ADMIN)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"scientificName\":\"Quercus ilex\",\"commonName\":\"Encina\"}"))
+                .content(ENRICHMENT_REQUEST_BODY))
         .andExpect(status().isOk())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
         .andExpect(jsonPath("$.synonyms[0]").value("Encina"))
@@ -114,12 +106,10 @@ class AiSpeciesEnrichmentControllerWebMvcTest {
   void suggest_withUnauthorizedRole_returns403Problem() throws Exception {
     mockMvc
         .perform(
-            post("/api/ai/species/enrichment-suggestions")
-                .header(
-                    HttpHeaders.AUTHORIZATION,
-                    "Bearer " + JwtDecoderConfigTest.TOKEN_ROL_NO_AUTORIZADO)
+            post(ENRICHMENT_PATH)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN_ROL_NO_AUTORIZADO)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(VALID_REQUEST_BODY))
+                .content(ENRICHMENT_REQUEST_BODY))
         .andExpect(status().isForbidden())
         .andExpect(jsonPath("$.title").value("Prohibido"));
   }
@@ -128,8 +118,8 @@ class AiSpeciesEnrichmentControllerWebMvcTest {
   void suggest_withInvalidBody_returns400() throws Exception {
     mockMvc
         .perform(
-            post("/api/ai/species/enrichment-suggestions")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + JwtDecoderConfigTest.TOKEN_ADMIN)
+            post(ENRICHMENT_PATH)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN_ADMIN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"scientificName\":\"\",\"commonName\":\"\"}"))
         .andExpect(status().isBadRequest())
@@ -147,17 +137,17 @@ class AiSpeciesEnrichmentControllerWebMvcTest {
 
     mockMvc
         .perform(
-            post("/api/ai/species/enrichment-suggestions")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + JwtDecoderConfigTest.TOKEN_ADMIN)
+            post(ENRICHMENT_PATH)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN_ADMIN)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(VALID_REQUEST_BODY))
+                .content(ENRICHMENT_REQUEST_BODY))
         .andExpect(status().isNotFound())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
         .andExpect(jsonPath("$.title").value("Sin resultado IA"))
         .andExpect(
             jsonPath("$.detail")
                 .value("La IA no devolvió contenido utilizable para la especie solicitada."))
-        .andExpect(jsonPath("$.instance").value("/api/ai/species/enrichment-suggestions"));
+        .andExpect(jsonPath("$.instance").value(ENRICHMENT_PATH));
   }
 
   @Test
@@ -171,10 +161,10 @@ class AiSpeciesEnrichmentControllerWebMvcTest {
 
     mockMvc
         .perform(
-            post("/api/ai/species/enrichment-suggestions")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + JwtDecoderConfigTest.TOKEN_ADMIN)
+            post(ENRICHMENT_PATH)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN_ADMIN)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(VALID_REQUEST_BODY))
+                .content(ENRICHMENT_REQUEST_BODY))
         .andExpect(status().isUnprocessableEntity())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
         .andExpect(jsonPath("$.title").value("Respuesta IA inválida"))
@@ -192,10 +182,10 @@ class AiSpeciesEnrichmentControllerWebMvcTest {
 
     mockMvc
         .perform(
-            post("/api/ai/species/enrichment-suggestions")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + JwtDecoderConfigTest.TOKEN_ADMIN)
+            post(ENRICHMENT_PATH)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + TOKEN_ADMIN)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(VALID_REQUEST_BODY))
+                .content(ENRICHMENT_REQUEST_BODY))
         .andExpect(status().isBadGateway())
         .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
         .andExpect(jsonPath("$.title").value("Proveedor IA no disponible"))

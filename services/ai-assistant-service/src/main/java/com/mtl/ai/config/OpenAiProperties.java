@@ -9,6 +9,7 @@ public record OpenAiProperties(
     String apiKey,
     @DefaultValue("https://api.openai.com") String baseUrl,
     @DefaultValue("gpt-4.1-mini") String enrichmentModel,
+    @DefaultValue("gpt-4.1-mini") String chatModel,
     @DefaultValue("5s") Duration connectTimeout,
     @DefaultValue("60s") Duration readTimeout,
     Retry retry) {

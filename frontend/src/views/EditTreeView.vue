@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, toRef } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import TreeChatDialog from '@/components/chat/TreeChatDialog.vue'
 import SpeciesEnrichmentPopup from '@/components/enrichment/SpeciesEnrichmentPopup.vue'
 import TreeEnrichmentPanel from '@/components/enrichment/TreeEnrichmentPanel.vue'
 import EditTreeGalleryPanel from '@/components/EditTreeGalleryPanel.vue'
@@ -11,6 +12,7 @@ import SpeciesAutocompleteInput from '@/components/SpeciesAutocompleteInput.vue'
 import TreeLocationMapPreview from '@/components/TreeLocationMapPreview.vue'
 import { areLatLngInValidRange } from '@/composables/createTreeFormValidation'
 import { useEditTreeForm } from '@/composables/useEditTreeForm'
+import { useTreeChat } from '@/composables/useTreeChat'
 import { useTreeCreateFlashFromRoute } from '@/composables/useTreeCreateFlashFromRoute'
 import { useTreeLocationAutofill } from '@/composables/useTreeLocationAutofill'
 
@@ -90,6 +92,37 @@ const mongoWarningMessage = computed(() => {
 const showMapMarker = computed(() => areLatLngInValidRange(form))
 const deleteConfirmOpen = ref(false)
 
+const {
+  draft: chatDraft,
+  messages: chatMessages,
+  isLoading: chatIsLoading,
+  error: chatError,
+  canRetry: chatCanRetry,
+  canSendMessage: chatCanSendMessage,
+  isAtThreadLimit: chatIsAtThreadLimit,
+  maxContentLength: chatMaxContentLength,
+  isOpen: chatIsOpen,
+  openChat,
+  closeChat,
+  sendMessage: sendChatTurn,
+  retryLastTurn,
+} = useTreeChat({ treeId })
+
+const chatOpen = computed({
+  get: () => chatIsOpen.value,
+  set: (value: boolean) => {
+    if (value) {
+      openChat()
+    } else {
+      closeChat()
+    }
+  },
+})
+
+function onOpenChat(): void {
+  openChat()
+}
+
 const { applyCoordinatesAndAutofillAddress } = useTreeLocationAutofill({
   form,
   provinces,
@@ -156,7 +189,39 @@ onMounted(async () => {
   <div class="tree-form-page">
     <header class="page-header tree-form-page__header">
       <PageBackLink :to="{ name: 'mis-ejemplares' }">{{ t('treeEdit.backToList') }}</PageBackLink>
-      <h1 class="page-header__title">{{ pageTitle }}</h1>
+      <div class="tree-edit-page__title-row">
+        <h1 class="page-header__title">{{ pageTitle }}</h1>
+        <button
+          v-if="isReady"
+          type="button"
+          class="btn btn-primary-soft btn-sm tree-edit-page__assistant-trigger"
+          data-testid="tree-chat-trigger"
+          :aria-label="t('treeEdit.assistantTriggerAria')"
+          @click="onOpenChat"
+        >
+          <svg
+            class="tree-edit-page__assistant-trigger-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M8 9.5h8M8 13h5"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+            />
+            <path
+              d="M7 18.5 8.5 16H18a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7.5a1.5 1.5 0 0 0 1.5 1.5H7Z"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span>{{ t('treeEdit.assistantTrigger') }}</span>
+        </button>
+      </div>
     </header>
 
     <output
@@ -462,6 +527,20 @@ onMounted(async () => {
       :confirm-danger="true"
       confirm-test-id="tree-delete-confirm"
       @confirm="onConfirmDelete"
+    />
+
+    <TreeChatDialog
+      v-model:open="chatOpen"
+      v-model:draft="chatDraft"
+      :messages="chatMessages"
+      :is-loading="chatIsLoading"
+      :error="chatError"
+      :can-retry="chatCanRetry"
+      :can-send-message="chatCanSendMessage"
+      :is-at-thread-limit="chatIsAtThreadLimit"
+      :max-content-length="chatMaxContentLength"
+      @send="sendChatTurn()"
+      @retry="retryLastTurn()"
     />
   </div>
 </template>

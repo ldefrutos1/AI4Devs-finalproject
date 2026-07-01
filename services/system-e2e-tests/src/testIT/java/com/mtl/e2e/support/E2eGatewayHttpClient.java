@@ -96,18 +96,59 @@ public final class E2eGatewayHttpClient {
   /** POST con cuerpo JSON (correlación {@code e2e-<uuid>} automática). */
   public static HttpResponse<String> post(String pathAndQuery, String jsonBody, String bearerToken)
       throws Exception {
+    return post(pathAndQuery, jsonBody, bearerToken, null);
+  }
+
+  /**
+   * @param correlationId si es {@code null} o vacío, se genera {@code e2e-<uuid>}; si no, se envía tal cual
+   */
+  public static HttpResponse<String> post(
+      String pathAndQuery, String jsonBody, String bearerToken, String correlationId)
+      throws Exception {
+    String corr =
+        correlationId == null || correlationId.isBlank()
+            ? "e2e-" + UUID.randomUUID()
+            : correlationId.trim();
     URI uri = URI.create(E2eGatewayConfig.baseUri() + pathAndQuery);
     HttpRequest.Builder builder =
         HttpRequest.newBuilder(uri)
             .timeout(Duration.ofSeconds(30))
             .header("Accept", "application/json")
             .header("Content-Type", "application/json")
-            .header(E2eCorrelationAssertions.HEADER_NAME, "e2e-" + UUID.randomUUID())
+            .header(E2eCorrelationAssertions.HEADER_NAME, corr)
             .POST(HttpRequest.BodyPublishers.ofString(jsonBody));
     if (bearerToken != null && !bearerToken.isBlank()) {
       builder.header("Authorization", "Bearer " + bearerToken.trim());
     }
     return CLIENT.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+  }
+
+  public static JsonNode postProblem(
+      String pathAndQuery,
+      String jsonBody,
+      String bearerToken,
+      int expectedStatus,
+      String expectedTitle)
+      throws Exception {
+    return postProblem(pathAndQuery, jsonBody, bearerToken, null, expectedStatus, expectedTitle);
+  }
+
+  public static JsonNode postProblem(
+      String pathAndQuery,
+      String jsonBody,
+      String bearerToken,
+      String correlationId,
+      int expectedStatus,
+      String expectedTitle)
+      throws Exception {
+    HttpResponse<String> response = post(pathAndQuery, jsonBody, bearerToken, correlationId);
+    JsonNode problem = E2eProblemAssertions.assertProblem(response, expectedStatus, expectedTitle);
+    if (correlationId != null && !correlationId.isBlank()) {
+      String corr = correlationId.trim();
+      E2eCorrelationAssertions.assertResponseHeader(response, corr);
+      E2eCorrelationAssertions.assertProblemField(problem, corr);
+    }
+    return problem;
   }
 
   /** DELETE (correlación {@code e2e-<uuid>} automática). */

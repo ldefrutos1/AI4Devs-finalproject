@@ -38,7 +38,7 @@ MyTreeLibrary.
 
 ### **1.3. Descripción breve**
 
-MyTreeLibrary es una plataforma colaborativa para registrar árboles singulares con fotos, ubicación y datos de interés, y consultarlos de forma pública. En el MVP, los usuarios con rol de administrador pueden consultar a la IA las características de una especie; la identificación por imagen y el chat quedan para versiones posteriores.
+MyTreeLibrary es una plataforma colaborativa para registrar árboles singulares con fotos, ubicación y datos de interés, y consultarlos de forma pública. En el MVP, los usuarios con rol de administrador pueden consultar a la IA las características de una especie; colaboradores y administradores pueden usar un chat asistido orientativo desde la edición de ficha; la identificación por imagen queda para versiones posteriores.
 
 ### **1.4. Repositorio**
 
@@ -80,7 +80,7 @@ La solución ofrece un sistema de notificaciones para comunicar novedades a usua
 
 #### Integración con IA
 
-En el **MVP**, usuarios con rol de administrador pueden consultar las características de una especie; en versiones futuras se incorporarán la identificación orientativa por imagen y un chat.
+En el **MVP**, usuarios con rol de administrador pueden consultar las características de una especie; colaboradores y administradores autenticados pueden mantener un chat orientativo con el asistente desde la edición de un ejemplar (**UC-06**, **HU-010**); en versiones futuras se incorporará la identificación orientativa por imagen (**HU-009**).
 
 ### **2.2.1. Diagrama de contexto del sistema (C1)**
 
@@ -96,7 +96,7 @@ flowchart TB
 
     KC["🔐 Keycloak<br>Autenticación"]:::soporte
     SMTP["📧 Servidor SMTP<br>Notificaciones"]:::soporte
-    PIA["🧠 Proveedor IA<br>Características especie MVP<br>Identificación y chat futuro"]:::externo
+    PIA["🧠 Proveedor IA<br>Características especie y chat MVP<br>Identificación imagen futuro"]:::externo
     MAP["🗺️ OpenStreetMap<br>Geolocalización"]:::externo
 
     U -->|Usa la aplicación| S
@@ -126,7 +126,7 @@ A continuación se incluye el diagrama de casos de uso del sistema.
 | UC-09 | Notificar por correo a suscriptores | Sistema |
 | UC-10 | Consultar asistente IA características especie | ADMIN |
 
-\* UC-05 y UC-06: quedan fuera del MVP (**HU-009**, **HU-010**).
+\* UC-05: queda fuera del MVP (**HU-009**).
 
 \* UC-04: **COLABORADOR** solo sobre fichas propias; **ADMIN** sobre **cualquier** ficha.
 
@@ -841,14 +841,15 @@ sequenceDiagram
 
 </details>
 
-### **3.2.4. Uso de IA: características de especie (MVP) e identificación/chat (futuro)**
+### **3.2.4. Uso de IA: características de especie y chat asistido (MVP); identificación por imagen (futuro)**
 
-En el MVP la invocación a un LLM externo se ha restringido a la consulta de características de especie, función accesible para usuarios con rol **ADMIN**. El **frontend** invoca **ai-assistant-service** (`POST /api/ai/species/enrichment-suggestions`) pasando el nombre científico y el común; el servicio valida el JSON recibido del LLM (los datos se esperan en el formato definido para el enriquecimiento de especie: referencia [mongo.md](docs/data-model/mongo.md) §6.3) y devuelve un resultado **orientativo** para precargar el popup de enriquecimiento de especie.
+En el MVP la invocación a un LLM externo cubre dos flujos en **ai-assistant-service** (modo `stub` u OpenAI según configuración):
 
-**Simulación LLM:** en local se usa `mtl.ai.provider.mode=stub` para simular el LLM (sin necesidad de una clave OpenAI). Desglose: [HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md).
+
+**Simulación LLM:** en local se puede usar `mtl.ai.provider.mode=stub` para simula el proveedor (sin clave OpenAI).
 
 <details>
-<summary><strong>Desplegar</strong> — Secuencia de consulta IA (MVP)</summary>
+<summary><strong>Desplegar</strong> — Secuencia de consulta IA de especie (MVP)</summary>
 
 Flujo de consulta IA: el frontend precarga el popup con los datos del LLM y **ai-assistant-service** registra la trazabilidad en PostgreSQL (`ai.auditoria_uso_ia`).
 
@@ -1441,7 +1442,7 @@ A continuación se incluye el backlog generado a partir de los casos de uso (§2
 | HU-007 | Aviso por correo al crear ficha | Cerrada |
 | HU-008 | Edición y baja de mis árboles | Cerrada |
 | HU-009 | Identificación orientativa por imagen | Próxima versión |
-| HU-010 | Chat asistido | Próxima versión |
+| HU-010 | Chat asistido | Cerrada |
 | HU-011 | Maestros de catálogo | Cerrada |
 | HU-012 | Gestión de suscripciones | Cerrada |
 | HU-013 | Estructura de páginas, navegación y guardas por rol (MVP) | Cerrada |
