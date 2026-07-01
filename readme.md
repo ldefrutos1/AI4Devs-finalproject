@@ -1,4 +1,4 @@
-﻿## Índice
+## Índice
 
 1. 📋 [Ficha del proyecto](#1-ficha-del-proyecto)
 2. 🌳 [Descripción general del producto](#2-descripción-general-del-producto)
@@ -23,7 +23,7 @@
 6. 📖 [Historias de usuario](#6-historias-de-usuario)
 7. 🎫 [Tickets de trabajo](#7-tickets-de-trabajo)
 8. 🔀 [Pull requests](#8-pull-requests)
-  
+
 ---
 
 ## 1. 📋 Ficha del proyecto
@@ -38,7 +38,7 @@ MyTreeLibrary.
 
 ### **1.3. Descripción breve**
 
-MyTreeLibrary es una plataforma colaborativa para registrar árboles singulares con fotos, ubicación y datos de interés, y consultarlos de forma pública. En el MVP, se habilita la consulta a la IA de características de especie a los usuarios administradores; identificación por imagen y chat quedan para versiones posteriores.
+MyTreeLibrary es una plataforma colaborativa para registrar árboles singulares con fotos, ubicación y datos de interés, y consultarlos de forma pública. En el MVP, los usuarios con rol de administrador pueden consultar a la IA las características de una especie; la identificación por imagen y el chat quedan para versiones posteriores.
 
 ### **1.4. Repositorio**
 
@@ -72,7 +72,7 @@ El sistema permite registrar árboles mediante fichas con información relevante
 
 #### Consulta pública y visualización geográfica
 
-El sistema implementa una consulta pública de los árboles publicados mediante listado y detalle; mostrando en la ficha de detalle las fotografías de cada árbol y su localización sobre mapa de forma clara e intuitiva.
+El sistema implementa una consulta pública de los árboles publicados mediante listado y detalle. La ficha de detalle muestra las fotografías de cada árbol y su localización en el mapa de forma clara e intuitiva.
 
 #### Notificaciones
 
@@ -80,7 +80,7 @@ La solución ofrece un sistema de notificaciones para comunicar novedades a usua
 
 #### Integración con IA
 
-En el **MVP**, usuarios con rol de administrador pueden consultar las características de una especie, para futuras versiones se incorporará la identificación orientativa por imagen y un chat.
+En el **MVP**, usuarios con rol de administrador pueden consultar las características de una especie; en versiones futuras se incorporarán la identificación orientativa por imagen y un chat.
 
 ### **2.2.1. Diagrama de contexto del sistema (C1)**
 
@@ -107,7 +107,7 @@ flowchart TB
 ```
 
 
-### **2.2.2. Diagrama de Casos de Uso del sistema**
+### **2.2.2. Diagrama de casos de uso del sistema**
 
 A continuación se incluye el diagrama de casos de uso del sistema.
 
@@ -130,7 +130,7 @@ A continuación se incluye el diagrama de casos de uso del sistema.
 
 \* UC-04: **COLABORADOR** solo sobre fichas propias; **ADMIN** sobre **cualquier** ficha.
 
-*El Modelo completo se puede consultar en:* [resumen de casos de uso](docs/use-cases/use-case-summary.md) · [modelo PlantUML](docs/use-cases/use-case-model.puml)
+*El modelo completo se puede consultar en:* [resumen de casos de uso](docs/use-cases/use-case-summary.md) · [modelo PlantUML](docs/use-cases/use-case-model.puml)
 
 ### **2.3. Diseño y experiencia de usuario**
 
@@ -220,7 +220,7 @@ La aplicación implementa una navegación simple por roles con una **página de 
   ```bash
   docker compose up -d
   ```
-2. **Backend:** los servicios de backend se arrancan desde la raíz del repo, hay que arrancar **una terminal por microservicio**, con perfil **`dev`** (siempre se debe arrancar **api-gateway** además de los microservicios a probar; se puede consultar qué levantar según el flujo en: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#qué-levantar-según-el-flujo)). Ejemplo con api-gateway y catalog-service:
+2. **Backend:** los servicios de backend se arrancan desde la raíz del repo; hay que abrir **una terminal por microservicio**, con perfil **`dev`** (siempre se debe arrancar **api-gateway** además de los microservicios a probar; se puede consultar qué levantar según el flujo en [local-setup-guide.md](docs/onboarding/local-setup-guide.md#qué-levantar-según-el-flujo)). Ejemplo con api-gateway y catalog-service:
    ```bash
    mvn -f services/pom.xml -pl api-gateway spring-boot:run -Dspring-boot.run.profiles=dev
    mvn -f services/pom.xml -pl catalog-service spring-boot:run -Dspring-boot.run.profiles=dev
@@ -233,11 +233,11 @@ La aplicación implementa una navegación simple por roles con una **página de 
    npm run dev
    ```
 
-Una vez levantados los contenedores y la parte front y back de la aplicación estarán disponibles estas URLs:
+Una vez levantados los contenedores y la aplicación (frontend y backend), quedarán disponibles las siguientes URLs:
    - → **UI** de la aplicación: **http://localhost:5173**
    - → **API Gateway**: **http://localhost:8080**
    - → **Microservicios**: **http://localhost:8081-8084**
-   - → **Keycloak** consola: **http://localhost:8180/** (usuario: admin. NOTA: en la configuración del compose está definido el realm mtl con los usuarios admin_mtl -"ADMIN", "COLABORADOR"- y colaborador -"COLABORADOR"-)
+   - → **Keycloak** consola: **http://localhost:8180/** (usuario: **admin**). En el compose está definido el realm **mtl** con los usuarios **admin_mtl** (roles **ADMIN** y **COLABORADOR**) y **colaborador** (**COLABORADOR**)
    - → **MinIO** consola: **http://localhost:9001/login** (usuario: minio)
    - → **Grafana**: **http://localhost:3000/** (usuario: admin)
    - → **Prometheus**: **http://localhost:9090/targets**
@@ -253,7 +253,9 @@ En desarrollo lo habitual es **infra en Docker** y **aplicación en host** (paso
 
 ### **2.5. Demo del MVP**
 
-**Vídeo** (~10 min): *pendiente* — se añadirá el enlace en este apartado tras la grabación.
+**Vídeo**
+
+C:\Users\ldefr\Videos\Captures\IA4Dev.mp4
 
 | Paso | Qué se muestra |
 |------|----------------|
@@ -261,7 +263,7 @@ En desarrollo lo habitual es **infra en Docker** y **aplicación en host** (paso
 | 2 | Un **colaborador** inicia sesión y da de alta un ejemplar en estado publicado |
 | 3 | Tras el alta, el aviso por correo queda visible en **Mailpit** ([localhost:8025](http://localhost:8025)) |
 | 4 | Un usuario **ADMIN** entra en maestros taxonómicos y en la gestión de suscripciones |
-| 5 | Como **ADMIN**, se pide una sugerencia IA de enriquecimiento de especie (modo `stub`) y se añaden datos semiestructurados que se almacenarán en MongoDB |
+| 5 | Como **ADMIN**, se pide una sugerencia IA de enriquecimiento de especie y se añaden datos semiestructurados que se almacenan en MongoDB |
 
 Usuarios de prueba: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#usuarios-de-prueba-keycloak-solo-local) · [infra/compose/README.md](infra/compose/README.md).
 
@@ -269,7 +271,7 @@ Usuarios de prueba: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#
 
 ## 3. 🏗️ Arquitectura del sistema
 
-**NOTA:** La elección de una arquitectura de microservicios en Java con Spring y Vue tiene un **__propósito didáctico__**, con el fin de aprender estas tecnologías.
+**NOTA:** La elección de una arquitectura de microservicios en Java con Spring y Vue tiene un **propósito didáctico**, con el fin de aprender estas tecnologías.
 
 En esta sección:
 
@@ -301,7 +303,7 @@ La aplicación se desarrolla en microservicios con Spring en la parte de backend
 - **Almacenamiento de imágenes:** Compatible S3 (MinIO)
 - **Observabilidad:** Prometheus + Grafana + logs JSON; métricas vía Actuator/Micrometer en cada microservicio
 
-**Decisiones documentadas ADR:** el Registro de Decisiones de Arquitectura se encuentra en la carpeta [docs/adr](docs/adr/README.md); caben destacar la decisión de descubrimiento y configuración de microservicios **sin Eureka ni Spring Cloud Config** ( las labores son asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md) y la implementación de **observabilidad** ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)).
+**Decisiones documentadas ADR:** el Registro de Decisiones de Arquitectura se encuentra en la carpeta [docs/adr](docs/adr/README.md); caben destacar la decisión de descubrimiento y configuración de microservicios **sin Eureka ni Spring Cloud Config** (las labores son asumidas por Compose/Kubernetes) — [ADR-0001](docs/adr/0001-discovery-y-configuracion-por-orquestador.md) y la implementación de **observabilidad** ([ADR-0005](docs/adr/0005-microservices-observability-spring-boot.md)).
 
 
 #### C2 — Diagrama de contenedores (nivel 2)
@@ -385,7 +387,7 @@ A continuación se detallan los componentes del diagrama C2 (§3.1), propios del
 | **catalog-service** | Spring Boot 4, JPA, Flyway, PostgreSQL, MongoDB, Redis; productor Kafka | Catálogo de ejemplares. |
 | **media-service** | Spring Boot 4, JPA, Flyway, cliente MinIO (API S3) | Almacenamiento de imágenes. |
 | **notification-service** | Spring Boot 4, JPA, Flyway, Spring Kafka, JavaMail | Notificación de novedades. |
-| **ai-assistant-service** | Spring Boot 4 | Comunicación con proveedor IA. |
+| **ai-assistant-service** | Spring Boot 4, JPA, Flyway, PostgreSQL | Comunicación con proveedor IA y auditoría de uso. |
 
 #### Capa de Seguridad e Identificación
 
@@ -398,7 +400,7 @@ A continuación se detallan los componentes del diagrama C2 (§3.1), propios del
 | Componente | Tecnología | Responsabilidad |
 | --- | --- | --- |
 | **Prometheus** | Prometheus 3 (Compose) | Métricas vía `/actuator/prometheus`. |
-| **Grafana** | Grafana 11 (Compose) | Dashboard **MTL Microservices**|
+| **Grafana** | Grafana 11 (Compose) | Dashboard **MTL Microservices** |
 
 #### Capa de almacenamiento
 
@@ -592,12 +594,12 @@ sequenceDiagram
 
 Para el envío de notificaciones a suscriptores el sistema implementa una arquitectura de eventos (Event-Driven Architecture) con Kafka.
 
-Tras el alta de un ejemplar, el envío de correo a suscriptores se realiza de forma asincrona. Después de crear la ficha del ejemplar, **catalog-service** publica un evento en Kafka (`catalog.ejemplar.evento`) y **notification-service** lo recibe para enviar los correos. El formato del mensaje está en [kafka-events.md](docs/events/kafka-events.md).
+Tras el alta de un ejemplar, el envío de correo a suscriptores se realiza de forma asíncrona. Después de crear la ficha del ejemplar, **catalog-service** publica un evento en Kafka (`catalog.ejemplar.evento`) y **notification-service** lo recibe para enviar los correos. El formato del mensaje está en [kafka-events.md](docs/events/kafka-events.md).
 
 <details>
 <summary><strong>Desplegar</strong> — Diagramas C3/C4 productor/consumidor y secuencias Kafka</summary>
 
- Contrato del mensaje: [docs/events/kafka-events.md](docs/events/kafka-events.md). Nomenclatura técnica: [ADR-0006](docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md). Configuración local: [services/README.md](services/README.md) (Kafka).
+Contrato del mensaje: [docs/events/kafka-events.md](docs/events/kafka-events.md). Nomenclatura técnica: [ADR-0006](docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md). Configuración local: [services/README.md](services/README.md) (Kafka).
 
 #### C3 — Productor: **catalog-service**
 
@@ -809,7 +811,7 @@ sequenceDiagram
   participant MS as media_service
   participant OBJ as MinIO_o_S3
 
-  U->>SPA: Alta de arbol con fotos
+  U->>SPA: Alta de árbol con fotos
   SPA->>KC: OIDC login PKCE
   KC-->>SPA: JWT
 
@@ -822,7 +824,7 @@ sequenceDiagram
     GW->>MS: proxy JWT
     MS->>CAT: GET media-submission-permission
     CAT-->>MS: actorUsuarioAppId
-    MS->>MS: validar MIME tamano cupo permiso
+    MS->>MS: validar MIME tamaño cupo permiso
     MS-->>SPA: uploadUrl objectKey
 
     SPA->>OBJ: PUT binario uploadUrl
@@ -841,7 +843,7 @@ sequenceDiagram
 
 ### **3.2.4. Uso de IA: características de especie (MVP) e identificación/chat (futuro)**
 
-En el MVP la invocación a un LLM externo se ha restringido a la consulta de características de especie, función accesible para usuarios con rol **ADMIN**. El **frontend** invoca **ai-assistant-service** (`POST /api/ai/species/enrichment-suggestions`) pasando el nombre científico y el común; el servicio valida el JSON recibido del LLM (los datos se esperan en el formato definido para el enriquecimiento de especie: referencia [mongo.md](docs/data-model/mongo.md) §6.3) y devuelve un resultado **orientativo** para precargar el popup de enriquecimiento de especie. 
+En el MVP la invocación a un LLM externo se ha restringido a la consulta de características de especie, función accesible para usuarios con rol **ADMIN**. El **frontend** invoca **ai-assistant-service** (`POST /api/ai/species/enrichment-suggestions`) pasando el nombre científico y el común; el servicio valida el JSON recibido del LLM (los datos se esperan en el formato definido para el enriquecimiento de especie: referencia [mongo.md](docs/data-model/mongo.md) §6.3) y devuelve un resultado **orientativo** para precargar el popup de enriquecimiento de especie.
 
 **Simulación LLM:** en local se usa `mtl.ai.provider.mode=stub` para simular el LLM (sin necesidad de una clave OpenAI). Desglose: [HU-016-ticket-breakdown.md](docs/backlog/HU-016-ticket-breakdown.md).
 
@@ -875,7 +877,7 @@ sequenceDiagram
   AIS->>PG: INSERT auditoria_uso_ia
   AIS-->>GW: DTO orientativo
   GW-->>SPA: 200 JSON
-  SPA->>SPA: precargar campos edicion sin PUT catalog
+  SPA->>SPA: precargar campos edición sin PUT catalog
 ```
 
 
@@ -918,7 +920,8 @@ proyecto/
 │   ├── commands/             # Commands Cursor
 │   ├── rules/                # Reglas Cursor (API, Spring, seguridad…)
 │   └── skills/               # Skills de encargo, refinamiento HU, BD…
-├── .github/                  # Plantillas de pull request
+├── .github/                  # Plantillas PR (feature-task, fix-chore)
+├── AGENTS.md                 # Índice para agentes IA (skills, canónicos, flujo)
 └── readme.md
 ```
 
@@ -935,13 +938,13 @@ proyecto/
 
 Accesos, puertos en ambos modos y qué servicios levantar por flujo: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#accesos).
 
-**Generación de imágenes:** para la ejecución en Docker es necesario generar previamente las imágenes con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1) y haber levantado la infraestrudtura comenatdada en el punto anterior; tras estos pasos se puede levantar la aplicación con:
+**Generación de imágenes:** para la ejecución en Docker es necesario generar previamente las imágenes con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1) y haber levantado la infraestructura comentada en el punto anterior; tras estos pasos se puede levantar la aplicación con:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
 ```
 
-**Script arranque completo:** existe un script que lanza todos los pasos anteriores (build de iagenes + levantar infra + levantar aplicación): `.\scripts\dev\start-docker-stack.ps1`.
+**Script arranque completo:** existe un script que lanza todos los pasos anteriores (build de imágenes + levantar infra + levantar aplicación): `.\scripts\dev\start-docker-stack.ps1`.
 
 **Observabilidad:** con la aplicación y la infra levantada, Prometheus recoge métricas de cada microservicio vía Actuator y Grafana muestra el dashboard **MTL Microservices**.
 
@@ -1017,16 +1020,16 @@ En **producción**, el tráfico expuesto (SPA, API e IdP) debe ir cifrado con **
 
 La estrategia de tests del sistema contempla los siguientes niveles:
 
-**Test unitarios** — lógica aislada, sin dependencias externas.
+**Tests unitarios** — lógica aislada, sin dependencias externas.
 - **Frontend (Vitest):** composables y componentes con lógica relevante.
 - **Backend (JUnit):** servicios de dominio y reglas de negocio.
 
-**Test de integración** — capas reales contra dependencias gestionadas.
+**Tests de integración** — capas reales contra dependencias gestionadas.
 - **Frontend:** componentes y vistas con stores/servicios mockeados o reales.
 - **Backend:** repositorios y endpoints por capa (Testcontainers: PostgreSQL/Mongo/Kafka).
 
 **Test E2E en dos niveles:**
-- **E2E completo (Playwright)** — pruebas de flujo de usuario completo, que ejercutan frontend y backend de forma conjunta.
+- **E2E completo (Playwright)** — pruebas de flujo de usuario completo que ejercitan frontend y backend de forma conjunta.
 
 - **E2E REST del backend** — pruebas HTTP/JWT de los servicios REST de backend aisladas del UI; cubren el recorrido backend completo (gateway, microservicios, Kafka) y resultan más robustas ante cambios de interfaz.
 
@@ -1049,7 +1052,7 @@ La estrategia de tests del sistema contempla los siguientes niveles:
 
 ## 4. 🛢️ Modelo de datos
 
- El modelado se ha realizado intencionadamente en **el idioma del dominio de negocio** que en este caso es el español. La justificación es que en proyectos que no son internacionales, tiene más sentido modelar en el idioma y la jerga del cliente. Esta decisión presenta un reto de coherencia que ha llevado a la definición del idioma aplicable a cada capa del sistema.
+El modelado se ha realizado intencionadamente en **el idioma del dominio de negocio** que en este caso es el español. La justificación es que en proyectos que no son internacionales, tiene más sentido modelar en el idioma y la jerga del cliente. Esta decisión presenta un reto de coherencia que ha llevado a la definición del idioma aplicable a cada capa del sistema.
 
 **Documentación relacionada:** [Notas de negocio y reglas](docs/data-model/data-model.md) · [Modelo técnico MongoDB (colecciones, validación, índices)](docs/data-model/mongo.md) · [Eventos Kafka](docs/events/kafka-events.md)
 
@@ -1062,7 +1065,7 @@ En esta sección:
 
 El modelo lógico presenta una vista unificada de las entidades principales del sistema y sus relaciones, independientemente del almacén o microservicio (§4.2). Las referencias entre dominios se expresan como **FK lógicas** sin que esto conlleve la implementación de una restricción física real entre los distintos esquemas.
 
-**Usuario de aplicación:** La auditoría de la aplicación se implementa en torno al usuario proporcionado por el token generado por Keycloak como proveedor OIDC. Para evitar duplicidades los diversos esquemas almacenan el identificador estable del proveedor (`sub`) que se guarda en el campo **`subject_oidc`**. En el caso de catalog-service este campo se guarda en una tabla USUARIO_APP con unicidad, no como clave primaria; esto permite trazabilidad sin duplicar la información; las FK de los campos de auditoría `creado_por` y `modificado_por` referencian a la clave primaria de esta tabla. [ADR-0004](docs/adr/0004-catalog-rest-write-and-audit.md).
+**Usuario de aplicación:** La auditoría de la aplicación se implementa en torno al usuario proporcionado por el token generado por Keycloak como proveedor OIDC. Para evitar duplicidades, los diversos esquemas almacenan el identificador estable del proveedor (`sub`) que se guarda en el campo **`subject_oidc`**. En el caso de catalog-service este campo se guarda en una tabla USUARIO_APP con unicidad, no como clave primaria; esto permite trazabilidad sin duplicar la información; las FK de los campos de auditoría `creado_por` y `modificado_por` referencian a la clave primaria de esta tabla. [ADR-0004](docs/adr/0004-catalog-rest-write-and-audit.md).
 
 ```mermaid
 erDiagram
@@ -1174,7 +1177,7 @@ En esta subsección:
 
 #### **4.2.1. PostgreSQL: catalog_service**
 
-Esquema con los datos generales de cada árbol y auditoria del usuario que los registró.
+Esquema con los datos generales de cada árbol y la auditoría del usuario que los registró.
 
 ```mermaid
 erDiagram
@@ -1261,14 +1264,14 @@ erDiagram
     USUARIO_APP ||--o{ AUDITORIA_CATALOGO : actua
 ```
 
-Para el alta de ejemplar, los valores admitidos son:
+En el alta de ejemplar, los valores admitidos son:
 
 - `estado_publicacion`: `BORRADOR` o `PUBLICADO`.
 - `visibilidad_mapa_publico`: `PRIVADO` o `PUBLICO`.
 
 #### **4.2.2. MongoDB (catalog-service; modelo en mongo.md)**
 
-Almacén de **enriquecimiento** con datos semiestructurados complementarios. Se contempla la desnormalización controlada de nombres de especie en MongoDB y PostgreSQL que permitan realizar búsquedas solo en MongoDB. Diseño, índices y validación: [mongo.md](docs/data-model/mongo.md).
+Almacén de enriquecimiento con datos semiestructurados complementarios. Incluye desnormalización controlada de nombres de especie desde PostgreSQL para búsquedas en MongoDB. Diseño, índices y validación: [mongo.md](docs/data-model/mongo.md).
 
 ```mermaid
 erDiagram
@@ -1376,7 +1379,7 @@ erDiagram
 
 #### **4.2.5. PostgreSQL ai_assistant_service (esquema `ai`)**
 
-Tabla de auditoria de las conaultas a IA.
+Auditoría de consultas a IA.
 
 ```mermaid
 erDiagram
@@ -1409,22 +1412,23 @@ La definición de los mensajes en Kafka, el payload y las reglas de publicación
 
 ### **Desarrollo asistido por IA (gobierno del proceso)**
 
-El desarrollo no se apoya en prompts sueltos, sino en **artefactos repetibles**. Para ello se ha partido definiendo las reglas que aplican a cada aspecto del desarrollo [reglas del repositorio](.cursor/rules/) y el backlog de la aplicación [backlog.md](docs/backlog/backlog.md) a partir de los casos de uso, de la descripción del sistema y del modelo de datos. En el flujo habitual se refinan las HU del Backlog. Después se hace el desglose en tickets  en los que se incluyen las **Reglas aplicables por capa** que deben implementarse en cada TASK del breakdown.
+El desarrollo no se apoya en prompts sueltos, sino en **artefactos repetibles**. Para ello se han definido las [reglas del repositorio](.cursor/rules/), el backlog [backlog.md](docs/backlog/backlog.md) y un índice operativo para agentes IA en [AGENTS.md](AGENTS.md). El flujo detallado está en [ai-development-playbook.md](docs/onboarding/ai-development-playbook.md). A partir de casos de uso, descripción del sistema y modelo de datos se refinan las HU y se desglosan en tickets con **Reglas aplicables por capa** por TASK.
 
+El detalle del ciclo por historia se resume en:
 
-El detalle del refinamiento y desglose de cada HU se puede resumir en los siguientes pasos:
-- 1.- Generación de la Historia de Usuario a partir del backlog con la skill [`hu-refinement-mtl`](.cursor/skills/hu-refinement-mtl/SKILL.md)
-- 2.- Análisis del documento generado
-- 3.- Aclaración, definición y/o corrección de los puntos detectados en los apartados de Riesgos y Aclaraciones pendientes (refinamiento)
-- 4.- Generación de los tickets de trabajo con la skill [`hu-breakdown-mtl`](.cursor/skills/hu-breakdown-mtl/SKILL.md)
+- 1. Refinamiento de la HU con la skill [`hu-refinement-mtl`](.cursor/skills/hu-refinement-mtl/SKILL.md) (mensaje breve con `HU-XXX`)
+- 2. Análisis del documento generado (`docs/backlog/HU-XXX-*.md`)
+- 3. Cierre de riesgos y **Aclaraciones pendientes** (refinamiento humano)
+- 4. Desglose en tickets con [`hu-breakdown-mtl`](.cursor/skills/hu-breakdown-mtl/SKILL.md) (`HU-*-ticket-breakdown.md`)
+- 5. Implementación de cada TASK con [`encargo-mtl`](.cursor/skills/encargo-mtl/SKILL.md): mensaje mínimo (`TASK-HU-XXX-nn` + `@` al breakdown); el agente completa objetivo, alcance y definición de hecho desde el breakdown. Encargo completo solo en TASKs complejos (véase la skill y [hu-breakdown-and-encargo.md](docs/ai-process-evidence/hu-breakdown-and-encargo.md))
 
-Por operativa práctica, al comienzo de la historia se hacen unas comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.
+Por cuestiones operativas, al comienzo de la historia se hacen comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.
 
-La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada `docs/backlog/HU-*.md`, redactar y revisar la especificación de cada TASK antes de implementar, pedir al agente una **revisión explícita** tras cada TASK (contra las reglas citadas en el breakdown), y confirmar tests y PR antes del merge.
+La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada `docs/backlog/HU-*.md`, validar el alcance de cada TASK antes de implementar, pedir al agente una **revisión explícita** tras cada TASK, contra las reglas del breakdown, y confirmar tests y PR antes del merge.
 
-**Evidencia del proceso**: se pueden ver ejemplos del proceso seguido en [docs/ai-process-evidence/](docs/ai-process-evidence/README.md). Muestra representativa por fase del ciclo de vida: [prompts.md](prompts.md). 
+**Evidencia del proceso:** hay ejemplos del proceso en [docs/ai-process-evidence/](docs/ai-process-evidence/README.md). Muestra representativa por fase del ciclo de vida: [prompts.md](prompts.md).
 
-A continuación se incluye el Backlog generado a partir de los casos de uso (§2.2.2) y del modelo de datos. Documentación completa (historias, criterios y tickets): [backlog.md](docs/backlog/backlog.md).
+A continuación se incluye el backlog generado a partir de los casos de uso (§2.2.2) y del modelo de datos. Documentación completa (historias, criterios y tickets): [backlog.md](docs/backlog/backlog.md).
 
 | ID | Título | Estado |
 |----|--------|--------|
@@ -1444,12 +1448,14 @@ A continuación se incluye el Backlog generado a partir de los casos de uso (§2
 | HU-014 | Consulta de fotografías del árbol | Cerrada |
 | HU-015 | Proyección y enriquecimiento Mongo | Cerrada |
 | HU-016 | Consulta de características de especie (ADMIN, MVP) | Cerrada |
- 
+
 ---
 
 ## 7. 🎫 Tickets de trabajo
 
-Como se ha comentado en el punto anterior, para mantener formato homogéneo se usa la skill [hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md) (desglose en tickets). Lo habitual es invocarla con un mensaje breve; la skill genera el fichero `HU-*-ticket-breakdown.md` en `docs/backlog/`. Al implementar cada TASK, el mensaje al agente suele ser más detallado (estructura [encargo-mtl](.cursor/skills/encargo-mtl/SKILL.md) rellena para ese ticket).
+El desglose homogéneo usa la skill [hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md): un mensaje breve con `HU-XXX` genera `docs/backlog/HU-*-ticket-breakdown.md` con orden, dependencias y **Reglas aplicables por capa**.
+
+La implementación de cada TASK sigue [encargo-mtl](.cursor/skills/encargo-mtl/SKILL.md): la especificación vive en el breakdown; lo habitual es un **mensaje mínimo** (`Implementa TASK-HU-XXX-nn` + enlace al breakdown) y que el agente estructure el encargo. Resumen del flujo de skills: [AGENTS.md](AGENTS.md) § «Cómo encargar trabajo al agente».
 
 En la generación de tickets de trabajo se incluye explícitamente una sección con las reglas de Cursor que debe aplicar el agente de IA al implementarlos.
 
@@ -1461,13 +1467,13 @@ En la generación de tickets de trabajo se incluye explícitamente una sección 
 
 Para el trabajo con GitHub se ha definido una estrategia sencilla de ramas — detalle en [docs/onboarding/github-branching.md](docs/onboarding/github-branching.md).
 
-Las pull requests usan la plantilla [`.github/pull_request_template.md`](.github/pull_request_template.md) (GitHub la inserta al crear el PR).
+Las pull requests usan plantillas en [`.github/PULL_REQUEST_TEMPLATE/`](.github/PULL_REQUEST_TEMPLATE/) (**feature-task** para HU/TASK, **fix-chore** para correcciones y mantenimiento); GitHub muestra un desplegable al crear el PR.
 
 En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), calidad frontend (`lint`, `typecheck`, Vitest) y escaneo de secretos (Gitleaks) — workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
 Adicionalmente, en cada PR, se lanza una revisión adicional desde **Codex**.
 
-Hay definidos dos **GitHub Actions** adicionales que se lanzan de forma manual: E2E Playwright y auditoría de dependencias ([docs/engineering/devsecops-ci.md](docs/engineering/devsecops-ci.md)).
+Existen dos workflows de **GitHub Actions** adicionales que se ejecutan manualmente: E2E Playwright y auditoría de dependencias ([docs/engineering/devsecops-ci.md](docs/engineering/devsecops-ci.md)).
 
 **Evidencia (PRs documentados):** ejemplos HU-004 y HU-008 en [pull-request-examples.md](docs/ai-process-evidence/pull-request-examples.md).
 

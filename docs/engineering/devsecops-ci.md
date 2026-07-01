@@ -111,7 +111,7 @@ Opcional en el repo: secret `NVD_API_KEY` (acelera OWASP en CI).
 
 ## Pull requests
 
-Checklist DevSecOps en [.github/pull_request_template.md](../../.github/pull_request_template.md).
+Checklist DevSecOps en [.github/PULL_REQUEST_TEMPLATE/feature-task.md](../../.github/PULL_REQUEST_TEMPLATE/feature-task.md) (PRs `feature/`) o el checklist mínimo en [fix-chore.md](../../.github/PULL_REQUEST_TEMPLATE/fix-chore.md).
 
 ## Referencias
 

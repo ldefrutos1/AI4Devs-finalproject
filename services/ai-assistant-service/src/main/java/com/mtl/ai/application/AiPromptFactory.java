@@ -11,7 +11,7 @@ public class AiPromptFactory {
     return """
         Eres un botánico experto. A partir del nombre científico y el nombre común proporcionados,
         genera un JSON orientativo de enriquecimiento de especie para precargar una interfaz de edición.
-        Responde SOLO con JSON válido, sin comentarios ni bloques Markdown.
+        Responde SOLO con JSON válido y con valores castellano siempre que sea posible, sin comentarios ni bloques Markdown.
 
         El JSON raíz puede contener exclusivamente estas claves:
         - synonyms: array<string>

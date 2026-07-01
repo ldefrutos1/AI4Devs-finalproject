@@ -9,7 +9,7 @@ Guía breve para trabajar con IA en este repo sin perder trazabilidad ni coheren
 3. Desglosar en tickets con `hu-breakdown-mtl` (incluye **Reglas aplicables por capa** en el breakdown).
 4. Implementar tickets por orden y dependencias (ideal: **un PR = un TASK**), con [encargo-mtl](../../.cursor/skills/encargo-mtl/SKILL.md) relleno por TASK.
 5. **Validar** lo implementado: pedir al agente una **revisión explícita** de que el cambio cumple las normas del proyecto (ver § siguiente).
-6. Abrir PR con sección **Trazabilidad** completa ([plantilla](../../.github/pull_request_template.md)).
+6. Abrir PR con plantilla **feature-task** ([.github/PULL_REQUEST_TEMPLATE/feature-task.md](../../.github/PULL_REQUEST_TEMPLATE/feature-task.md)) o **fix-chore** si aplica.
 7. Tras merge: ticket(s) → **Hecho** en el breakdown; actualizar **Estado** de la HU en `backlog.md` §3.
 
 ## Validación contra reglas del proyecto

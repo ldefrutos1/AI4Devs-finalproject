@@ -61,13 +61,13 @@ Los `application-dev.properties` de los servicios con JDBC usan `jdbc:postgresql
 
 1. **Infra de apoyo** (Postgres, Mongo, Redis, MinIO, Kafka, Keycloak, Mailpit, Prometheus, Grafana): [infra/compose/README.md](../infra/compose/README.md) — `docker compose up -d` desde `infra/compose/` con `.env` copiado de `.env.example`.
 2. **Microservicios** con perfil **`dev`** (no está fijado en `application.properties`; actívalo con `SPRING_PROFILES_ACTIVE=dev`, `--spring.profiles.active=dev` o Maven `-Dspring-boot.run.profiles=dev`): conexión a Postgres según el punto anterior; usuario/contraseña como en `.env` / `.env.example` (p. ej. `mtl` / `mtl_dev_password`).
-3. **Flyway** (servicios con SQL bajo `services/`): scripts **solo** en **`src/main/resources/db/migration/`** (convención `V1__….sql`, `V2__….sql`, …). No hay otra carpeta obligatoria bajo `db/` para el arranque. En **Spring Boot 4** hace falta **`spring-boot-starter-flyway`**. En **catalog-service**: DDL único en `V1__baseline.sql` (tablas, `unaccent`, CHECK e índice parcial de `ejemplar`, secuencia Kafka); semillas en `V2__seed_maestros_inicial.sql`. En **media-service** y **notification-service**: DDL único en `V1__baseline.sql`. No reescribas migraciones ya desplegadas en compartido; añade siempre una versión nueva.
+3. **Flyway** (servicios con SQL bajo `services/`): scripts **solo** en **`src/main/resources/db/migration/`** (convención `V1__….sql`, `V2__….sql`, …). No hay otra carpeta obligatoria bajo `db/` para el arranque. En **Spring Boot 4** hace falta **`spring-boot-starter-flyway`**. En **catalog-service**: DDL único en `V1__baseline.sql` (tablas, `unaccent`, CHECK e índice parcial de `ejemplar`, secuencia Kafka); semillas en `V2__seed_maestros_inicial.sql`. En **media-service** y **notification-service**: DDL único en `V1__baseline.sql`. En **ai-assistant-service**: esquema `ai` en `V1__baseline.sql`; tabla `auditoria_uso_ia` en `V2__create_auditoria_uso_ia.sql`. No reescribas migraciones ya desplegadas en compartido; añade siempre una versión nueva.
 
 **Si Flyway ya aplicó versiones antiguas y has cambiado `V1`/`V2`:** en desarrollo, reset de esquema o volumen — [docs/engineering/flyway-dev-reset.md](../docs/engineering/flyway-dev-reset.md).
 
 4. **Tests:** **`mvn test`** (Surefire, p. ej. catálogo con H2). **`mvn verify`** añade Failsafe (`*IT` en `testIT`). En **catalog-service** y **notification-service**, los IT con Testcontainers se **omiten** sin Docker (no rompen el build); detalle y JWT de prueba: [testing-java.md](../docs/engineering/testing-java.md) §4 y "Docker y IT". Dónde colocar properties y scripts de IT en classpath: **§1** del mismo doc. Lanzar una clase: **§7** del mismo doc.
 
-**Puertos HTTP locales (MVP esqueleto)**
+**Puertos HTTP locales (desarrollo)**
 
 | Módulo | Puerto |
 |--------|--------|
