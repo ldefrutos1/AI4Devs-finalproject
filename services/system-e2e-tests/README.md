@@ -7,7 +7,7 @@ HTTP contra el **API Gateway** y microservicios reales (JWT Keycloak, sin WireMo
 
 ## Requisitos
 
-Stack según [services/README.md](../README.md): Keycloak, PostgreSQL (Flyway catálogo, semilla maestros), **catalog-service** (8081), **api-gateway** (8080), perfil `dev`. Para `EjemplarLifecycleGatewayE2EIT` añade **media-service** (8082): el borrado del ejemplar llama a media en cascada.
+Stack según [services/README.md](../README.md): Keycloak, PostgreSQL (Flyway catálogo, semilla maestros), **catalog-service** (8081), **api-gateway** (8080), perfil `dev`. Para `EjemplarLifecycleGatewayE2EIT` añade **media-service** (8082): el borrado del ejemplar llama a media en cascada. Para **HU-010** (`Hu010Scenario01…`) añade **ai-assistant-service** (8084) con `mtl.ai.provider.mode=stub` (o proveedor configurado).
 
 El `iss` del token debe coincidir con `MTL_JWT_ISSUER_URI` (por defecto `http://localhost:8180/realms/mtl`); no mezclar `localhost` y `127.0.0.1` al obtener el token.
 
@@ -33,6 +33,7 @@ Desde `services/`:
 ```powershell
 $env:MTL_E2E_AUTO_KEYCLOAK_TOKEN = "true"
 mvn -pl system-e2e-tests "-Dit.test=Hu001Scenario*" verify          # HU-001 esc. 2–4
+mvn -pl system-e2e-tests "-Dit.test=Hu010Scenario*" verify          # HU-010 esc. 1 y 3 (Java)
 mvn -pl system-e2e-tests verify                                      # + maestros (CatalogMasters…)
 ```
 
@@ -50,8 +51,10 @@ mvn -pl system-e2e-tests verify
 | `Hu001Scenario04…` | Esc. 4: COLABORADOR → `families`, `species/1` → **403** (id `1` en semilla) |
 | `CatalogMastersGatewayE2EIT` | Maestros species/provinces, búsqueda `q` / `unaccent` |
 | `EjemplarLifecycleGatewayE2EIT` | Ciclo completo del ejemplar por HTTP: alta `POST` → consulta en "mis árboles" `GET` → borrado `DELETE` (204) → ausencia. Complementa el E2E de UI (Playwright `e2e/`). Requiere **media-service** arriba |
+| `Hu010Scenario01…` | **HU-010** esc. 1 (Java): `POST /api/ai/chat/messages` con `treeId` → **200** respuesta orientativa |
+| `Hu010Scenario03…` | **HU-010** esc. 3 (Java): sin Bearer / Bearer inválido → **401** Problem + correlación |
 
-Tags: `hu001`, `hu001-s0N`. Convención Maven/IT: [testing-java.md](../../docs/engineering/testing-java.md).
+Tags: `hu001`, `hu001-s0N`, `hu010`, `hu010-s0N`. Convención Maven/IT: [testing-java.md](../../docs/engineering/testing-java.md).
 
 ## Postman (gateway + maestros catálogo)
 

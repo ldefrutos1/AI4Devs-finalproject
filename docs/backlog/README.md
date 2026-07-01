@@ -12,7 +12,7 @@ Esta carpeta contiene el [backlog resumido](backlog.md) y, para cada historia de
 | `HU-<id>` | Identificador de la historia en [backlog.md](backlog.md) (p. ej. `HU-001`, `HU-004`). |
 | `ticket-breakdown` | Sufijo fijo: desglose en tickets/tareas técnicas vinculadas a esa HU. |
 
-Ejemplos: `HU-004-ticket-breakdown.md`, `HU-016-ticket-breakdown.md` (HU cerrada). Sin breakdown aún: `HU-010-ticket-breakdown.md`.
+Ejemplos: `HU-004-ticket-breakdown.md`, `HU-010-ticket-breakdown.md`, `HU-016-ticket-breakdown.md` (HU cerrada).
 
 ## Contenido esperado de cada `HU-*-<nombre>.md` (refinamiento)
 

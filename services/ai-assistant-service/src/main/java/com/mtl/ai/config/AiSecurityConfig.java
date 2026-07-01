@@ -34,6 +34,8 @@ public class AiSecurityConfig {
                     .permitAll()
                     .requestMatchers("/api/ai/species/enrichment-suggestions")
                     .hasRole("ADMIN")
+                    .requestMatchers("/api/ai/chat/messages")
+                    .hasAnyRole("COLABORADOR", "ADMIN")
                     .anyRequest()
                     .authenticated())
         .exceptionHandling(

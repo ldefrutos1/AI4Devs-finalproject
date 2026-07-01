@@ -28,7 +28,9 @@ tags:
   - name: notifications
     description: Suscripciones y notificaciones (notification-service)
   - name: ai
-    description: Consulta orientativa de enriquecimiento de especie con IA (ai-assistant-service, HU-016)
+    description: >
+      Servicios de IA orientativa (ai-assistant-service): enriquecimiento de especie para **ADMIN**
+      (**HU-016**) y chat conversacional para **COLABORADOR** / **ADMIN** desde edición de ficha (**HU-010**).
   - name: media
     description: Metadatos de fotografías y subida a almacén objeto (media-service)
 
@@ -1143,6 +1145,48 @@ paths:
         "502":
           $ref: "#/components/responses/ProblemBadGateway"
 
+  /api/ai/chat/messages:
+    post:
+      tags: [ai]
+      summary: Enviar turno de chat con el asistente IA (HU-010)
+      description: >
+        Solo **COLABORADOR** o **ADMIN** (**401** sin JWT; **403** para otros roles). Turno conversacional
+        **stateless**: el cliente reenvía el hilo acumulado en `messages[]`; el servidor procesa el turno,
+        devuelve la respuesta del asistente y registra **AUDITORIA_USO_IA** con `tipo_uso_ia` = `chat-message`
+        y `ejemplar_id` = `treeId`. **`treeId` no** se envía al proveedor IA. **`conversationId`** (UUID v4)
+        correlaciona auditoría y logs; el servidor no persiste conversaciones. Copy de producto: resultado
+        orientativo, no veredicto científico ([product-context](../../.cursor/rules/product-context.mdc)).
+        **429** por rate limit (máx. 40 turnos/hora por usuario, mínimo 2 s entre peticiones). **502** si el
+        proveedor IA falla tras reintentos (mismo criterio que **HU-016**). Código **422** reservado para
+        moderación de contenido; fuera de alcance MVP.
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/CorrelationId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiChatMessageRequest"
+      responses:
+        "200":
+          description: Turno procesado; respuesta del asistente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiChatMessageResponse"
+        "400":
+          $ref: "#/components/responses/ProblemBadRequest"
+        "401":
+          $ref: "#/components/responses/ProblemUnauthorized"
+        "403":
+          $ref: "#/components/responses/ProblemForbidden"
+        "429":
+          $ref: "#/components/responses/ProblemTooManyRequests"
+        "502":
+          $ref: "#/components/responses/ProblemBadGateway"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1919,6 +1963,81 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/BibliographicReference"
+    AiChatMessageRequest:
+      type: object
+      required: [conversationId, treeId, messages]
+      description: >
+        Entrada de `POST /api/ai/chat/messages` (**HU-010**). Hilo conversacional reenviado por el cliente
+        en cada turno; el último elemento de `messages` debe ser `role` = `user` con `content` no vacío
+        (tras trim). Máximo 20 mensajes (~10 intercambios usuario↔asistente) por petición.
+      additionalProperties: false
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+          description: >
+            UUID v4 generado por el cliente al abrir el chat; se reenvía en cada turno para correlación
+            en auditoría y logs. El servidor no valida existencia previa ni almacena el hilo.
+        treeId:
+          type: integer
+          format: int64
+          minimum: 1
+          description: >
+            Identificador del ejemplar en edición (`EditTreeView`); se persiste como `ejemplar_id` en
+            auditoría. No se incluye en el prompt al proveedor IA.
+        messages:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/AiChatTurn"
+          description: >
+            Turnos previos más el mensaje nuevo del usuario, en orden cronológico. El último elemento debe
+            ser `role` = `user`.
+    AiChatTurn:
+      type: object
+      required: [role, content]
+      description: Un turno del hilo conversacional (`user` o `assistant`).
+      additionalProperties: false
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Texto del turno; máximo 2 000 caracteres.
+    AiChatMessageResponse:
+      type: object
+      required: [conversationId, message]
+      description: Salida de `POST /api/ai/chat/messages` (**HU-010**).
+      additionalProperties: false
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+          description: Eco del identificador de conversación enviado en la petición.
+        message:
+          $ref: "#/components/schemas/AiChatAssistantMessage"
+    AiChatAssistantMessage:
+      type: object
+      required: [role, content, createdAt]
+      description: Respuesta del asistente para el turno procesado.
+      additionalProperties: false
+      properties:
+        role:
+          type: string
+          enum: [assistant]
+        content:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: Texto orientativo del asistente.
+        createdAt:
+          type: string
+          format: date-time
+          description: Marca temporal UTC de generación de la respuesta en el servidor.
     AiSpeciesEnrichmentSuggestionRequest:
       type: object
       required: [scientificName, commonName]
@@ -2609,6 +2728,14 @@ components:
             $ref: "#/components/schemas/Problem"
     ProblemBadGateway:
       description: Error al contactar con un servicio aguas arriba
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    ProblemTooManyRequests:
+      description: >
+        Demasiadas peticiones (p. ej. rate limit de chat **HU-010**: máx. 40 turnos/hora por usuario,
+        mínimo 2 s entre peticiones consecutivas del mismo `subject_oidc`).
       content:
         application/problem+json:
           schema:

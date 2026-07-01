@@ -249,3 +249,16 @@ Checklist minimo al crear o alinear un servicio MVC:
 - **Respuestas de error:** **404** (sin contenido IA utilizable), **422** (JSON no válido tras LLM), **502** (proveedor no disponible); Problem Details con copy orientativo.
 - **Tests automáticos:** `mvn -f services/pom.xml -pl ai-assistant-service test verify`; gateway: `mvn -f services/pom.xml -pl api-gateway verify -Dit.test=GatewayAiProxyJwtIT`.
 - **Verificación manual:** [frontend/README.md](../frontend/README.md) (apartado HU-016); desglose [HU-016-ticket-breakdown.md](../docs/backlog/HU-016-ticket-breakdown.md).
+
+**Chat asistido colaborador (HU-010):**
+
+- **Servicio:** **ai-assistant-service** (**8084**), mismo esquema **`ai`** / **`AUDITORIA_USO_IA`** que **HU-016**.
+- **Gateway:** `POST /api/ai/chat/messages` con JWT (proxy a **8084**). Contrato: [openapi.yaml](../docs/api/openapi.yaml).
+- **Seguridad:** roles realm **COLABORADOR** o **ADMIN** (**403** para otros; **401** sin JWT). **HU-016** (`/api/ai/species/enrichment-suggestions`) sigue **solo ADMIN**.
+- **Alcance del servicio:** turno conversacional **stateless**; el cliente reenvía `messages[]`; respuesta textual **orientativa** (OpenAI Responses / **`stub`**). **`treeId`** solo para `ejemplar_id` en auditoría; **no** va al LLM ni se llama a **catalog-service**. Sin persistencia de hilos en servidor.
+- **Rate limit (MVP):** en memoria por instancia — máx. **40 turnos/hora** por `subject_oidc` (ventana deslizante) y mínimo **2 s** entre peticiones del mismo usuario → **429** Problem Details. En clúster multi-réplica el límite efectivo puede ser algo mayor (ver javadoc de `ChatMessageRateLimiter`).
+- **Modo local:** mismo `mtl.ai.provider.mode=stub` que **HU-016**; modelo chat configurable con `mtl.ai.openai.chat-model`.
+- **Respuestas de error:** **400** (validación de hilo, tamaños, `treeId`, `conversationId`), **429** (rate limit), **502** (proveedor no disponible); Problem Details con copy orientativo.
+- **Auditoría:** invocaciones exitosas registran **AUDITORIA_USO_IA** con `tipo_uso_ia` = `chat-message`, `ejemplar_id` = `treeId`, resumen de prompt/hilo y `conversationId` en `resultado_resumen`.
+- **Tests automáticos:** `mvn -f services/pom.xml -pl ai-assistant-service test verify`; gateway: `mvn -f services/pom.xml -pl api-gateway verify -Dit.test=GatewayAiProxyJwtIT` (incluye relay JWT del chat). E2E Java opcional: `mvn -f services/pom.xml -pl system-e2e-tests "-Dit.test=Hu010Scenario*" verify` (requiere stack + token colaborador; ver [system-e2e-tests/README.md](system-e2e-tests/README.md)).
+- **Verificación manual:** [frontend/README.md](../frontend/README.md) (apartado HU-010); desglose [HU-010-ticket-breakdown.md](../docs/backlog/HU-010-ticket-breakdown.md).

@@ -11,6 +11,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import com.mtl.ai.config.OpenAiProperties;
 import com.mtl.ai.exception.AiAssistantException;
 import java.time.Duration;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ class OpenAiResponsesClientTest {
         new OpenAiProperties(
             "test-api-key",
             "https://api.openai.com",
+            "gpt-4.1-mini",
             "gpt-4.1-mini",
             Duration.ofSeconds(2),
             Duration.ofSeconds(5),
@@ -116,5 +118,40 @@ class OpenAiResponsesClientTest {
     assertThatThrownBy(() -> client.createJsonObjectResponse("gpt-4.1-mini", "prompt json"))
         .isInstanceOf(AiAssistantException.class)
         .hasMessageContaining("proveedor");
+  }
+
+  @Test
+  void createTextResponse_returnsExtractedText() {
+    server
+        .expect(requestTo("https://api.openai.com/v1/responses"))
+        .andExpect(method(HttpMethod.POST))
+        .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer test-api-key"))
+        .andRespond(
+            withSuccess(
+                """
+                {
+                  "status": "completed",
+                  "output": [
+                    {
+                      "type": "message",
+                      "content": [
+                        {
+                          "type": "output_text",
+                          "text": "Respuesta orientativa del asistente."
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """,
+                MediaType.APPLICATION_JSON));
+
+    String text =
+        client.createTextResponse(
+            "gpt-4.1-mini",
+            "system prompt",
+            List.of(new OpenAiResponsesRequest.InputMessage("user", "Hola")));
+
+    assertThat(text).isEqualTo("Respuesta orientativa del asistente.");
   }
 }

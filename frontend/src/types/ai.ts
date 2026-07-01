@@ -17,3 +17,38 @@ export type AiSpeciesEnrichmentSuggestionResponse = SpeciesEnrichmentReplaceRequ
   ecologicalData?: Record<string, unknown>
   references?: BibliographicReference[]
 }
+
+/** Rol de un turno conversacional (`POST /api/ai/chat/messages`, HU-010). */
+export type ChatRole = 'user' | 'assistant'
+
+/** Un turno del hilo conversacional (HU-010). */
+export interface AiChatTurn {
+  role: ChatRole
+  content: string
+}
+
+/** Entrada de `POST /api/ai/chat/messages` (HU-010). */
+export interface AiChatMessageRequest {
+  conversationId: string
+  treeId: number
+  messages: AiChatTurn[]
+}
+
+/** Respuesta del asistente para un turno procesado (HU-010). */
+export interface AiChatAssistantMessage {
+  role: 'assistant'
+  content: string
+  createdAt: string
+}
+
+/** Salida de `POST /api/ai/chat/messages` (HU-010). */
+export interface AiChatMessageResponse {
+  conversationId: string
+  message: AiChatAssistantMessage
+}
+
+/** Máximo de turnos por petición (OpenAPI HU-010). */
+export const AI_CHAT_MAX_MESSAGES = 20
+
+/** Máximo de caracteres por `content` (OpenAPI HU-010). */
+export const AI_CHAT_MAX_CONTENT_LENGTH = 2000

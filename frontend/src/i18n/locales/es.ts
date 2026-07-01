@@ -467,6 +467,8 @@ export const es = {
   treeEdit: {
     title: 'Edición Id {id}',
     titleInvalid: 'Edición de árbol',
+    assistantTrigger: 'Asistente IA',
+    assistantTriggerAria: 'Abrir asistente de chat para esta ficha',
     description: 'Modifica los datos de la ficha, la galería fotográfica y la ubicación en mapa.',
     loading: 'Cargando ficha para edición...',
     backToList: 'Volver a mis árboles',
@@ -747,6 +749,42 @@ export const es = {
         'El catálogo no está disponible. Arranca catalog-service o revisa el API Gateway.',
       serviceError: 'Error en el servicio.',
       unexpectedError: 'No se pudo completar la operación por un error inesperado.',
+    },
+  },
+  chat: {
+    dialog: {
+      title: 'Asistente IA',
+      orientativeNotice:
+        'Las respuestas son orientativas y no sustituyen el criterio del colaborador.',
+      close: 'Cerrar',
+      closeAria: 'Cerrar asistente de chat',
+      send: 'Enviar',
+      sending: 'Enviando…',
+      retry: 'Reintentar',
+      loading: 'El asistente está respondiendo…',
+      emptyThread: 'Pregunta sobre la ficha o el proceso de edición. El historial se reinicia al cerrar este panel.',
+      threadLimit: 'Has alcanzado el máximo de mensajes de esta conversación.',
+      inputLabel: 'Tu mensaje',
+      inputPlaceholder: 'Escribe tu consulta…',
+      roles: {
+        user: 'Tú',
+        assistant: 'Asistente',
+      },
+    },
+    ai: {
+      errors: {
+        networkError:
+          'No se pudo conectar con el asistente IA. Verifica tu conexión o que ai-assistant-service esté en marcha.',
+        unauthorized: 'Tu sesión no es válida o ha caducado. Inicia sesión de nuevo.',
+        badRequest: 'El mensaje no es válido para el chat.',
+        forbidden: 'No tienes permiso para usar el asistente de chat.',
+        tooManyRequests:
+          'Has alcanzado el límite de mensajes. Espera unos segundos antes de volver a intentarlo.',
+        badGateway:
+          'El asistente IA no está disponible. Arranca ai-assistant-service o revisa el API Gateway.',
+        serviceError: 'Error en el servicio de chat IA.',
+        unexpectedError: 'No se pudo completar el mensaje por un error inesperado.',
+      },
     },
   },
 } as const

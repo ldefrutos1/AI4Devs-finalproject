@@ -74,8 +74,9 @@ note right of UC5
 end note
 
 note right of UC6
-  **Próxima versión** (HU-010):
-  chat asistido.
+  **MVP** (HU-010):
+  chat asistido en
+  edición de ficha.
 end note
 
 
