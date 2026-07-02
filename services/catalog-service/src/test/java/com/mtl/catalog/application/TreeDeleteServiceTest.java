@@ -1,8 +1,12 @@
 package com.mtl.catalog.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +19,7 @@ import com.mtl.catalog.exception.CatalogNotFoundException;
 import com.mtl.catalog.infrastructure.persistence.jpa.repository.EjemplarRepository;
 import java.math.BigDecimal;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +32,20 @@ class TreeDeleteServiceTest {
   @Mock private EjemplarRepository ejemplarRepository;
   @Mock private EjemplarEnrichmentDeletionPort ejemplarEnrichmentDeletionPort;
   @Mock private CatalogAuditService catalogAuditService;
+  @Mock private AfterCommitTaskRegistrar afterCommitTaskRegistrar;
   @InjectMocks private EjemplarDeleteService ejemplarDeleteService;
+
+  @BeforeEach
+  void ejecutaTareaTrasCommitDeInmediatoEnTests() {
+    lenient()
+        .doAnswer(
+            inv -> {
+              inv.getArgument(0, Runnable.class).run();
+              return null;
+            })
+        .when(afterCommitTaskRegistrar)
+        .runAfterCommit(any(Runnable.class));
+  }
 
   @Test
   void authorize_ownerCollaborator_returnsContext() {
@@ -57,6 +75,21 @@ class TreeDeleteServiceTest {
 
     verify(ejemplarRepository).deleteById(42L);
     verify(ejemplarEnrichmentDeletionPort).deleteEnrichmentForEjemplar(42L);
+    verify(catalogAuditService).recordEjemplarDeleted(eq(7L), eq(42L), eq(10L), eq(28L));
+  }
+
+  @Test
+  void commitPhysicalDelete_falloMongo_noPropagaExcepcion() {
+    EjemplarDeleteAuthorization auth = new EjemplarDeleteAuthorization(42L, 10L, 28L);
+    when(ejemplarRepository.existsById(42L)).thenReturn(true);
+    doThrow(new RuntimeException("Mongo caído"))
+        .when(ejemplarEnrichmentDeletionPort)
+        .deleteEnrichmentForEjemplar(42L);
+
+    assertThatCode(() -> ejemplarDeleteService.commitPhysicalDelete(auth, 7L))
+        .doesNotThrowAnyException();
+
+    verify(ejemplarRepository).deleteById(42L);
     verify(catalogAuditService).recordEjemplarDeleted(eq(7L), eq(42L), eq(10L), eq(28L));
   }
 
