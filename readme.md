@@ -1422,6 +1422,8 @@ El detalle del ciclo por historia se resume en:
 - 3. Cierre de riesgos y **Aclaraciones pendientes** (refinamiento humano)
 - 4. Desglose en tickets con [`hu-breakdown-mtl`](.cursor/skills/hu-breakdown-mtl/SKILL.md) (`HU-*-ticket-breakdown.md`)
 - 5. Implementación de cada TASK con [`encargo-mtl`](.cursor/skills/encargo-mtl/SKILL.md): mensaje mínimo (`TASK-HU-XXX-nn` + `@` al breakdown); el agente completa objetivo, alcance y definición de hecho desde el breakdown. Encargo completo solo en TASKs complejos (véase la skill y [hu-breakdown-and-encargo.md](docs/ai-process-evidence/hu-breakdown-and-encargo.md))
+- 6. Abrir PR: [`.github/pull_request_template.md`](.github/pull_request_template.md) (GitHub la precarga desde la rama **base**, `main`) — [github-branching.md](docs/onboarding/github-branching.md)
+- 7. Tras merge: ticket → **Hecho** en el breakdown; **Estado** de la HU en [backlog.md](docs/backlog/backlog.md) §3
 
 Por cuestiones operativas, al comienzo de la historia se hacen comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.
 
@@ -1468,7 +1470,7 @@ En la generación de tickets de trabajo se incluye explícitamente una sección 
 
 Para el trabajo con GitHub se ha definido una estrategia sencilla de ramas — detalle en [docs/onboarding/github-branching.md](docs/onboarding/github-branching.md).
 
-Plantilla PR: [`.github/pull_request_template.md`](.github/pull_request_template.md) (se precarga al abrir el PR en GitHub).
+Plantilla PR: [`.github/pull_request_template.md`](.github/pull_request_template.md) (precarga desde la rama base `main`; en **fix/chore**, trazabilidad HU → **N/A**).
 
 En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), calidad frontend (`lint`, `typecheck`, Vitest) y escaneo de secretos (Gitleaks) — workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
