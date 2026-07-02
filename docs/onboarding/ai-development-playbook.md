@@ -9,7 +9,7 @@ Guía breve para trabajar con IA en este repo sin perder trazabilidad ni coheren
 3. Desglosar en tickets con `hu-breakdown-mtl` (incluye **Reglas aplicables por capa** en el breakdown).
 4. Implementar tickets por orden y dependencias (ideal: **un PR = un TASK**), con [encargo-mtl](../../.cursor/skills/encargo-mtl/SKILL.md) relleno por TASK.
 5. **Validar** lo implementado: pedir al agente una **revisión explícita** de que el cambio cumple las normas del proyecto (ver § siguiente).
-6. Abrir PR: plantilla **feature-task** o **fix-chore** vía enlaces en [.github/pull_request_template.md](../../.github/pull_request_template.md) o `--body-file` ([github-branching.md](github-branching.md)).
+6. Abrir PR: rellena [.github/pull_request_template.md](../../.github/pull_request_template.md) (se precarga al crear el PR en GitHub) — [github-branching.md](github-branching.md).
 7. Tras merge: ticket(s) → **Hecho** en el breakdown; actualizar **Estado** de la HU en `backlog.md` §3.
 
 ## Validación contra reglas del proyecto
@@ -26,6 +26,7 @@ La supervisión humana confirma el resultado de esa revisión antes de abrir PR.
 - Refinamiento HU: `.cursor/skills/hu-refinement-mtl/SKILL.md`
 - Breakdown HU: `.cursor/skills/hu-breakdown-mtl/SKILL.md`
 - Encargo de implementación (o revisión): `.cursor/skills/encargo-mtl/SKILL.md`
+- Auditoría capa de datos (pre-PR; revisión estática): [db-postgresql-mtl](../../.cursor/skills/db-postgresql-mtl/SKILL.md); catálogo híbrido: [db-mongo-mtl](../../.cursor/skills/db-mongo-mtl/SKILL.md)
 
 ## Reglas operativas
 
@@ -45,6 +46,7 @@ La supervisión humana confirma el resultado de esa revisión antes de abrir PR.
 ## Checklist mínimo antes de cerrar una tarea
 
 - Reglas aplicables por capa citadas en el breakdown y **revisión explícita** solicitada al agente tras implementar.
+- Si toca Flyway/JPA/repos: `db-postgresql-mtl` (en `catalog-service` con Mongo, también `db-mongo-mtl`).
 - Checks mínimos según capa ([devsecops-ci.md](../engineering/devsecops-ci.md)); checks extra del breakdown si los define.
 - Alcance respectado (sin meter trabajo de otra HU).
 - Copy y i18n coherentes si hay cambios frontend.

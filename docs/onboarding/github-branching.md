@@ -65,14 +65,14 @@ Opcional con issue: `feature/123-descripcion`. Con HU/ticket: `feature/hu-015-ta
 - **Base:** `main` (salvo acuerdo explícito del equipo).
 - **Un PR = un tema revisable** (idealmente un **TASK**). No mezclar HUs ni tickets no relacionados.
 - **Título:** en trabajo de backlog (`feature/`): `tipo(HU-xxx): TASK-HU-xxx-nn — resumen breve` (p. ej. `feat(HU-015): TASK-HU-015-04 — API enrichment especie`). En **`fix/`** y **`chore/`**: `fix: resumen` o `chore: resumen` (sin HU ni TASK).
-- **Plantillas:** [feature-task](../../.github/PULL_REQUEST_TEMPLATE/feature-task.md) (HU/TASK) · [fix-chore](../../.github/PULL_REQUEST_TEMPLATE/fix-chore.md) (fix/chore). Al abrir el PR carga [.github/pull_request_template.md](../../.github/pull_request_template.md) con enlaces `?template=…` (GitHub no ofrece desplegable).
+- **Plantilla:** al abrir el PR, GitHub precarga [.github/pull_request_template.md](../../.github/pull_request_template.md). En **fix/chore**, pon **N/A** en trazabilidad HU/TASK.
 - **Commits:** mensaje con el *por qué*; `TASK-HU-xxx-nn` en el cuerpo **opcional** (recomendado en backlog; en fix/chore suele omitirse) — [git-commit.md](../../.cursor/commands/git-commit.md).
 - **Tras merge:** ticket → **Hecho** en el breakdown; HU → **En curso** o **Cerrada** en `backlog.md` §3 ([playbook IA](ai-development-playbook.md)).
 - **Plan de pruebas:** marca solo lo ejecutado de verdad.
 
-**Web:** Compare & pull request → base `main`. En la descripción, enlace `?template=feature-task.md` o `?template=fix-chore.md` (desde la plantilla por defecto).
+**Web:** Compare & pull request → base `main` (la plantilla se rellena sola).
 
-**CLI** ([gh](https://cli.github.com/)): `gh pr create --base main --title "fix: …" --body-file .github/PULL_REQUEST_TEMPLATE/fix-chore.md`
+**CLI** ([gh](https://cli.github.com/)): `gh pr create --base main --title "fix: …" --body-file .github/pull_request_template.md`
 
 **Antes del PR** — ejecuta y marca en el plan de pruebas solo lo que hayas corrido de verdad:
 

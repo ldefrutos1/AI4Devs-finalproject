@@ -619,7 +619,7 @@ La imagen debe tener draggable="false", alt accesible y no debe seleccionarse al
 
 **Prompt 1:**
 
-He cerrado el **TASK-HU-xxx-nn** de la **HU-xxx** en la rama `feature/hu-xxx-task-nn-descripcion`. Ayúdame a redactar la **pull request** hacia `main` siguiendo @docs/onboarding/github-branching.md y la plantilla @.github/PULL_REQUEST_TEMPLATE/feature-task.md.
+He cerrado el **TASK-HU-xxx-nn** de la **HU-xxx** en la rama `feature/hu-xxx-task-nn-descripcion`. Ayúdame a redactar la **pull request** hacia `main` siguiendo @docs/onboarding/github-branching.md y la plantilla @.github/pull_request_template.md.
 
 Incluye en el cuerpo del PR:
 - **Trazabilidad:** HU, TASK y enlace al breakdown (`docs/backlog/HU-xxx-ticket-breakdown.md`).
