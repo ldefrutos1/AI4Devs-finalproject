@@ -1,8 +1,5 @@
-# Crea rama desde main actualizado (sin merge local de otras ramas).
-# Uso: .\scripts\dev\git-new-branch.ps1 -Prefix fix -Name revision-bugs-entrega-dos
-#      .\scripts\dev\git-new-branch.ps1 -Prefix feature -Name mi-tarea -Stash
+# Rama desde main actualizado. Uso: .\scripts\dev\git-new-branch.ps1 -Prefix feature -Name mi-tarea [-Stash]
 
-[CmdletBinding()]
 param(
     [Parameter(Mandatory)]
     [ValidateSet('feature', 'fix', 'chore')]
@@ -15,61 +12,37 @@ param(
 )
 
 . "$PSScriptRoot\_common.ps1"
-
 Assert-CommandInPath -Name 'git'
 
-$branchSegment = ($Name.Trim() -replace '\s+', '-').ToLowerInvariant()
-if ([string]::IsNullOrWhiteSpace($branchSegment)) {
-    throw 'El nombre de rama no puede estar vacío.'
+$segment = ($Name.Trim() -replace '\s+', '-').ToLowerInvariant()
+if ($segment -notmatch '^[a-z0-9]+(-[a-z0-9]+)*$') {
+    throw "Nombre de rama no válido: '$segment' (minúsculas, números y guiones)."
 }
-if ($branchSegment -notmatch '^[a-z0-9]+(-[a-z0-9]+)*$') {
-    throw "Nombre de rama no válido: '$branchSegment'. Usa minúsculas, números y guiones."
+$branch = "$Prefix/$segment"
+
+function Invoke-Git {
+    param([Parameter(Mandatory)][string[]]$GitArgs)
+    & git @GitArgs
+    if ($LASTEXITCODE -ne 0) {
+        throw "git $($GitArgs -join ' ') falló"
+    }
 }
 
-$fullBranch = "$Prefix/$branchSegment"
-$repoRoot = Get-MtlRepoRoot
-
-Push-Location -LiteralPath $repoRoot
-try {
-    $clean = Test-MtlGitWorkingTreeClean
-    if (-not $clean) {
-        if ($Stash) {
-            $stashMsg = "WIP antes de $fullBranch"
-            Write-MtlWarn "Cambios sin commit; guardando en stash: $stashMsg"
-            git stash push -u -m $stashMsg
-            if ($LASTEXITCODE -ne 0) {
-                throw 'git stash push falló'
-            }
-        }
-        else {
-            Write-MtlError 'Hay cambios sin commitear. Opciones:'
-            Write-Host '  - Commit (recomendado) o Cursor: .cursor/commands/git-commit.md'
-            Write-Host '  - Stash: .\scripts\dev\git-new-branch.ps1 -Prefix ... -Name ... -Stash'
-            Write-Host '  - Abortar y limpiar el working tree manualmente'
+Invoke-MtlInDirectory (Get-MtlRepoRoot) {
+    if (-not (Test-MtlGitWorkingTreeClean)) {
+        if (-not $Stash) {
+            Write-MtlError 'Hay cambios sin commit. Commit, -Stash o aborta (.cursor/commands/git-commit.md).'
             exit 1
         }
+        Write-MtlWarn "Guardando cambios en stash antes de $branch"
+        Invoke-Git @('stash', 'push', '-u', '-m', "WIP antes de $branch")
     }
 
-    Write-MtlInfo 'checkout main'
-    git checkout main
-    if ($LASTEXITCODE -ne 0) { throw 'git checkout main falló' }
+    Invoke-Git @('checkout', 'main')
+    Invoke-Git @('pull', 'origin', 'main')
+    Invoke-Git @('checkout', '-b', $branch)
 
-    Write-MtlInfo 'git pull origin main'
-    git pull origin main
-    if ($LASTEXITCODE -ne 0) { throw 'git pull origin main falló' }
-
-    Write-MtlInfo "checkout -b $fullBranch"
-    git checkout -b $fullBranch
-    if ($LASTEXITCODE -ne 0) { throw "git checkout -b $fullBranch falló" }
-
-    Write-MtlOk "Rama creada: $fullBranch"
-    Write-Host ''
-    Write-Host 'Primera subida:  git push -u origin HEAD'
-    Write-Host 'PR hacia main: docs/onboarding/github-branching.md'
-    if ($Stash) {
-        Write-Host 'Recuperar stash: git stash pop'
-    }
-}
-finally {
-    Pop-Location
+    Write-MtlOk "Rama creada: $branch"
+    Write-Host 'Subir:  git push -u origin HEAD'
+    if ($Stash) { Write-Host 'Stash:  git stash pop' }
 }
