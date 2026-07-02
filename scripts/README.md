@@ -96,6 +96,8 @@ Requiere Keycloak levantado. Útil cuando el realm ya existía en un volumen y `
 |-----------|-------------|
 | `-All` | Muestra también puertos MTL habituales que están libres. |
 
+Si cambian puertos en Compose o en microservicios, actualizar la tabla en este script y la documentación canónica.
+
 **git-new-branch.ps1**
 
 | Parámetro | Descripción |
@@ -109,9 +111,6 @@ Requiere Keycloak levantado. Útil cuando el realm ya existía en un volumen y `
 | Fichero | Rol |
 |---------|-----|
 | `_common.ps1` | Raíz del repo, mensajes, `git`/directorios, comprobación de comandos |
-| `_ports.ps1` | Tabla de puertos alineada con [services/README.md](../services/README.md) e [infra/compose/README.md](../infra/compose/README.md) |
-
-Si cambian puertos en Compose o en microservicios, actualizar **`_ports.ps1`** y la documentación canónica.
 
 ## Stack Docker local (flujo habitual)
 

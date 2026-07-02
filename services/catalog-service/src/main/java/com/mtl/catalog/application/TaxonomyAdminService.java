@@ -37,6 +37,8 @@ public class TaxonomyAdminService {
   private final EjemplarRepository ejemplarRepository;
   private final UsuarioAppMaterializationService usuarioAppMaterializationService;
   private final CatalogAuditService catalogAuditService;
+  private final AfterCommitTaskRegistrar afterCommitTaskRegistrar;
+  private final EspecieDetalleNamesSyncPort especieDetalleNamesSyncPort;
 
   public TaxonomyAdminService(
       FamiliaRepository familiaRepository,
@@ -44,13 +46,17 @@ public class TaxonomyAdminService {
       EspecieRepository especieRepository,
       EjemplarRepository ejemplarRepository,
       UsuarioAppMaterializationService usuarioAppMaterializationService,
-      CatalogAuditService catalogAuditService) {
+      CatalogAuditService catalogAuditService,
+      AfterCommitTaskRegistrar afterCommitTaskRegistrar,
+      EspecieDetalleNamesSyncPort especieDetalleNamesSyncPort) {
     this.familiaRepository = familiaRepository;
     this.generoRepository = generoRepository;
     this.especieRepository = especieRepository;
     this.ejemplarRepository = ejemplarRepository;
     this.usuarioAppMaterializationService = usuarioAppMaterializationService;
     this.catalogAuditService = catalogAuditService;
+    this.afterCommitTaskRegistrar = afterCommitTaskRegistrar;
+    this.especieDetalleNamesSyncPort = especieDetalleNamesSyncPort;
   }
 
   @Transactional(readOnly = true)
@@ -140,6 +146,13 @@ public class TaxonomyAdminService {
     Especie saved = especieRepository.save(especie);
     catalogAuditService.recordSpeciesModified(
         actor.getId(), previo, speciesAuditSummary(saved));
+    long savedSpeciesId = saved.getId();
+    String scientificName = saved.getNombreCientifico();
+    String commonName = saved.getNombreComun();
+    afterCommitTaskRegistrar.runAfterCommit(
+        () ->
+            especieDetalleNamesSyncPort.syncNamesAfterMasterUpdate(
+                savedSpeciesId, scientificName, commonName));
     return toSpeciesResponse(saved);
   }
 

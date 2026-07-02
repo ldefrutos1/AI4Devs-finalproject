@@ -37,11 +37,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 class CatalogMongoPersistenceIT {
 
   @Container
-  static final MongoDBContainer MONGO = new MongoDBContainer("mongo:7.0");
+  static final MongoDBContainer MONGO_DB = new MongoDBContainer("mongo:7.0");
 
   @DynamicPropertySource
   static void mongoProperties(DynamicPropertyRegistry registry) {
-    registry.add("spring.mongodb.uri", MONGO::getConnectionString);
+    registry.add("spring.mongodb.uri", () -> MONGO_DB.getConnectionString() + "/mtl_catalog");
   }
 
   @Autowired private EspecieDetalleMongoRepository especieDetalleMongoRepository;

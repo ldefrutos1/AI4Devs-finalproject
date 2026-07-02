@@ -14,8 +14,7 @@ param(
 
 . "$PSScriptRoot\_common.ps1"
 
-$repoRoot = Get-MtlRepoRoot
-$composeDir = Join-Path $repoRoot 'infra\compose'
+$composeDir = Join-Path (Get-MtlRepoRoot) 'infra\compose'
 $realmJsonPath = Join-Path $composeDir 'init\keycloak\mtl-realm.json'
 $envFile = Join-Path $composeDir '.env'
 
@@ -23,44 +22,33 @@ if (-not (Test-Path -LiteralPath $realmJsonPath)) {
     throw "No se encontro $realmJsonPath"
 }
 
-if ([string]::IsNullOrWhiteSpace($KeycloakPort) -and (Test-Path -LiteralPath $envFile)) {
-    foreach ($line in Get-Content -LiteralPath $envFile) {
-        if ($line -match '^\s*KEYCLOAK_PORT\s*=\s*(\d+)\s*$') {
-            $KeycloakPort = $Matches[1]
-            break
+$envVars = @{}
+if (Test-Path -LiteralPath $envFile) {
+    Get-Content -LiteralPath $envFile | ForEach-Object {
+        if ($_ -match '^\s*([^#=\s]+)\s*=\s*(\S+)\s*$') {
+            $envVars[$Matches[1]] = $Matches[2]
         }
     }
 }
-if ([string]::IsNullOrWhiteSpace($KeycloakPort)) {
-    $KeycloakPort = '8180'
+
+function Resolve-Param {
+    param(
+        [string]$Value,
+        [string]$EnvKey,
+        [string]$Default
+    )
+    if (-not [string]::IsNullOrWhiteSpace($Value)) { return $Value }
+    if ($envVars.ContainsKey($EnvKey)) { return $envVars[$EnvKey] }
+    return $Default
 }
 
-if ([string]::IsNullOrWhiteSpace($AdminUser) -and (Test-Path -LiteralPath $envFile)) {
-    foreach ($line in Get-Content -LiteralPath $envFile) {
-        if ($line -match '^\s*KEYCLOAK_ADMIN\s*=\s*(\S+)\s*$') {
-            $AdminUser = $Matches[1]
-            break
-        }
-    }
-}
-if ([string]::IsNullOrWhiteSpace($AdminUser)) {
-    $AdminUser = 'admin'
-}
+$KeycloakPort = Resolve-Param $KeycloakPort 'KEYCLOAK_PORT' '8180'
+$AdminUser = Resolve-Param $AdminUser 'KEYCLOAK_ADMIN' 'admin'
+$AdminPassword = Resolve-Param $AdminPassword 'KEYCLOAK_ADMIN_PASSWORD' 'admin_dev_password'
 
-if ([string]::IsNullOrWhiteSpace($AdminPassword) -and (Test-Path -LiteralPath $envFile)) {
-    foreach ($line in Get-Content -LiteralPath $envFile) {
-        if ($line -match '^\s*KEYCLOAK_ADMIN_PASSWORD\s*=\s*(\S+)\s*$') {
-            $AdminPassword = $Matches[1]
-            break
-        }
-    }
-}
-if ([string]::IsNullOrWhiteSpace($AdminPassword)) {
-    $AdminPassword = 'admin_dev_password'
-}
-
-$realmDoc = Get-Content -LiteralPath $realmJsonPath -Raw | ConvertFrom-Json
-$spaClient = $realmDoc.clients | Where-Object { $_.clientId -eq 'mtl-spa' } | Select-Object -First 1
+$spaClient = (Get-Content -LiteralPath $realmJsonPath -Raw | ConvertFrom-Json).clients |
+    Where-Object clientId -eq 'mtl-spa' |
+    Select-Object -First 1
 if (-not $spaClient) {
     throw 'No se encontro clientId mtl-spa en mtl-realm.json'
 }
@@ -68,38 +56,34 @@ if (-not $spaClient) {
 $keycloakBase = "http://localhost:$KeycloakPort"
 Write-MtlInfo "Keycloak: $keycloakBase - sincronizando cliente mtl-spa..."
 
-$tokenBody = @{
-    client_id     = 'admin-cli'
-    username      = $AdminUser
-    password      = $AdminPassword
-    grant_type    = 'password'
-}
 try {
-    $tokenResponse = Invoke-RestMethod `
+    $adminToken = (Invoke-RestMethod `
         -Uri "$keycloakBase/realms/master/protocol/openid-connect/token" `
         -Method POST `
         -ContentType 'application/x-www-form-urlencoded' `
-        -Body $tokenBody
+        -Body @{
+            client_id  = 'admin-cli'
+            username   = $AdminUser
+            password   = $AdminPassword
+            grant_type = 'password'
+        }
+    ).access_token
 } catch {
     throw "No se pudo autenticar en Keycloak ($keycloakBase). Comprueba que este levantado y las credenciales admin."
 }
 
-$adminToken = $tokenResponse.access_token
-$authHeader = @{ Authorization = "Bearer $adminToken" }
-
+$headers = @{ Authorization = "Bearer $adminToken" }
 $clients = Invoke-RestMethod `
     -Uri "$keycloakBase/admin/realms/mtl/clients?clientId=mtl-spa" `
-    -Headers $authHeader
+    -Headers $headers
 if (-not $clients -or $clients.Count -eq 0) {
     throw 'Cliente mtl-spa no encontrado en realm mtl. Keycloak importo el realm?'
 }
 
 $clientUuid = $clients[0].id
-$clientResponse = Invoke-WebRequest `
+$clientJson = Invoke-RestMethod `
     -Uri "$keycloakBase/admin/realms/mtl/clients/$clientUuid" `
-    -Headers $authHeader `
-    -UseBasicParsing
-$clientJson = $clientResponse.Content | ConvertFrom-Json
+    -Headers $headers
 
 $clientJson.redirectUris = @($spaClient.redirectUris)
 $clientJson.webOrigins = @($spaClient.webOrigins)
@@ -119,12 +103,6 @@ Invoke-RestMethod `
     -Body ([System.Text.Encoding]::UTF8.GetBytes($jsonBody)) | Out-Null
 
 Write-MtlOk 'Cliente mtl-spa actualizado.'
-Write-MtlInfo 'Valid redirect URIs:'
-foreach ($uri in $spaClient.redirectUris) {
-    Write-Host "  $uri"
-}
-Write-MtlInfo 'Web origins:'
-foreach ($origin in $spaClient.webOrigins) {
-    Write-Host "  $origin"
-}
+Write-MtlInfo "Valid redirect URIs:`n  $($spaClient.redirectUris -join "`n  ")"
+Write-MtlInfo "Web origins:`n  $($spaClient.webOrigins -join "`n  ")"
 Write-MtlOk 'Prueba login en http://localhost:8088'

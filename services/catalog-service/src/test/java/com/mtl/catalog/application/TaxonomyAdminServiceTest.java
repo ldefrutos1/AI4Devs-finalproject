@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -48,6 +49,8 @@ class TaxonomyAdminServiceTest {
   @Mock private EjemplarRepository ejemplarRepository;
   @Mock private UsuarioAppMaterializationService usuarioAppMaterializationService;
   @Mock private CatalogAuditService catalogAuditService;
+  @Mock private AfterCommitTaskRegistrar afterCommitTaskRegistrar;
+  @Mock private EspecieDetalleNamesSyncPort especieDetalleNamesSyncPort;
 
   @InjectMocks private TaxonomyAdminService service;
 
@@ -59,6 +62,14 @@ class TaxonomyAdminServiceTest {
     jwt = Jwt.withTokenValue("t").header("alg", "none").subject("admin").build();
     actor = actor(1L);
     lenient().when(usuarioAppMaterializationService.materialize(any())).thenReturn(actor);
+    lenient()
+        .doAnswer(
+            inv -> {
+              inv.getArgument(0, Runnable.class).run();
+              return null;
+            })
+        .when(afterCommitTaskRegistrar)
+        .runAfterCommit(any(Runnable.class));
   }
 
   @Test
@@ -194,6 +205,8 @@ class TaxonomyAdminServiceTest {
             eq(1L),
             eq("especie_id=9 genero_id=2 nombre_cientifico=Quercus ilex"),
             eq("especie_id=9 genero_id=3 nombre_cientifico=Quercus robur"));
+    verify(especieDetalleNamesSyncPort)
+        .syncNamesAfterMasterUpdate(9L, "Quercus robur", "Roble común");
   }
 
   @Test
