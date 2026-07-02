@@ -31,7 +31,6 @@ public class TreeEnrichmentService {
     return TreeEnrichmentMapper.toResponse(treeId, ejemplar.getEspecieId(), document);
   }
 
-  @Transactional
   public TreeEnrichmentResponse replaceTreeEnrichment(
       long treeId, TreeEnrichmentReplaceRequest request, Jwt jwt) {
     Ejemplar ejemplar = ejemplarEnrichmentAccessService.requireWritableEjemplar(treeId, jwt);

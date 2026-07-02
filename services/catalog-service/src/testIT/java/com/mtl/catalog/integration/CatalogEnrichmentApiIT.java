@@ -52,14 +52,16 @@ class CatalogEnrichmentApiIT {
   static final PostgreSQLContainer<?> POSTGRES =
       new PostgreSQLContainer<>("postgres:16-alpine").withInitScript("postgres-init-test.sql");
 
-  @Container static final MongoDBContainer MONGO = new MongoDBContainer("mongo:7.0");
+  @Container
+  static final MongoDBContainer MONGO_DB = new MongoDBContainer("mongo:7.0");
 
   @DynamicPropertySource
   static void registerContainers(DynamicPropertyRegistry registry) {
     registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
     registry.add("spring.datasource.username", POSTGRES::getUsername);
     registry.add("spring.datasource.password", POSTGRES::getPassword);
-    registry.add("spring.mongodb.uri", MONGO::getConnectionString);
+    registry.add("spring.datasource.driver-class-name", () -> "org.postgresql.Driver");
+    registry.add("spring.mongodb.uri", () -> MONGO_DB.getConnectionString() + "/mtl_catalog");
     registry.add("mtl.catalog.mongo.enabled", () -> "true");
   }
 
@@ -107,6 +109,77 @@ class CatalogEnrichmentApiIT {
         .andExpect(jsonPath("$.synonyms[0]").value("Encina mediterránea"));
 
     assertThat(especieDetalleMongoRepository.findById(SPECIES_ID)).isPresent();
+  }
+
+  @Test
+  void updateSpeciesMaestro_syncNombresEnMongoPreservaEnriquecimiento() throws Exception {
+    long genusId =
+        jsonMapper
+            .readTree(
+                mockMvc
+                    .perform(
+                        get("/api/catalog/species/{speciesId}", SPECIES_ID)
+                            .headers(auth(JwtDecoderConfigTest.TOKEN_ADMIN)))
+                    .andExpect(status().isOk())
+                    .andReturn()
+                    .getResponse()
+                    .getContentAsByteArray())
+            .path("genusId")
+            .longValue();
+
+    MvcResult createResult =
+        mockMvc
+            .perform(
+                post("/api/catalog/species")
+                    .headers(auth(JwtDecoderConfigTest.TOKEN_ADMIN))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                          "genusId": %d,
+                          "scientificName": "SyncTest enrichment IT",
+                          "commonName": "Sync IT"
+                        }
+                        """
+                            .formatted(genusId)))
+            .andExpect(status().isCreated())
+            .andReturn();
+    long speciesId =
+        jsonMapper
+            .readTree(createResult.getResponse().getContentAsByteArray())
+            .path("speciesId")
+            .longValue();
+
+    mockMvc
+        .perform(
+            put("/api/catalog/species/{speciesId}/enrichment", speciesId)
+                .headers(auth(JwtDecoderConfigTest.TOKEN_ADMIN))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"synonyms\":[\"Encina mediterránea\"]}"))
+        .andExpect(status().isOk());
+
+    mockMvc
+        .perform(
+            put("/api/catalog/species/{speciesId}", speciesId)
+                .headers(auth(JwtDecoderConfigTest.TOKEN_ADMIN))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                      "genusId": %d,
+                      "scientificName": "SyncTest enrichment IT renamed",
+                      "commonName": "Sync IT renamed"
+                    }
+                    """
+                        .formatted(genusId)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.scientificName").value("SyncTest enrichment IT renamed"))
+        .andExpect(jsonPath("$.commonName").value("Sync IT renamed"));
+
+    var document = especieDetalleMongoRepository.findById(speciesId).orElseThrow();
+    assertThat(document.getNombreCientifico()).isEqualTo("SyncTest enrichment IT renamed");
+    assertThat(document.getNombreComun()).isEqualTo("Sync IT renamed");
+    assertThat(document.getSinonimos()).containsExactly("Encina mediterránea");
   }
 
   @Test

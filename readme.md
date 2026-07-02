@@ -916,7 +916,7 @@ proyecto/
 │   ├── security/             # JWT, gateway, estrategia de validación
 │   ├── software-revisions/   # Revisiones y auditorías del proyecto
 │   └── use-cases/            # Casos de uso
-├── scripts/                  # Atajos PowerShell locales (`dev/`); ver README.md
+├── scripts/                  # Atajos PowerShell locales (`dev/`); ver scripts/README.md
 ├── .cursor/
 │   ├── commands/             # Commands Cursor
 │   ├── rules/                # Reglas Cursor (API, Spring, seguridad…)
@@ -1468,7 +1468,7 @@ En la generación de tickets de trabajo se incluye explícitamente una sección 
 
 Para el trabajo con GitHub se ha definido una estrategia sencilla de ramas — detalle en [docs/onboarding/github-branching.md](docs/onboarding/github-branching.md).
 
-Las pull requests usan plantillas en [`.github/PULL_REQUEST_TEMPLATE/`](.github/PULL_REQUEST_TEMPLATE/) (**feature-task** para HU/TASK, **fix-chore** para correcciones y mantenimiento); GitHub muestra un desplegable al crear el PR.
+Plantillas PR: [`.github/pull_request_template.md`](.github/pull_request_template.md) (selector) y [`.github/PULL_REQUEST_TEMPLATE/`](.github/PULL_REQUEST_TEMPLATE/) (**feature-task**, **fix-chore**).
 
 En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), calidad frontend (`lint`, `typecheck`, Vitest) y escaneo de secretos (Gitleaks) — workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 

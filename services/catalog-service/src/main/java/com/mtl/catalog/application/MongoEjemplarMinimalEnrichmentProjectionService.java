@@ -4,9 +4,7 @@ import com.mtl.catalog.domain.Especie;
 import com.mtl.catalog.exception.CatalogNotFoundException;
 import com.mtl.catalog.infrastructure.persistence.jpa.repository.EspecieRepository;
 import com.mtl.catalog.infrastructure.persistence.mongo.document.EjemplarDetalleDocument;
-import com.mtl.catalog.infrastructure.persistence.mongo.document.EspecieDetalleDocument;
 import com.mtl.catalog.infrastructure.persistence.mongo.repository.EjemplarDetalleMongoRepository;
-import com.mtl.catalog.infrastructure.persistence.mongo.repository.EspecieDetalleMongoRepository;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,15 +24,15 @@ public class MongoEjemplarMinimalEnrichmentProjectionService
       LoggerFactory.getLogger(MongoEjemplarMinimalEnrichmentProjectionService.class);
 
   private final EspecieRepository especieRepository;
-  private final EspecieDetalleMongoRepository especieDetalleMongoRepository;
+  private final EspecieDetalleMongoNamesWriter especieDetalleMongoNamesWriter;
   private final EjemplarDetalleMongoRepository ejemplarDetalleMongoRepository;
 
   public MongoEjemplarMinimalEnrichmentProjectionService(
       EspecieRepository especieRepository,
-      EspecieDetalleMongoRepository especieDetalleMongoRepository,
+      EspecieDetalleMongoNamesWriter especieDetalleMongoNamesWriter,
       EjemplarDetalleMongoRepository ejemplarDetalleMongoRepository) {
     this.especieRepository = especieRepository;
-    this.especieDetalleMongoRepository = especieDetalleMongoRepository;
+    this.especieDetalleMongoNamesWriter = especieDetalleMongoNamesWriter;
     this.ejemplarDetalleMongoRepository = ejemplarDetalleMongoRepository;
   }
 
@@ -42,7 +40,8 @@ public class MongoEjemplarMinimalEnrichmentProjectionService
   public Optional<String> projectAfterEjemplarSqlPersisted(long ejemplarId, long speciesId) {
     try {
       Especie especie = requireEspecie(speciesId);
-      upsertEspecieDetalle(speciesId, especie.getNombreCientifico(), especie.getNombreComun());
+      especieDetalleMongoNamesWriter.upsertNames(
+          speciesId, especie.getNombreCientifico(), especie.getNombreComun());
       upsertEjemplarDetalle(ejemplarId, speciesId);
       return Optional.empty();
     } catch (Exception ex) {
@@ -63,15 +62,6 @@ public class MongoEjemplarMinimalEnrichmentProjectionService
             () ->
                 new CatalogNotFoundException(
                     "No se encontró una especie con el identificador indicado."));
-  }
-
-  private void upsertEspecieDetalle(long speciesId, String scientificName, String commonName) {
-    EspecieDetalleDocument document =
-        especieDetalleMongoRepository.findById(speciesId).orElseGet(EspecieDetalleDocument::new);
-    document.assignEspeciePgId(speciesId);
-    document.setNombreCientifico(scientificName);
-    document.setNombreComun(commonName);
-    especieDetalleMongoRepository.save(document);
   }
 
   private void upsertEjemplarDetalle(long ejemplarId, long speciesId) {
