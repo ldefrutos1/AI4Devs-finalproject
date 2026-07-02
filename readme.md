@@ -921,7 +921,7 @@ proyecto/
 │   ├── commands/             # Commands Cursor
 │   ├── rules/                # Reglas Cursor (API, Spring, seguridad…)
 │   └── skills/               # Skills de encargo, refinamiento HU, BD…
-├── .github/                  # Plantillas PR (feature-task, fix-chore)
+├── .github/                  # Plantilla PR (pull_request_template.md)
 ├── AGENTS.md                 # Índice para agentes IA (skills, canónicos, flujo)
 └── readme.md
 ```
@@ -1425,7 +1425,7 @@ El detalle del ciclo por historia se resume en:
 
 Por cuestiones operativas, al comienzo de la historia se hacen comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.
 
-La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada `docs/backlog/HU-*.md`, validar el alcance de cada TASK antes de implementar, pedir al agente una **revisión explícita** tras cada TASK, contra las reglas del breakdown, y confirmar tests y PR antes del merge.
+La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada `docs/backlog/HU-*.md`, validar el alcance de cada TASK antes de implementar, pedir al agente una **revisión explícita** tras cada TASK, contra las reglas del breakdown, y confirmar tests y PR antes del merge. Persistencia: [db-postgresql-mtl](.cursor/skills/db-postgresql-mtl/SKILL.md) ([db-mongo-mtl](.cursor/skills/db-mongo-mtl/SKILL.md) en catálogo híbrido).
 
 **Evidencia del proceso:** hay ejemplos del proceso en [docs/ai-process-evidence/](docs/ai-process-evidence/README.md). Muestra representativa por fase del ciclo de vida: [prompts.md](prompts.md).
 
@@ -1468,7 +1468,7 @@ En la generación de tickets de trabajo se incluye explícitamente una sección 
 
 Para el trabajo con GitHub se ha definido una estrategia sencilla de ramas — detalle en [docs/onboarding/github-branching.md](docs/onboarding/github-branching.md).
 
-Plantillas PR: [`.github/pull_request_template.md`](.github/pull_request_template.md) (selector) y [`.github/PULL_REQUEST_TEMPLATE/`](.github/PULL_REQUEST_TEMPLATE/) (**feature-task**, **fix-chore**).
+Plantilla PR: [`.github/pull_request_template.md`](.github/pull_request_template.md) (se precarga al abrir el PR en GitHub).
 
 En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), calidad frontend (`lint`, `typecheck`, Vitest) y escaneo de secretos (Gitleaks) — workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
