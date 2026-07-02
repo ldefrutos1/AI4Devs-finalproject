@@ -1,165 +1,123 @@
-# PostgreSQL Model Validator — Spring Boot + Flyway
+# Auditoría PostgreSQL / JPA / Flyway (MTL)
 
-## Cuándo activar esta skill
+Skill de **revisión estática** e informe de hallazgos. **No** sustituye reglas de implementación:
+[data-model-design.mdc](../../.cursor/rules/data-model-design.mdc),
+[naming-conventions.md](../../docs/engineering/naming-conventions.md),
+[spring-boot-4-backend.mdc](../../.cursor/rules/spring-boot-4-backend.mdc) § Persistencia.
 
-Úsala cuando el usuario proporcione o mencione cualquiera de estos artefactos:
-- Scripts de migración Flyway (`V*.sql`, `U*.sql`, `R__*.sql`)
-- Entidades JPA (`@Entity`, `@Table`, `@Column`)
-- Configuración de base de datos (`application.yml`, `application.properties`)
-- Diagramas o descripciones de esquemas PostgreSQL
+## Cuándo activar
 
-También activar ante frases como: "revisa mi modelo", "mira estas migraciones", "tengo un
-problema con mi esquema", "valida mis entidades", "diseña esta tabla".
+- El usuario pide auditar/revisar/validar la capa de datos o un diff pre-PR.
+- Tras un TASK que toque `db/migration/`, entidades JPA o repositorios.
+- **No** activar solo para diseñar algo nuevo.
 
----
+## Procedimiento
 
-## Instrucciones de análisis
+1. Confirmar **módulo** y alcance (`catalog-service` | `media-service` | `notification-service` | `ai-assistant-service`; diff, ficheros o módulo completo). Preguntar si falta.
+2. Escanear (sin `target/`):
+   - `services/<módulo>/src/main/resources/db/migration/`
+   - `…/infrastructure/persistence/jpa/**`
+   - `…/application/**` (N+1, `@Transactional`)
+   - `…/controller/**` — ❌ si hay `Repository`, `@Query`, `EntityManager` o `JdbcTemplate`
+3. Si es **`catalog-service`**, aplicar también [db-mongo-mtl](../db-mongo-mtl/SKILL.md).
+4. Evaluar cada **dimensión** (✅ | ⚠️ | ❌) y entregar **informe** (plantilla al final).
 
-Eres un ingeniero senior especializado en PostgreSQL, JPA/Hibernate y Flyway. Cuando el usuario
-comparta artefactos de base de datos, ejecuta una revisión exhaustiva en las siguientes
-dimensiones. Marca cada una con ✅ Correcto | ⚠️ Advertencia | ❌ Problema crítico.
+## Dimensiones
 
----
+### 1. Flyway
 
-### 1. Migraciones Flyway
+- `V{version}__{descripcion}.sql`; FK solo a tablas de versiones anteriores
+- ❌ editar migraciones ya aplicadas
+- Idempotencia (`IF NOT EXISTS`) donde aplique; `spring.flyway.clean-disabled=true` en prod
 
-- Nombres siguen `V{version}__{descripcion}.sql` (doble guion bajo)
-- Las FK referencian tablas creadas en versiones anteriores
-- No se modifican migraciones ya aplicadas (rompe checksums)
-- Uso correcto de `IF NOT EXISTS` para idempotencia
-- `spring.flyway.clean-disabled=true` en producción
+### 2. Tipos PostgreSQL
 
-### 2. Tipos de datos PostgreSQL
-
-| Uso | Tipo recomendado | Evitar |
-|---|---|---|
-| Identificadores | `BIGSERIAL` / `UUID` con `gen_random_uuid()` | `INTEGER` si escala |
-| Textos acotados | `VARCHAR(n)` | `CHAR` |
-| Textos libres | `TEXT` | `VARCHAR` sin límite real |
-| Dinero/precios | `NUMERIC(19,4)` | `FLOAT`, `DOUBLE PRECISION` |
-| Fechas con TZ | `TIMESTAMPTZ` | `TIMESTAMP` naive |
+| Uso | OK | Evitar |
+|-----|-----|--------|
+| IDs | `BIGSERIAL` / `UUID` | `INTEGER` si escala |
+| Texto | `VARCHAR(n)` / `TEXT` | `CHAR`, floats para dinero |
+| Fechas | `TIMESTAMPTZ` | `TIMESTAMP` sin TZ |
 | Flags | `BOOLEAN` | `CHAR(1)`, `INTEGER` |
-| JSON semiestructurado | `JSONB` | `JSON`, `TEXT` |
+| JSON | `JSONB` (+ GIN si se filtra) | `TEXT` opaco |
 
-### 3. Naming conventions
+### 3. Naming
 
-- Tablas: `snake_case` **singular** (`ejemplar`, `fotografia`, `usuario_app`)
-- Columnas: `snake_case` (`cliente_id`, `creado_en`)
-- Índices: `idx_{tabla}_{columnas}`
-- Unique constraints: `uq_{tabla}_{columnas}`
-- FKs: `{tabla_referenciada}_id`
+Canónico: [naming-conventions.md](../../docs/engineering/naming-conventions.md) § **N1**. Marcar ❌ desvíos y `@Table`/`@Column` desalineados con Flyway o [ADR-0007](../../docs/adr/0007-english-http-spanish-persistence.md).
 
-### 4. Integridad referencial
+### 4. Integridad
 
-- Toda FK en JPA (`@ManyToOne`) debe tener `FOREIGN KEY` en SQL
-- `ON DELETE CASCADE` solo para composición (order → order_items)
-- `ON DELETE RESTRICT` para referencias (order → customer)
-- Detectar tablas huérfanas sin relaciones
+- FK JPA ↔ `FOREIGN KEY` en SQL
+- `ON DELETE CASCADE` solo en composición; `RESTRICT` en referencias maestras
+- Tablas huérfanas o relaciones ausentes
 
-### 5. Índices y performance
+### 5. Índices y rendimiento
 
-- **Las FK no crean índice automáticamente en PostgreSQL** → crearlos siempre
-- Índices en columnas de `WHERE`, `JOIN`, `ORDER BY` frecuentes
-- Índices parciales para soft delete: `WHERE eliminado_en IS NULL`
-- GIN para columnas `JSONB`
-- Detectar y eliminar índices duplicados o sin uso
+- Índice en columnas FK (PostgreSQL no lo crea solo)
+- Índices en filtros/joins/orden frecuentes; parciales con soft delete (`eliminado_en IS NULL`)
+- N+1: `LAZY` en colecciones; ❌ `EAGER` sin justificación
 
-### 6. Alineación JPA ↔ PostgreSQL
+### 6. JPA ↔ SQL
 
-- `@Enumerated(EnumType.STRING)` — nunca `ORDINAL`
-- `FetchType.LAZY` en todas las colecciones `@OneToMany`
-- Fechas: `OffsetDateTime` (preferido con `TIMESTAMPTZ`) o `Instant`; no `LocalDateTime`
-- `spring.jpa.hibernate.ddl-auto=validate` en producción
-- `allocationSize` en `@SequenceGenerator` debe coincidir con `INCREMENT BY` en SQL
-- Dialecto: `PostgreSQLDialect` (no el genérico)
+- `@Enumerated(STRING)`; fechas `OffsetDateTime`/`Instant` con `TIMESTAMPTZ`
+- `ddl-auto=validate` en prod; `PostgreSQLDialect`; `@SequenceGenerator` alineado con SQL
 
-### 7. Diseño del modelo
+### 7. Diseño físico
 
-- Normalización 3FN: detectar redundancias y dependencias transitivas
-- Tablas con >30 columnas: candidata a split vertical
-- Soft delete consistente: `eliminado_en TIMESTAMPTZ` con índice parcial
-- Auditoría uniforme: `creado_en`, `modificado_en`, `creado_por`, `modificado_por`
-- Multi-tenancy: `tenant_id` presente e indexado si aplica
+- Redundancias 3FN; tablas muy anchas (>30 cols)
+- Auditoría: `creado_en`, `modificado_en`, `creado_por`, `modificado_por` donde aplique
 
----
+### 8. Seguridad
 
-## Formato de respuesta
+- Native SQL: solo parámetros nombrados; ❌ concatenación/`String.format` con input usuario
+- ❌ `@Entity` en API o binding request → entidad; usar DTO ([ADR-0007](../../docs/adr/0007-english-http-spanish-persistence.md))
+- ❌ PII o filas completas en logs ([logging.mdc](../../.cursor/rules/logging.mdc))
+
+## Informe (obligatorio)
 
 ```
-## 📋 Resumen ejecutivo
-[Estado general y severidad de hallazgos]
-
-## 🔍 Hallazgos por dimensión
-
-### [Dimensión] [✅/⚠️/❌]
-**Problema**: [descripción]
-**Impacto**: [qué puede salir mal]
-**Solución**:
-[código SQL o Java corregido]
-
-## 🚨 Críticos (bloquean producción)
-## ⚠️ Importantes (deuda técnica)
-## 💡 Mejoras opcionales
-
-## ✅ Checklist de resolución
-[ ] Fix 1 — nueva migración V{N}__fix_xxx.sql
-[ ] Fix 2 — ...
+## Resumen ejecutivo
+## Hallazgos por dimensión — [Dimensión] [✅/⚠️/❌]
+  Problema | Impacto | Solución (fragmento concreto)
+## Críticos | Importantes | Opcionales
+## Checklist — fixes como nueva migración V{N}__…
 ```
 
----
+## Reglas de auditoría
 
-## Reglas de oro
+1. No inventar: pedir artefacto o diff que falte.
+2. Fixes SQL → **nueva** migración Flyway, nunca reescribir `V*` aplicadas.
+3. Prioridad: seguridad/producción > rendimiento > deuda > estilo.
 
-1. Nunca asumir lo que no está en el código — pedir el artefacto que falta
-2. Cualquier fix SQL debe plantearse como **nueva migración Flyway**, nunca editando las existentes
-3. Ser específico: mostrar el fragmento problemático y la corrección exacta
-4. Priorizar por impacto: producción > performance > deuda técnica > estilo
+## Anexo — esquemas y SQL útil
 
----
+| Módulo | Esquema PG |
+|--------|------------|
+| `catalog-service` | `catalog` |
+| `media-service` | `media` |
+| `notification-service` | `notification` |
+| `ai-assistant-service` | `ai` |
 
-## Patrones Flyway frecuentes
+Sustituir `:schema` al ejecutar en local. Ejemplos Flyway asumen `search_path` del servicio.
 
 ```sql
--- Añadir columna de forma segura
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM information_schema.columns
-        WHERE table_name='ejemplar' AND column_name='notas'
-    ) THEN
-        ALTER TABLE ejemplar ADD COLUMN notas TEXT;
-    END IF;
-END $$;
-
--- Crear índice si no existe
-CREATE INDEX IF NOT EXISTS idx_ejemplar_especie_id ON ejemplar(especie_id);
-
--- Índice parcial para soft delete
-CREATE INDEX IF NOT EXISTS idx_ejemplar_activos
-    ON ejemplar(creado_en DESC) WHERE eliminado_en IS NULL;
-```
-
-## Diagnóstico rápido PostgreSQL
-
-```sql
--- FK sin índice (problema de performance)
-SELECT tc.table_name, kcu.column_name
+-- FK sin índice
+SELECT tc.table_schema, tc.table_name, kcu.column_name
 FROM information_schema.table_constraints tc
 JOIN information_schema.key_column_usage kcu
-    ON tc.constraint_name = kcu.constraint_name
-WHERE tc.constraint_type = 'FOREIGN KEY'
+  ON tc.constraint_name = kcu.constraint_name AND tc.table_schema = kcu.table_schema
+WHERE tc.constraint_type = 'FOREIGN KEY' AND tc.table_schema = :schema
   AND NOT EXISTS (
-      SELECT 1 FROM pg_indexes
-      WHERE tablename = tc.table_name
-        AND indexdef LIKE '%' || kcu.column_name || '%'
-  );
+    SELECT 1 FROM pg_indexes pi
+    WHERE pi.schemaname = tc.table_schema AND pi.tablename = tc.table_name
+      AND pi.indexdef LIKE '%' || kcu.column_name || '%');
 
 -- Tablas sin PK
-SELECT table_name FROM information_schema.tables t
-WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+SELECT t.table_schema, t.table_name FROM information_schema.tables t
+WHERE t.table_schema = :schema AND t.table_type = 'BASE TABLE'
   AND NOT EXISTS (
-      SELECT 1 FROM information_schema.table_constraints tc
-      WHERE tc.table_name = t.table_name
-        AND tc.constraint_type = 'PRIMARY KEY'
-  );
+    SELECT 1 FROM information_schema.table_constraints tc
+    WHERE tc.table_schema = t.table_schema AND tc.table_name = t.table_name
+      AND tc.constraint_type = 'PRIMARY KEY');
 ```
+
+Patrón de fix idempotente (informe): `CREATE INDEX IF NOT EXISTS idx_ejemplar_especie_id ON ejemplar(especie_id);`

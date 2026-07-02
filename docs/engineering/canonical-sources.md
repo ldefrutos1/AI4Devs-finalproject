@@ -31,6 +31,7 @@ Al **encargar trabajo** suele bastar con la regla que hace de índice (p. ej. [b
 | Agregado *ejemplar* (PG/Mongo/Kafka en español; HTTP `/trees` + `treeId`) | [docs/adr/0006-ejemplar-aggregate-http-kafka-naming.md](../adr/0006-ejemplar-aggregate-http-kafka-naming.md) | [openapi.yaml](../api/openapi.yaml), [mongo.md](../data-model/mongo.md) |
 | Contratos HTTP en inglés + persistencia español (mapeo DTO) | [docs/adr/0007-english-http-spanish-persistence.md](../adr/0007-english-http-spanish-persistence.md) | [api-design.mdc](../../.cursor/rules/api-design.mdc), [openapi.yaml](../api/openapi.yaml) |
 | Nomenclatura global (BD, API, código, docs, Git, checklist auditoría) | [naming-conventions.md](naming-conventions.md) | [AGENTS.md](../../AGENTS.md), ADR-0006, ADR-0007 |
+| Auditoría estática capa de datos (Flyway, JPA, Mongo en catálogo) | [.cursor/skills/db-postgresql-mtl/SKILL.md](../../.cursor/skills/db-postgresql-mtl/SKILL.md); catálogo + Mongo: [db-mongo-mtl](../../.cursor/skills/db-mongo-mtl/SKILL.md) | [spring-boot-4-backend.mdc](../../.cursor/rules/spring-boot-4-backend.mdc), [data-model-design.mdc](../../.cursor/rules/data-model-design.mdc) |
 | Checklist al tocar `services/` | (índice) | [.cursor/rules/backend-generation-standard.mdc](../../.cursor/rules/backend-generation-standard.mdc) |
 | Frontend Vue 3 (`frontend/`) | (convenciones en regla; guías en `docs/` cuando existan) | [.cursor/rules/frontend-vue3.mdc](../../.cursor/rules/frontend-vue3.mdc) |
 

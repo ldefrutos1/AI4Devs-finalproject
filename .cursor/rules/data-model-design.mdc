@@ -33,6 +33,12 @@ Diseñar modelos de datos simples, consistentes, extensibles y adecuados para un
 - Modela campos obligatorios como no nulos.
 - Para catálogos estables usa `enum`; para catálogos evolutivos usa entidad propia.
 
+## Dónde persistir (`catalog-service`)
+
+- **PostgreSQL** (esquema `catalog`): maestros transaccionales — `especie`, `ejemplar`, taxonomía, ubicación PostGIS, integridad referencial.
+- **MongoDB** (`especie_detalle`, `ejemplar_detalle`): enriquecimientos semiestructurados y observaciones; **no** añadirlos como columnas JPA ni como entidad `@Document` sustituta del maestro SQL.
+- Canónico del híbrido: [mongo-hybrid.mdc](mongo-hybrid.mdc), [mongo.md](../../docs/data-model/mongo.md). Ante duda «¿SQL o Mongo?», consultar ahí — no duplicar criterios en esta rule.
+
 ## Auditoría y trazabilidad
 - Incluye campos de auditoría en entidades principales:
   - creadoEn
@@ -51,16 +57,19 @@ Diseñar modelos de datos simples, consistentes, extensibles y adecuados para un
 - Piensa explícitamente en N+1 queries al definir relaciones.
 
 ## Geolocalización y multimedia
+
+### Ubicación (`catalog-service`)
+
 - Modela ubicación de forma explícita y estable.
 - En **catalog-service** el `readme` prevé **PostgreSQL + PostGIS**: usa tipos espaciales apropiados (p. ej. `geometry`/`geography` o equivalente JPA/Hibernate) para el punto del ejemplar, no sustituir por simples lat/lon salvo decisión explícita en documentación.
 - Solo donde un agregado **no** disponga de PostGIS, latitud y longitud numéricas como campos separados son aceptables.
-- Las fotos deben modelarse como recurso asociado con metadatos mínimos:
-  - url o storageKey
-  - título opcional
-  - visibilidad pública
-  - fecha de alta
-  - autor
-- No guardes binarios en la entidad si el sistema usará almacenamiento externo.
+
+### Fotografías (`media-service`)
+
+- El agregado **`fotografia`** vive en **`media-service`** (esquema PostgreSQL `media`), enlazado al ejemplar por `ejemplar_id` / `treeId` en API — **no** embeber metadatos de foto en la entidad JPA `Ejemplar` de catálogo ni en Mongo.
+- Metadatos mínimos en `media.fotografia`: referencia al ejemplar, `storageKey` / URL derivada, visibilidad, foto principal, categoría, auditoría; binarios en **MinIO** (u otro object storage), nunca en JPA ni Mongo.
+- Orquestación cross-service (permiso de subida en catálogo, borrado en cascada al eliminar árbol): ver [media-upload-hu006.md](../../docs/engineering/media-upload-hu006.md) y contrato en [openapi.yaml](../../docs/api/openapi.yaml).
+- Al modelar en **`catalog-service`**: como mucho identificadores o flags de negocio acordados por API; la persistencia de fotos es responsabilidad de **`media-service`**.
 
 ## Calidad
 - Cada entidad debe tener una responsabilidad clara.
@@ -69,3 +78,4 @@ Diseñar modelos de datos simples, consistentes, extensibles y adecuados para un
   - ajuste de DTOs,
   - pruebas de persistencia si aplica.
 - Antes de crear una nueva entidad, valida si realmente representa un concepto del negocio.
+- Tras cambios de Flyway, entidades JPA o documentos Mongo: revisión estática según [db-postgresql-mtl](../skills/db-postgresql-mtl/SKILL.md); en `catalog-service`, también [db-mongo-mtl](../skills/db-mongo-mtl/SKILL.md) ([canonical-sources.md](../../docs/engineering/canonical-sources.md)).
