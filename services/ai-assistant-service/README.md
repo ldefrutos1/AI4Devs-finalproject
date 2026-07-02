@@ -15,7 +15,29 @@ Contrato OpenAPI: [docs/api/openapi.yaml](../../docs/api/openapi.yaml). El clien
 
 ## Modo local
 
-Por defecto `mtl.ai.provider.mode=stub` (sin red ni clave OpenAI). Chat y enriquecimiento comparten infraestructura de proveedor; modelo de chat: `mtl.ai.openai.chat-model` (ver `application.properties`).
+Por defecto `mtl.ai.provider.mode=stub` (sin red ni clave OpenAI). Chat y enriquecimiento comparten infraestructura de proveedor; modelos: `mtl.ai.openai.enrichment-model` y `mtl.ai.openai.chat-model` (ver `application.properties`).
+
+### Arranque con OpenAI real (perfil `dev`)
+
+La clave **no** debe commitearse ni pegarse en ficheros del repo.
+
+Variables en la **misma sesión** de terminal que arranca el proceso (PowerShell, desde la raíz del monorepo):
+
+```powershell
+$env:MTL_AI_PROVIDER_MODE = "openai"
+$env:MTL_OPENAI_API_KEY = "sk-..."   # tu clave; no la subas a Git
+mvn -f services/pom.xml -pl ai-assistant-service spring-boot:run "-Dspring-boot.run.profiles=dev"
+```
+
+Equivalente en bash:
+
+```bash
+export MTL_AI_PROVIDER_MODE=openai
+export MTL_OPENAI_API_KEY='sk-...'
+mvn -f services/pom.xml -pl ai-assistant-service spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+Si `MTL_AI_PROVIDER_MODE=openai` y falta la clave, el servicio falla al arrancar (`OpenAiStartupValidator`). Tests (`mvn test` / CI) siguen en **`stub`** vía `application-test.properties`; no hace falta clave para desarrollo habitual sin red a OpenAI.
 
 ## Tests
 

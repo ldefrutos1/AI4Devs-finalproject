@@ -55,6 +55,7 @@ mvn -pl catalog-service spring-boot:run -Dspring-boot.run.profiles=dev
 | Aviso por correo (alta de ejemplar) | Kafka, Mailpit | api-gateway, catalog-service, notification-service |
 | Admin (maestros / suscripciones) | — | api-gateway, catalog-service; notification-service (suscripciones) |
 | Consulta IA especie (ADMIN, stub) | — | api-gateway, ai-assistant-service + **catalog-service** para pantallas de alta/edición con popup de especie |
+| Consulta IA / chat con **OpenAI** real | — | Igual que la fila anterior; en la terminal de **ai-assistant-service** exportar `MTL_AI_PROVIDER_MODE=openai` y `MTL_OPENAI_API_KEY` antes de `spring-boot:run` — [ai-assistant-service/README.md](../../services/ai-assistant-service/README.md) |
 
 > **Redis:** **catalog-service** en `dev` usa caché Redis; el contenedor Redis debe estar en marcha **antes** de arrancarlo.
 

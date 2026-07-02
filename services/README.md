@@ -156,6 +156,8 @@ En **catalog-service**, `application-prod.properties` fija además `spring.datas
 | `MTL_OPENAI_API_KEY` / `OPENAI_API_KEY` | ai-assistant | Clave OpenAI; **nunca** en Git. Obligatoria si `MTL_AI_PROVIDER_MODE=openai` |
 | `MTL_OPENAI_*` (opc.) | ai-assistant | Base URL, modelo, timeouts y reintentos (ver `application.properties`) |
 
+**OpenAI real en local:** por defecto el servicio arranca en **`stub`**. Pasos copy-paste (PowerShell/bash, perfil `dev`): [ai-assistant-service/README.md](ai-assistant-service/README.md) § «Arranque con OpenAI real».
+
 **Flyway en prod:** `spring.flyway.clean-disabled=true` y `spring.flyway.create-schemas=false` (los esquemas los crea el DBA o el aprovisionamiento inicial). No usar `ddl-auto=update`; solo **`validate`**.
 
 **Local vs prod:** en **`dev`**, JDBC apunta a `localhost:5433` con credenciales del Compose (`.env.example`). En **`prod`**, las tres variables `MTL_DATASOURCE_*` sustituyen por completo esa configuración.
