@@ -23,6 +23,8 @@ import com.mtl.catalog.util.OidcUserProfileExtractor;
 import com.mtl.catalog.util.SpeciesLabelFormatter;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TaxonomyAdminService {
+
+  private static final Logger log = LoggerFactory.getLogger(TaxonomyAdminService.class);
 
   private final FamiliaRepository familiaRepository;
   private final GeneroRepository generoRepository;
@@ -39,6 +43,7 @@ public class TaxonomyAdminService {
   private final CatalogAuditService catalogAuditService;
   private final AfterCommitTaskRegistrar afterCommitTaskRegistrar;
   private final EspecieDetalleNamesSyncPort especieDetalleNamesSyncPort;
+  private final EspecieDetalleEnrichmentDeletionPort especieDetalleEnrichmentDeletionPort;
 
   public TaxonomyAdminService(
       FamiliaRepository familiaRepository,
@@ -48,7 +53,8 @@ public class TaxonomyAdminService {
       UsuarioAppMaterializationService usuarioAppMaterializationService,
       CatalogAuditService catalogAuditService,
       AfterCommitTaskRegistrar afterCommitTaskRegistrar,
-      EspecieDetalleNamesSyncPort especieDetalleNamesSyncPort) {
+      EspecieDetalleNamesSyncPort especieDetalleNamesSyncPort,
+      EspecieDetalleEnrichmentDeletionPort especieDetalleEnrichmentDeletionPort) {
     this.familiaRepository = familiaRepository;
     this.generoRepository = generoRepository;
     this.especieRepository = especieRepository;
@@ -57,6 +63,7 @@ public class TaxonomyAdminService {
     this.catalogAuditService = catalogAuditService;
     this.afterCommitTaskRegistrar = afterCommitTaskRegistrar;
     this.especieDetalleNamesSyncPort = especieDetalleNamesSyncPort;
+    this.especieDetalleEnrichmentDeletionPort = especieDetalleEnrichmentDeletionPort;
   }
 
   @Transactional(readOnly = true)
@@ -171,6 +178,20 @@ public class TaxonomyAdminService {
     String resumen = speciesAuditSummary(especie);
     especieRepository.delete(especie);
     catalogAuditService.recordSpeciesDeleted(actor.getId(), resumen);
+    afterCommitTaskRegistrar.runAfterCommit(
+        () -> deleteSpeciesMongoEnrichmentSafely(speciesId));
+  }
+
+  private void deleteSpeciesMongoEnrichmentSafely(long speciesId) {
+    try {
+      especieDetalleEnrichmentDeletionPort.deleteEnrichmentForSpecies(speciesId);
+    } catch (Exception ex) {
+      log.error(
+          "Fallo al eliminar enriquecimiento Mongo tras baja SQL de especie (speciesId={}): {}",
+          speciesId,
+          ex.toString());
+      log.debug("Detalle fallo borrado Mongo especie", ex);
+    }
   }
 
   private Especie persistNewSpecies(

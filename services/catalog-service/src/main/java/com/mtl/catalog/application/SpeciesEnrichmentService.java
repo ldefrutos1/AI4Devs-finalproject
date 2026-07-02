@@ -38,7 +38,6 @@ public class SpeciesEnrichmentService {
         speciesId, especie.getNombreCientifico(), especie.getNombreComun(), document);
   }
 
-  @Transactional
   public SpeciesEnrichmentResponse replaceSpeciesEnrichment(
       long speciesId, SpeciesEnrichmentReplaceRequest request, Jwt jwt) {
     requireAdminRole(jwt);

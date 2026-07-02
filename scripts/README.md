@@ -1,14 +1,13 @@
 # Scripts de desarrollo local
 
-Atajos PowerShell para tareas habituales del monorepo MyTreeLibrary. Los comandos Cursor (`.cursor/commands/`) cubren flujos con confirmación (commit, rama con cambios pendientes); estos scripts son para **ejecución directa en terminal**.
+Atajos PowerShell para tareas habituales. Los comandos Cursor (`.cursor/commands/`) cubren flujos con confirmación (commit, rama con cambios pendientes); estos scripts son para **ejecución directa en terminal**.
 
 ## Requisitos
 
 - **Windows:** PowerShell 5.1+ o PowerShell 7.
-- Herramientas en `PATH` según el script: `git`, `mvn`, `npm`, `docker` (stack Docker y E2E autocontenido).
-- Ejecutar desde la **raíz del repositorio** (o cualquier ruta: los scripts resuelven la raíz vía `services/pom.xml`).
+- Herramientas en `PATH` según el script: `git`, `mvn`, `npm`, `docker`.
 
-Para **stack Docker** (`build-images.ps1`, `start-docker-stack.ps1`): Docker Desktop en marcha y, la primera vez, `infra/compose/.env` copiado desde `.env.example` — ver [infra/compose/README.md](../infra/compose/README.md).
+Para **stack Docker** (`build-images.ps1`, `start-docker-stack.ps1`): Docker Desktop en marcha y `infra/compose/.env` configurado — ver [infra/compose/README.md](../infra/compose/README.md).
 
 Si la política de ejecución bloquea scripts:
 
@@ -20,24 +19,18 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\dev\test-backend.p
 
 ## Scripts (`scripts/dev/`)
 
-| Script | Descripción | Equivalente CI |
-|--------|-------------|----------------|
-| [test-backend.ps1](dev/test-backend.ps1) | `mvn test` (`-Quick`) o `mvn verify` en `services/` | `-Quick`: sí · sin flag: no (`verify`) |
-| [test-frontend.ps1](dev/test-frontend.ps1) | `npm ci` + `npm test` en `frontend/` | Parcial — añade `lint`/`typecheck` vía [devsecops-ci.md](../docs/engineering/devsecops-ci.md) |
-| [test-e2e.ps1](dev/test-e2e.ps1) | E2E de UI (Playwright). Por defecto stack autocontenido en Docker; `-Local` contra entorno ya levantado | No — local o workflow manual en Actions |
-| [build-images.ps1](dev/build-images.ps1) | Build Maven + imágenes Docker locales `mtl/*` (front + 5 microservicios) | Preparado para CI futuro |
-| [start-docker-stack.ps1](dev/start-docker-stack.ps1) | Build + infra (`docker-compose.yml`) + apps (`docker-compose.apps.yml`) | Preparado para CI futuro |
-| [sync-keycloak-spa-client.ps1](dev/sync-keycloak-spa-client.ps1) | Aplica redirect URIs / web origins de `mtl-realm.json` al cliente `mtl-spa` en Keycloak ya importado | — |
-| [check-ports.ps1](dev/check-ports.ps1) | Puertos MTL en escucha (`-All` lista también libres) | — |
-| [git-new-branch.ps1](dev/git-new-branch.ps1) | `main` + `pull` + `checkout -b prefijo/nombre` (`-Stash` si hay cambios) | — |
+| Script | Descripción |
+|--------|-------------|
+| [test-backend.ps1](dev/test-backend.ps1) | Test de backend: `mvn test` (`-Quick`) o `mvn verify` en `services/` |
+| [test-frontend.ps1](dev/test-frontend.ps1) | Test de frontend: `npm ci` + `npm test` en `frontend/` |
+| [test-e2e.ps1](dev/test-e2e.ps1) | E2E de UI (Playwright) |
+| [build-images.ps1](dev/build-images.ps1) | Build Maven + imágenes Docker locales `mtl/*` (front + 5 microservicios) |
+| [start-docker-stack.ps1](dev/start-docker-stack.ps1) | Build + infra (`docker-compose.yml`) + apps (`docker-compose.apps.yml`) |
+| [sync-keycloak-spa-client.ps1](dev/sync-keycloak-spa-client.ps1) | Aplica redirect URIs / web origins de `mtl-realm.json` al cliente `mtl-spa` en Keycloak ya importado |
+| [check-ports.ps1](dev/check-ports.ps1) | Comprueba puertos MTL en escucha (`-All` lista también libres) |
+| [git-new-branch.ps1](dev/git-new-branch.ps1) | `main` + `pull` + `checkout -b prefijo/nombre` |
 
 ### Parámetros
-
-**test-backend.ps1**
-
-| Parámetro | Descripción |
-|-----------|-------------|
-| `-Quick` | Solo `mvn test` (Surefire). Sin flag: `mvn verify` (unitarios + IT Failsafe). |
 
 **test-frontend.ps1**
 
@@ -88,15 +81,7 @@ Tras un rebuild de imágenes, recrea contenedores de apps (`--force-recreate`) p
 | `-AdminUser` | Usuario admin (por defecto: `KEYCLOAK_ADMIN` en `.env` o `admin`). |
 | `-AdminPassword` | Contraseña admin (por defecto: `KEYCLOAK_ADMIN_PASSWORD` en `.env` o valor de desarrollo). |
 
-Requiere Keycloak levantado. Útil cuando el realm ya existía en un volumen y `--import-realm` no reaplicó URIs de `:8088`.
-
-**check-ports.ps1**
-
-| Parámetro | Descripción |
-|-----------|-------------|
-| `-All` | Muestra también puertos MTL habituales que están libres. |
-
-Si cambian puertos en Compose o en microservicios, actualizar la tabla en este script y la documentación canónica.
+Requiere Keycloak levantado.
 
 **git-new-branch.ps1**
 
@@ -112,58 +97,12 @@ Si cambian puertos en Compose o en microservicios, actualizar la tabla en este s
 |---------|-----|
 | `_common.ps1` | Raíz del repo, mensajes, `git`/directorios, comprobación de comandos |
 
-## Stack Docker local (flujo habitual)
+## Notas
 
-1. Copiar entorno: `copy infra\compose\.env.example infra\compose\.env` (ajustar puertos si hace falta).
-2. Levantar todo: `.\scripts\dev\start-docker-stack.ps1`
-3. Comprobar puertos: `.\scripts\dev\check-ports.ps1`
-4. Si el login OIDC falla por redirect URI (realm antiguo en volumen): `.\scripts\dev\sync-keycloak-spa-client.ps1`
-5. Bajar stack: `.\scripts\dev\start-docker-stack.ps1 -Down` (añadir `-KeepVolumes` para conservar datos).
-
-Accesos tras el arranque: SPA `http://localhost:8088`, API Gateway `http://localhost:8080`, Keycloak `http://localhost:8180`. Detalle de compose y servicios: [infra/compose/README.md](../infra/compose/README.md).
-
-Iteración rápida tras cambios de código:
-
-```powershell
-.\scripts\dev\build-images.ps1              # o -SkipMaven si los jars ya están
-.\scripts\dev\start-docker-stack.ps1 -SkipBuild -AppsOnly
-```
-
-## Ejemplos
-
-```powershell
-cd C:\ruta\al\AI4Devs-finalproject
-
-.\scripts\dev\check-ports.ps1
-.\scripts\dev\check-ports.ps1 -All
-
-.\scripts\dev\test-backend.ps1
-.\scripts\dev\test-backend.ps1 -Quick
-
-.\scripts\dev\test-frontend.ps1
-.\scripts\dev\test-frontend.ps1 -SkipInstall
-
-.\scripts\dev\test-e2e.ps1                       # E2E Docker autocontenido
-.\scripts\dev\test-e2e.ps1 -SkipBuild -KeepStack # depurar stack E2E levantado
-.\scripts\dev\test-e2e.ps1 -Local                # contra entorno ya levantado (Vite :5173)
-.\scripts\dev\test-e2e.ps1 -Local -Ui -BaseUrl http://localhost:8088
-
-.\scripts\dev\build-images.ps1
-.\scripts\dev\build-images.ps1 -Tag dev -SkipMaven
-.\scripts\dev\build-images.ps1 -ServicesOnly
-
-.\scripts\dev\start-docker-stack.ps1
-.\scripts\dev\start-docker-stack.ps1 -InfraOnly
-.\scripts\dev\start-docker-stack.ps1 -SkipBuild -AppsOnly
-.\scripts\dev\start-docker-stack.ps1 -Down
-.\scripts\dev\start-docker-stack.ps1 -Down -KeepVolumes
-
-.\scripts\dev\sync-keycloak-spa-client.ps1
-.\scripts\dev\sync-keycloak-spa-client.ps1 -KeycloakPort 8180
-
-.\scripts\dev\git-new-branch.ps1 -Prefix fix -Name revision-bugs-entrega-dos
-.\scripts\dev\git-new-branch.ps1 -Prefix feature -Name mi-tarea -Stash
-```
+1. Levantar todo: `.\scripts\dev\start-docker-stack.ps1`
+2. Comprobar puertos: `.\scripts\dev\check-ports.ps1`
+3. Si el login OIDC falla por redirect URI (realm antiguo en volumen): `.\scripts\dev\sync-keycloak-spa-client.ps1`
+4. Bajar stack: `.\scripts\dev\start-docker-stack.ps1 -Down` (añadir `-KeepVolumes` para conservar datos).
 
 ## Referencias
 

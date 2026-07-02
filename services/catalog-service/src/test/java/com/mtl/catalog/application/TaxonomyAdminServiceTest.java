@@ -51,6 +51,7 @@ class TaxonomyAdminServiceTest {
   @Mock private CatalogAuditService catalogAuditService;
   @Mock private AfterCommitTaskRegistrar afterCommitTaskRegistrar;
   @Mock private EspecieDetalleNamesSyncPort especieDetalleNamesSyncPort;
+  @Mock private EspecieDetalleEnrichmentDeletionPort especieDetalleEnrichmentDeletionPort;
 
   @InjectMocks private TaxonomyAdminService service;
 
@@ -221,6 +222,7 @@ class TaxonomyAdminServiceTest {
     verify(catalogAuditService)
         .recordSpeciesDeleted(
             eq(1L), eq("especie_id=9 genero_id=2 nombre_cientifico=Quercus ilex"));
+    verify(especieDetalleEnrichmentDeletionPort).deleteEnrichmentForSpecies(9L);
   }
 
   @Test
@@ -234,6 +236,7 @@ class TaxonomyAdminServiceTest {
 
     verify(especieRepository, never()).delete(any());
     verify(catalogAuditService, never()).recordSpeciesDeleted(anyLong(), any());
+    verify(especieDetalleEnrichmentDeletionPort, never()).deleteEnrichmentForSpecies(anyLong());
   }
 
   @Test
