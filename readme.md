@@ -1000,8 +1000,8 @@ flowchart TB
         DC --> GRd
         KCd --> PGd
         GRd --> PRd
-        PRd -.->|scrape Actuator host.docker.internal o DNS interno| GWh
-        PRd -.-> MSh
+        PRd -->|scrape Actuator host.docker.internal o DNS interno| GWh
+        PRd --> MSh
     end
 ```
 
