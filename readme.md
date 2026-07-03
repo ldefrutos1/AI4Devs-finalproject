@@ -418,15 +418,17 @@ flowchart TB
     %% --- Estilos (Consistentes con los anteriores) ---
     classDef service fill:#E1F5EE,stroke:#0F6E56,stroke-width:1px,color:#085041;
     classDef db fill:#F5F5F5,stroke:#616161,stroke-width:1px,color:#424242,stroke-dasharray: 5 5;
-    classDef cluster fill:#FAFAFA,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5;
 
-    %% --- Servicios (La capa de lógica) ---
-    CAT["📂 Catalog Service"]:::service
-    MED["🖼️ Media Service"]:::service
-    NS["📧 Notification Service"]:::service
-    AIS["🧠 AI Assistant"]:::service
+    %% --- Servicios (misma fila que los esquemas para alinear flechas) ---
+    subgraph svc[" "]
+        direction LR
+        CAT["📂 Catalog Service"]:::service
+        MED["🖼️ Media Service"]:::service
+        NS["📧 Notification Service"]:::service
+        AIS["🧠 AI Assistant"]:::service
+    end
 
-    %% --- Subgraph PostgreSQL (La capa de almacenamiento) ---
+    %% --- PostgreSQL: un esquema por servicio ---
     subgraph pg["PostgreSQL + PostGIS"]
         direction LR
         SCH_C["📋 schema: catalog"]:::db
@@ -435,11 +437,13 @@ flowchart TB
         SCH_I["🤖 schema: ai"]:::db
     end
 
-    %% --- Relaciones (Unívocas) ---
+    %% --- Relaciones (entre subgrafos: flecha al nodo destino, no al contenedor) ---
     CAT --> SCH_C
     MED --> SCH_M
     NS --> SCH_N
     AIS --> SCH_I
+
+    style svc fill:none,stroke:none
 ```
 
 #### Capa de mensajería (Kafka)
@@ -1425,7 +1429,7 @@ El detalle del ciclo por historia se resume en:
 
 Por cuestiones operativas, al comienzo de la historia se hacen comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.
 
-La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada `docs/backlog/HU-*.md`, validar el alcance de cada TASK antes de implementar, pedir al agente una **revisión explícita** tras cada TASK, contra las reglas del breakdown, y confirmar tests y PR antes del merge. Persistencia: [db-postgresql-mtl](.cursor/skills/db-postgresql-mtl/SKILL.md) ([db-mongo-mtl](.cursor/skills/db-mongo-mtl/SKILL.md) en catálogo híbrido).
+La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada `docs/backlog/HU-*.md`, validar el alcance de cada TASK antes de implementar, pedir al agente una **revisión explícita** tras cada TASK, contra las reglas del breakdown, y confirmar tests y PR antes del merge. Además se han implementado skills específicas de revisión para la capa de persistencia y backend: [db-postgresql-mtl](.cursor/skills/db-postgresql-mtl/SKILL.md) ([db-mongo-mtl](.cursor/skills/db-mongo-mtl/SKILL.md)); revisión transversal del diff (tests, seguridad, arquitectura, etc.) en [`.cursor/skills/review`](.cursor/skills/review/README.md).
 
 **Evidencia del proceso:** hay ejemplos del proceso en [docs/ai-process-evidence/](docs/ai-process-evidence/README.md). Muestra representativa por fase del ciclo de vida: [prompts.md](prompts.md).
 
