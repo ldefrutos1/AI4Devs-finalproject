@@ -966,14 +966,18 @@ flowchart TB
 
         subgraph host [Aplicación - host dev o docker-compose.apps.yml]
             direction TB
+            DA["🐳 docker-compose.apps.yml (opcional)"]:::orch
             SPAh["🌐 Frontend SPA (Vite :5173 host / Nginx :8088 en Compose apps)"]:::web
             GWh["⚙️ Backend API Gateway :8080 (host o Compose apps)"]:::web
             MSh["Microservicios Spring Boot (host :8081-8084 / Compose apps :8080 interno)"]:::service
             SPAh --> GWh
             GWh --> MSh
+            DA --> GWh
+            DA --> MSh
+            DA --> SPAh
         end
 
-        subgraph compose [Docker Compose - infra base y overlay de aplicación]
+        subgraph compose [Docker Compose - infra base]
             direction TB
             DC["🐳 docker-compose.yml + docker-compose.apps.yml (opcional)"]:::orch
 
@@ -1000,8 +1004,7 @@ flowchart TB
         DC --> GRd
         KCd --> PGd
         GRd --> PRd
-        PRd -->|scrape Actuator host.docker.internal o DNS interno| GWh
-        PRd --> MSh
+
     end
 ```
 
