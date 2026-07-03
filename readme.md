@@ -418,17 +418,15 @@ flowchart TB
     %% --- Estilos (Consistentes con los anteriores) ---
     classDef service fill:#E1F5EE,stroke:#0F6E56,stroke-width:1px,color:#085041;
     classDef db fill:#F5F5F5,stroke:#616161,stroke-width:1px,color:#424242,stroke-dasharray: 5 5;
+    classDef cluster fill:#FAFAFA,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5;
 
-    %% --- Servicios (misma fila que los esquemas para alinear flechas) ---
-    subgraph svc[" "]
-        direction LR
-        CAT["📂 Catalog Service"]:::service
-        MED["🖼️ Media Service"]:::service
-        NS["📧 Notification Service"]:::service
-        AIS["🧠 AI Assistant"]:::service
-    end
+    %% --- Servicios (La capa de lógica) ---
+    CAT["📂 Catalog Service"]:::service
+    MED["🖼️ Media Service"]:::service
+    NS["📧 Notification Service"]:::service
+    AIS["🧠 AI Assistant"]:::service
 
-    %% --- PostgreSQL: un esquema por servicio ---
+    %% --- Subgraph PostgreSQL (La capa de almacenamiento) ---
     subgraph pg["PostgreSQL + PostGIS"]
         direction LR
         SCH_C["📋 schema: catalog"]:::db
@@ -437,13 +435,11 @@ flowchart TB
         SCH_I["🤖 schema: ai"]:::db
     end
 
-    %% --- Relaciones (entre subgrafos: flecha al nodo destino, no al contenedor) ---
+    %% --- Relaciones (Unívocas) ---
     CAT --> SCH_C
     MED --> SCH_M
     NS --> SCH_N
     AIS --> SCH_I
-
-    style svc fill:none,stroke:none
 ```
 
 #### Capa de mensajería (Kafka)
