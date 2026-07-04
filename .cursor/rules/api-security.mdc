@@ -7,7 +7,7 @@ alwaysApply: false
 
 # Seguridad de API (MyTreeLibrary)
 
-Visión de producto: [readme.md](../../readme.md) §2.5. **Rutas y contrato HTTP:** [docs/api/openapi.yaml](../../docs/api/openapi.yaml). **Flujo OIDC/JWT, gateway, relay y alternativas:** [jwt-gateway-strategy.md](../../docs/security/jwt-gateway-strategy.md) (no duplicar aquí el relato largo).
+Visión de producto: [readme.md](../../readme.md) §2.1 y [product-context.mdc](product-context.mdc). **Rutas y contrato HTTP:** [docs/api/openapi.yaml](../../docs/api/openapi.yaml). **Flujo OIDC/JWT, gateway, relay y alternativas:** [jwt-gateway-strategy.md](../../docs/security/jwt-gateway-strategy.md) (no duplicar aquí el relato largo).
 
 ## Autenticación y capa de confianza
 

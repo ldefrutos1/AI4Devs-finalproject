@@ -48,6 +48,6 @@ flowchart LR
 
 Tras **TASK-HU-005-05** publicando un mensaje real, el **notification-service** consume al menos una vez, registra idempotencia y genera notificación/correo (o no-op documentado) verificable por test o traza controlada.
 
-**TASK-HU-007-04 (cerrado):** verificación manual orientativa en [services/README.md](../../services/README.md) (apartado notificaciones / Mailpit) e infra Mailpit en [infra/compose/README.md](../../infra/compose/README.md).
+**TASK-HU-007-04 (cerrado):** verificación manual orientativa en [local-setup-guide.md](../onboarding/local-setup-guide.md) (flujo aviso por correo), Mailpit en [infra/compose/README.md](../../infra/compose/README.md) y nota HU-007 en [services/README.md](../../services/README.md) §1.
 
 **TASK-HU-007-05 (cerrado):** `NotificationArbolCreadoKafkaIT` en `notification-service` (`src/testIT/java`, perfil `test-it-pg-kafka`, recursos bajo `src/test/resources` para classpath Failsafe); Kafka (`confluentinc/cp-kafka`) + Postgres con esquema **notification**; comprobación de persistencia e idempotencia ante reentrega.

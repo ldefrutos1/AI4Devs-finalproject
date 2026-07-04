@@ -34,7 +34,7 @@ No hay **umbral de cobertura %** obligatorio en CI; sí estas reglas **baratas d
 
 - Módulo Maven **`services/system-e2e-tests`**: HTTP contra el **API Gateway** con **JWT real** de Keycloak; requiere gateway, catálogo (y demás infra según el caso) en marcha. Instrucciones y variables: [services/system-e2e-tests/README.md](../../services/system-e2e-tests/README.md).
 - Sin token ni flags de habilitación (`MTL_E2E_AUTO_KEYCLOAK_TOKEN`, `MTL_E2E_RUN_SECURITY`), los `*GatewayE2EIT` quedan **desactivados** (`@EnabledIf`); `mvn verify` no exige stack.
-- Los casos actuales de maestros asumen **semilla Flyway** (`V2__…`) y comprueban **`content` no vacío**; incluyen búsqueda con **`q`** para ejercitar SQL con **`unaccent`** (PostgreSQL). Detalle de rutas: README del módulo.
+- Maestros (**HU-005**): `Hu005Task03MastersReadGatewayE2EIT` asume **semilla Flyway** (`V2__…`), **`content` no vacío** y búsqueda **`q`** / **`unaccent`**. Chat (**HU-010**): `Hu010Scenario*` requiere **catalog-service** + **ai-assistant-service** además del gateway (stack en README del módulo).
 - Pruebas manuales con **Postman** (token OIDC, exploración de maestros): [api-manual-testing-postman.md](api-manual-testing-postman.md).
 - Complementan, no sustituyen, los IT del **api-gateway** con **WireMock** (autocontenidos).
 - **E2E de UI (Playwright)** del flujo de producto (login → alta → mis árboles → borrado) en la carpeta **`e2e/`**: documento canónico [testing-e2e.md](testing-e2e.md). Distinto de `system-e2e-tests` (HTTP/JWT sin navegador): el de UI valida OIDC, router y CRUD visible.
@@ -72,6 +72,9 @@ No hay **umbral de cobertura %** obligatorio en CI; sí estas reglas **baratas d
 | `…support.E2ePagedJsonAssertions`, `E2eProblemAssertions`, `E2eCorrelationAssertions` | Aserciones compartidas (paginación, Problem, `X-Correlation-Id`) |
 | `…integration.hu005hu008.Hu005Hu008CollaboratorTreeLifecycleGatewayE2EIT` | **HU-005** TASK-005-06 + **HU-008** TASK-008-02/07: ciclo alta → listado → borrado vía gateway |
 | `…integration.hu005.Hu005Task03MastersReadGatewayE2EIT` | **HU-005** TASK-005-03: maestros (especies/provincias, `q` / `unaccent`) |
+| `…integration.hu010.Hu010Scenario01ChatMessageGatewayE2EIT` | **HU-010** esc. 1: `POST /api/ai/chat/messages` con `treeId` → **200** (stub); alta/borrado borrador vía `Hu010E2eTreeSupport` |
+| `…integration.hu010.Hu010Scenario03UnauthorizedGatewayE2EIT` | **HU-010** esc. 3: sin Bearer / Bearer inválido → **401** Problem + correlación |
+| `…integration.hu010.Hu010E2eTreeSupport` | Fixture: `POST /api/catalog/trees` borrador para obtener `treeId` en esc. 1 |
 | `…integration.hu001.Hu001Scenario0N…` | Escenarios de aceptación HU-001 |
 | `…support.E2eCollaboratorTokenSupport` | `@BeforeAll` / `@AfterAll` compartidos para token Keycloak |
 

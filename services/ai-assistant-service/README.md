@@ -2,7 +2,7 @@
 
 Microservicio Spring Boot de IA orientativa (**puerto 8084** en local, perfil `dev`). Auditoría en PostgreSQL esquema **`ai`** (`AUDITORIA_USO_IA`).
 
-**Arranque, JDBC, Flyway, variables `MTL_AI_*` y observabilidad:** [services/README.md](../README.md) (§1 y §2).
+**Arranque, JDBC, Flyway y variables `MTL_AI_*`:** [services/README.md](../README.md) (§1 y §2). **Observabilidad (Actuator):** [platform/observability/README.md](../../platform/observability/README.md) (véase §1 de `services/README.md`).
 
 ## Endpoints HTTP
 

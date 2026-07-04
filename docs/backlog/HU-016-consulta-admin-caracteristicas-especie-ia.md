@@ -15,7 +15,7 @@
 **Inconsistencias detectadas**
 
 - «Usuario administrador» y **ADMIN** se consideran equivalentes en la documentación funcional de esta historia.
-- readme §2.2 (Integración con IA), §3.2.4 y backlog §3 son coherentes: en el MVP solo entra la consulta de características de especie; identificación por imagen y chat quedan en **HU-009** / **HU-010** (próximas versiones).
+- readme §2.2 (Integración con IA), §3.2.4 y backlog §3 son coherentes: en el MVP entran la consulta de características de especie (**HU-016**) y el chat asistido (**HU-010**); la identificación por imagen queda en **HU-009** (próxima versión).
 - La persistencia Mongo de `especie_detalle` queda fuera de **HU-016** y pertenece al alcance ya cerrado de **HU-015**.
 - El contrato `/api/ai/**` de esta historia debe limitarse a la **consulta a IA** para obtener un JSON compatible con la pantalla existente de edición de características de especie.
 

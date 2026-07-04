@@ -6,9 +6,21 @@ HTTP contra el **API Gateway** y microservicios reales (JWT Keycloak, sin WireMo
 
 ## Requisitos
 
-Stack backend en marcha (Keycloak, PostgreSQL, gateway y microservicios según la clase IT); sin stack levantado los tests quedan deshabilitados o fallan con 401/502.
+Infra Compose (Postgres, Keycloak) y microservicios Maven en perfil **`dev`** según la clase IT. Sin stack levantado los tests quedan deshabilitados o fallan con 401/502.
 
 El `iss` del token debe coincidir con `MTL_JWT_ISSUER_URI` (por defecto `http://localhost:8180/realms/mtl`); no mezclar `localhost` y `127.0.0.1` al obtener el token.
+
+### Stack Maven por clase
+
+| Clase / patrón | Servicios `dev` (además de Compose + **api-gateway** **8080**) |
+|----------------|----------------------------------------------------------------|
+| `Hu001Scenario02…` – `04…` | **catalog-service** **8081** |
+| `Hu005Task03MastersReadGatewayE2EIT` | **catalog-service** **8081** |
+| `Hu005Hu008CollaboratorTreeLifecycleGatewayE2EIT` | **catalog-service** **8081**, **media-service** **8082** |
+| `Hu010Scenario01…` | **catalog-service** **8081** (alta borrador para `treeId`), **ai-assistant-service** **8084** (`stub` por defecto) |
+| `Hu010Scenario03…` | **ai-assistant-service** **8084** (ruta `/api/ai/**` en gateway) |
+
+Arranque por flujo: [local-setup-guide.md](../../docs/onboarding/local-setup-guide.md). Verificación manual HU-010: [frontend/README.md](../../frontend/README.md) (apartado HU-010).
 
 ## Variables de entorno
 
