@@ -3,7 +3,7 @@
 Documento **canónico** para las pruebas E2E de navegador (Playwright) que ejercitan el flujo de producto extremo a extremo a través del SPA. Complementa, sin sustituir:
 
 - **Tests unitarios/componente frontend (Vitest):** [testing-frontend.md](testing-frontend.md).
-- **E2E de backend (gateway + microservicios reales, HTTP/JWT):** [testing-java.md](testing-java.md) §2.1 y el módulo [services/system-e2e-tests](../../services/system-e2e-tests/README.md). El **mismo ciclo de vida del ejemplar** (alta → consulta → borrado) está cubierto por HTTP en `EjemplarLifecycleGatewayE2EIT`, independiente de la UI.
+- **E2E de backend (gateway + microservicios reales, HTTP/JWT):** [testing-java.md](testing-java.md) §2.1 y el módulo [services/system-e2e-tests](../../services/system-e2e-tests/README.md). El **mismo ciclo de vida del ejemplar** (alta → consulta → borrado) está cubierto por HTTP en `Hu005Hu008CollaboratorTreeLifecycleGatewayE2EIT`, independiente de la UI.
 
 Reparto de responsabilidades (qué demuestra cada capa, evitando duplicar): [testing-java.md](testing-java.md) §2.1.1. Regla corta de calidad: [quality-and-testing.mdc](../../.cursor/rules/quality-and-testing.mdc).
 

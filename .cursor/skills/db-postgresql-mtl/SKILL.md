@@ -1,9 +1,9 @@
 # Auditoría PostgreSQL / JPA / Flyway (MTL)
 
 Skill de **revisión estática** e informe de hallazgos. **No** sustituye reglas de implementación:
-[data-model-design.mdc](../../.cursor/rules/data-model-design.mdc),
-[naming-conventions.md](../../docs/engineering/naming-conventions.md),
-[spring-boot-4-backend.mdc](../../.cursor/rules/spring-boot-4-backend.mdc) § Persistencia.
+[data-model-design.mdc](../../rules/data-model-design.mdc),
+[naming-conventions.md](../../../docs/engineering/naming-conventions.md),
+[spring-boot-4-backend.mdc](../../rules/spring-boot-4-backend.mdc) § Persistencia.
 
 ## Cuándo activar
 
@@ -42,7 +42,7 @@ Skill de **revisión estática** e informe de hallazgos. **No** sustituye reglas
 
 ### 3. Naming
 
-Canónico: [naming-conventions.md](../../docs/engineering/naming-conventions.md) § **N1**. Marcar ❌ desvíos y `@Table`/`@Column` desalineados con Flyway o [ADR-0007](../../docs/adr/0007-english-http-spanish-persistence.md).
+Canónico: [naming-conventions.md](../../../docs/engineering/naming-conventions.md) § **N1**. Marcar ❌ desvíos y `@Table`/`@Column` desalineados con Flyway o [ADR-0007](../../../docs/adr/0007-english-http-spanish-persistence.md).
 
 ### 4. Integridad
 
@@ -69,8 +69,8 @@ Canónico: [naming-conventions.md](../../docs/engineering/naming-conventions.md)
 ### 8. Seguridad
 
 - Native SQL: solo parámetros nombrados; ❌ concatenación/`String.format` con input usuario
-- ❌ `@Entity` en API o binding request → entidad; usar DTO ([ADR-0007](../../docs/adr/0007-english-http-spanish-persistence.md))
-- ❌ PII o filas completas en logs ([logging.mdc](../../.cursor/rules/logging.mdc))
+- ❌ `@Entity` en API o binding request → entidad; usar DTO ([ADR-0007](../../../docs/adr/0007-english-http-spanish-persistence.md))
+- ❌ PII o filas completas en logs ([logging.mdc](../../rules/logging.mdc))
 
 ## Informe (obligatorio)
 

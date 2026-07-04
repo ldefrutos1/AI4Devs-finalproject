@@ -9,8 +9,14 @@ En PRs **fix/** o **chore/** escribe **N/A** en la tabla.
 | Campo | Valor |
 |-------|--------|
 | **HU** | |
-| **Ticket** | |
-| **Breakdown** | |
+| **Ticket** (`TASK-HU-XXX-nn`) | |
+| **Enlace al breakdown** | |
+
+<!-- Ejemplo (borra este bloque al rellenar):
+| **HU** | HU-001 |
+| **Ticket** (`TASK-HU-XXX-nn`) | TASK-HU-001-14 |
+| **Enlace al breakdown** | [HU-001-ticket-breakdown.md](../docs/backlog/HU-001-ticket-breakdown.md) |
+-->
 
 ## Cambios principales
 
@@ -28,7 +34,7 @@ Marca solo lo que hayas ejecutado. Detalle: [devsecops-ci.md](../docs/engineerin
 
 - [ ] Sin secretos en el diff
 - [ ] Tests acordes al impacto del cambio
-- [ ] Tras merge: ticket → **Hecho** y HU actualizada en [backlog.md](../docs/backlog/backlog.md) *(solo si aplica HU/TASK)*
+- [ ] Revisión estado ticket y HU
 
 ## Notas para review *(opcional)*
 

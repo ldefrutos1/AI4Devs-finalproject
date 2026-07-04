@@ -2,7 +2,7 @@
 
 Revisión estática de Mongo y coherencia SQL↔Mongo. Complementa [db-postgresql-mtl](../db-postgresql-mtl/SKILL.md) en auditorías completas de catálogo.
 
-**Implementación:** [mongo-hybrid.mdc](../../.cursor/rules/mongo-hybrid.mdc), [mongo.md](../../docs/data-model/mongo.md), [data-model-design.mdc](../../.cursor/rules/data-model-design.mdc) § Dónde persistir. **Esta skill solo audita.**
+**Implementación:** [mongo-hybrid.mdc](../../rules/mongo-hybrid.mdc), [mongo.md](../../../docs/data-model/mongo.md), [data-model-design.mdc](../../rules/data-model-design.mdc) § Dónde persistir. **Esta skill solo audita.**
 
 ## Cuándo activar
 
@@ -17,7 +17,7 @@ Revisión estática de Mongo y coherencia SQL↔Mongo. Complementa [db-postgresq
    - `services/catalog-service/…/infrastructure/persistence/mongo/**`
    - `…/application/**` (sync SQL→Mongo)
    - `…/controller/**` — ❌ repos Mongo o orquestación híbrida fuera de `application`
-3. Contrastar con [mongo.md](../../docs/data-model/mongo.md) y [mongo-hybrid.mdc](../../.cursor/rules/mongo-hybrid.mdc).
+3. Contrastar con [mongo.md](../../../docs/data-model/mongo.md) y [mongo-hybrid.mdc](../../rules/mongo-hybrid.mdc).
 4. Evaluar dimensiones (✅ | ⚠️ | ❌) e informe (misma plantilla que db-postgresql-mtl).
 
 ## Dimensiones
@@ -28,13 +28,13 @@ Revisión estática de Mongo y coherencia SQL↔Mongo. Complementa [db-postgresq
 |------|-----|
 | Maestros especie/ejemplar, taxonomía, transaccional | PostgreSQL |
 | Enriquecimiento semiestructurado | Mongo (`especie_detalle`, `ejemplar_detalle`) |
-| Binarios / fotos | Object storage ([media-service](../../docs/engineering/media-upload-hu006.md)) |
+| Binarios / fotos | Object storage (**media-service**; contrato en [openapi.yaml](../../../docs/api/openapi.yaml)) |
 
 ❌ maestros o integridad transaccional en Mongo.
 
 ### 2. Identificadores
 
-- `_id` entero = `especie_pg_id` o `ejemplar_pg_id` ([mongo.md](../../docs/data-model/mongo.md)); ❌ `ObjectId` / prefijos `esp_`/`eje_` en MVP
+- `_id` entero = `especie_pg_id` o `ejemplar_pg_id` ([mongo.md](../../../docs/data-model/mongo.md)); ❌ `ObjectId` / prefijos `esp_`/`eje_` en MVP
 - Enlaces explícitos `especie_pg_id` / `ejemplar_pg_id` en documentos
 - ❌ IDs SQL obsoletos sin actualizar Mongo
 
@@ -57,7 +57,7 @@ Revisión estática de Mongo y coherencia SQL↔Mongo. Complementa [db-postgresq
 
 ### 6. Paquetes
 
-Según [spring-boot-4-backend.mdc](../../.cursor/rules/spring-boot-4-backend.mdc) § Persistencia: JPA y Mongo separados bajo `infrastructure.persistence.*`; sync en `application`.
+Según [spring-boot-4-backend.mdc](../../rules/spring-boot-4-backend.mdc) § Persistencia: JPA y Mongo separados bajo `infrastructure.persistence.*`; sync en `application`.
 
 ❌ sync en `domain` o repos JPA; ⚠️ `@Document` mezclado con `@Entity`.
 

@@ -11,25 +11,19 @@ Microservicio Spring Boot de IA orientativa (**puerto 8084** en local, perfil `d
 | `POST /api/ai/species/enrichment-suggestions` | **ADMIN** | [HU-016](../../docs/backlog/HU-016-ticket-breakdown.md) |
 | `POST /api/ai/chat/messages` | **COLABORADOR**, **ADMIN** | [HU-010](../../docs/backlog/HU-010-ticket-breakdown.md) |
 
-Contrato OpenAPI: [docs/api/openapi.yaml](../../docs/api/openapi.yaml). El cliente accede vía **api-gateway** (`/api/ai/**`).
+Contrato: [openapi.yaml](../../docs/api/openapi.yaml). Acceso vía **api-gateway** (`/api/ai/**`). UI: [frontend/README.md](../../frontend/README.md) (HU-010, HU-016).
 
-## Modo local
+## Modo proveedor (`stub` / OpenAI)
 
-Por defecto `mtl.ai.provider.mode=stub` (sin red ni clave OpenAI). Chat y enriquecimiento comparten infraestructura de proveedor; modelos: `mtl.ai.openai.enrichment-model` y `mtl.ai.openai.chat-model` (ver `application.properties`).
+Por defecto `mtl.ai.provider.mode=stub` (sin red ni clave). Modelos en `application.properties`: `mtl.ai.openai.enrichment-model`, `mtl.ai.openai.chat-model`. Tests y CI usan **`stub`** (`application-test.properties`).
 
-### Arranque con OpenAI real (perfil `dev`)
-
-La clave **no** debe commitearse ni pegarse en ficheros del repo.
-
-Variables en la **misma sesión** de terminal que arranca el proceso (PowerShell, desde la raíz del monorepo):
+**OpenAI real (perfil `dev`):** la clave **no** va en el repo. Exporta en la misma terminal que arranca el servicio:
 
 ```powershell
 $env:MTL_AI_PROVIDER_MODE = "openai"
-$env:MTL_OPENAI_API_KEY = "sk-..."   # tu clave; no la subas a Git
+$env:MTL_OPENAI_API_KEY = "sk-..."   # no subir a Git
 mvn -f services/pom.xml -pl ai-assistant-service spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
-
-Equivalente en bash:
 
 ```bash
 export MTL_AI_PROVIDER_MODE=openai
@@ -37,20 +31,8 @@ export MTL_OPENAI_API_KEY='sk-...'
 mvn -f services/pom.xml -pl ai-assistant-service spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-Si `MTL_AI_PROVIDER_MODE=openai` y falta la clave, el servicio falla al arrancar (`OpenAiStartupValidator`). Tests (`mvn test` / CI) siguen en **`stub`** vía `application-test.properties`; no hace falta clave para desarrollo habitual sin red a OpenAI.
+Sin clave con `MTL_AI_PROVIDER_MODE=openai`, falla al arrancar (`OpenAiStartupValidator`).
 
 ## Tests
 
-Desde `services/`:
-
-```bash
-mvn -pl ai-assistant-service test verify
-```
-
-Detalle Surefire/Failsafe: [testing-java.md](../../docs/engineering/testing-java.md).
-
-## Documentación de producto
-
-- Enriquecimiento especie: apartado **HU-016** en [services/README.md](../README.md).
-- Chat asistido: apartado **HU-010** en [services/README.md](../README.md).
-- Verificación manual UI: [frontend/README.md](../../frontend/README.md) (HU-016, HU-010).
+`mvn -pl ai-assistant-service test verify` (desde `services/`). Detalle: [testing-java.md](../../docs/engineering/testing-java.md).
