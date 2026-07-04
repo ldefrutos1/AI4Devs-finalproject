@@ -6,6 +6,7 @@
 #
 # Uso (desde infra/compose):
 #   docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
+#   docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d --scale catalog-service=2   # N réplicas catalog
 #   docker compose -f docker-compose.yml -f docker-compose.apps.yml down
 #
 # Acceso:

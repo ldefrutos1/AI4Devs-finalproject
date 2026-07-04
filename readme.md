@@ -966,7 +966,7 @@ flowchart TB
 
         subgraph host [Aplicación - host dev o docker-compose.apps.yml]
             direction TB
-            DA["🐳 docker-compose.apps.yml (opcional)"]:::orch
+            DA["🐳 docker-compose.apps.yml"]:::orch
             SPAh["🌐 Frontend SPA (Vite :5173 host / Nginx :8088 en Compose apps)"]:::web
             GWh["⚙️ Backend API Gateway :8080 (host o Compose apps)"]:::web
             MSh["Microservicios Spring Boot (host :8081-8084 / Compose apps :8080 interno)"]:::service

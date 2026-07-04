@@ -78,6 +78,8 @@ Los `application-dev.properties` de los servicios con JDBC usan `jdbc:postgresql
 | ai-assistant-service | 8084 |
 | system-e2e-tests | (no aplica: solo tests contra URLs configurables) |
 
+**Varias réplicas de catalog (solo Compose):** [docker-compose.apps.yml](../infra/compose/docker-compose.apps.yml) admite `--scale catalog-service=N` en el `up` de apps; sin flag, una réplica. No requiere cambios en gateway ni en código. Detalle: [infra/compose/README.md](../infra/compose/README.md).
+
 ### Observabilidad (ADR-0005)
 
 Cada microservicio expone Actuator con **`/actuator/health`**, **`/actuator/prometheus`** y logs **JSON** en consola (`logging.structured.format.console=logstash`). Etiquetas Micrometer: `application` (`spring.application.name`) y `environment` (`APP_ENV`, por defecto `local`).

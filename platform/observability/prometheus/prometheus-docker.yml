@@ -15,10 +15,18 @@ scrape_configs:
 
   - job_name: catalog-service
     metrics_path: /actuator/prometheus
-    static_configs:
-      - targets: ["catalog-service:8080"]
-        labels:
-          environment: docker
+    # Con --scale catalog-service=N, Docker DNS devuelve una IP por contenedor.
+    dns_sd_configs:
+      - names: ["catalog-service"]
+        type: A
+        port: 8080
+    relabel_configs:
+      # Solo IPs (evita entradas hostname duplicadas en targets).
+      - source_labels: [__address__]
+        regex: '^((?:[0-9]{1,3}\.){3}[0-9]{1,3}):8080$'
+        action: keep
+      - target_label: environment
+        replacement: docker
 
   - job_name: media-service
     metrics_path: /actuator/prometheus
