@@ -10,7 +10,7 @@ package com.mtl.e2e.support;
  */
 public final class E2eCollaboratorTokenLifecycle {
 
-  private static final Object KEYCLOAK_LOCK = new Object();
+  private static final Object KEYCLOAK_LOCK = KeycloakE2eAdminSupport.KEYCLOAK_ADMIN_LOCK;
   private static boolean directAccessGrantsToggledByTest;
 
   private E2eCollaboratorTokenLifecycle() {}

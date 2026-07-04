@@ -42,7 +42,7 @@ El código del gateway sigue el **modo token relay** por defecto; cualquier camb
 
 - Usuarios de prueba del realm (solo desarrollo, ver [infra/compose/README.md](../../infra/compose/README.md)): `colaborador` / `colaborador_dev` (rol `COLABORADOR`), `admin_mtl` / `admin_mtl_dev` (roles `ADMIN` y `COLABORADOR`).
 - Variables de entorno `VITE_*` en Vue ([frontend/.env.example](../../frontend/.env.example)): **`VITE_OIDC_ISSUER`** (URL **completa** del issuer, p. ej. `http://localhost:8180/realms/mtl` si `KEYCLOAK_PORT=8180`), **`VITE_OIDC_CLIENT_ID`** (`mtl-spa`), **`VITE_OIDC_SCOPE`** (`openid profile email`).
-- **Redirect URIs** y **Web origins** deben coincidir con el origen real de la SPA (`http://localhost:5173` con Vite en host; `http://localhost:8088` con overlay Compose apps; ver [infra/compose/README.md](../../infra/compose/README.md)).
+- **Redirect URIs** y **Web origins** deben coincidir con el origen real de la SPA (`http://localhost:5173` con Vite en host; `http://localhost:8088` con overlay Compose apps; ver [infra/compose/README.md](../../infra/compose/README.md)). Callbacks **Postman** (`oauth.pstmn.io`): [api-manual-testing-postman.md](../engineering/api-manual-testing-postman.md).
 - Usar el **access token** como Bearer hacia el gateway; no usar el ID token como sustituto del access token para la API REST.
 
 ## 5. Back (Spring Boot)

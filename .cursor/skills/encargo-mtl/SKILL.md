@@ -32,7 +32,7 @@ Lista incumplimientos o confirma conformidad; no modifiques código.
 
 ## Encargo completo (TASKs complejos)
 
-Si el TASK es grande, transversal o el breakdown no basta (muchas exclusiones o decisiones técnicas), rellena tú las secciones desde `## Objetivo` hasta `## Modo` y pégalas en el chat, o pide al agente que las redacte primero y las valides antes de implementar. Ejemplo documentado: [hu-breakdown-and-encargo.md](../../docs/ai-process-evidence/hu-breakdown-and-encargo.md) (TASK-HU-016-02).
+Si el TASK es grande, transversal o el breakdown no basta (muchas exclusiones o decisiones técnicas), rellena tú las secciones desde `## Objetivo` hasta `## Modo` y pégalas en el chat, o pide al agente que las redacte primero y las valides antes de implementar. Ejemplo documentado: [hu-breakdown-and-encargo.md](../../../docs/ai-process-evidence/hu-breakdown-and-encargo.md) (TASK-HU-016-02).
 
 ## Prompt operativo (agente)
 
@@ -45,7 +45,7 @@ Cuando el usuario pide trabajar un **`TASK-HU-XXX-nn`** con esta skill:
    - **Solo diseño / plan:** análisis y propuesta; **sin** modificar ficheros.
    - **Solo revisión:** informe de conformidad o incumplimientos; **sin** modificar ficheros.
 4. **Aplicar** las reglas citadas en el breakdown y las reglas Cursor del área tocada; si hay contradicción con contrato, seguridad o arquitectura, **pregunta** antes de implementar.
-5. **Al cerrar (modo Implementar):** cumplir la definición de hecho del encargo (tests/comandos según breakdown y [devsecops-ci.md](../../docs/engineering/devsecops-ci.md) cuando aplique).
+5. **Al cerrar (modo Implementar):** cumplir la definición de hecho del encargo (tests/comandos según breakdown y [devsecops-ci.md](../../../docs/engineering/devsecops-ci.md) cuando aplique).
 6. **Al cerrar (modo Solo revisión):** lista explícita de incumplimientos o confirmación de conformidad; no proponer cambios de código salvo que el usuario lo pida después.
 
 ## Cómo usar la plantilla manualmente (pasos)

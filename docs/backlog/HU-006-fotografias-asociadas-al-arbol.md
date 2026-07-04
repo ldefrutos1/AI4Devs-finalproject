@@ -50,7 +50,7 @@ Como usuario autenticado, quiero asociar una o varias fotografías a los árbole
 
 ### Riesgos
 
-- **Contrato HTTP (presign / confirm):** cerrado en OpenAPI (TASK-HU-006-06); flujo y propiedades operativas en [media-upload-hu006.md](../engineering/media-upload-hu006.md).
+- **Contrato HTTP (presign / confirm):** cerrado en OpenAPI (TASK-HU-006-06); flujo y propiedades operativas en [openapi.yaml](../api/openapi.yaml) y readme §3.2.3.
 - **Autoría y permisos:** reglas distintas por rol (p. ej. colaborador frente a árbol ajeno frente a **ADMIN**); deben quedar explícitas en implementación y pruebas, en coherencia con la matriz del readme (alta y edición de árbol para colaborador y administrador).
 - **Ventana de la URL prefirmada** y reintentos: UX y seguridad si la subida falla o caduca.
 - **Extracción de metadatos EXIF** en cliente: no todas las imágenes incorporan GPS; además puede haber diferencias de formato entre dispositivos.
@@ -59,7 +59,7 @@ Como usuario autenticado, quiero asociar una o varias fotografías a los árbole
 
 ### Decisiones de refinamiento (registro)
 
-Resumen técnico actualizado: [media-upload-hu006.md](../engineering/media-upload-hu006.md). Contrato: [openapi.yaml](../api/openapi.yaml).
+Contrato y decisiones de refinamiento: [openapi.yaml](../api/openapi.yaml).
 
 - Límite de tamaño fijado en **20 MB por fotografía** con configuración por propiedad de aplicación.
 - Número máximo de fotografías por árbol fijado en **10** para el primer release.
@@ -73,7 +73,7 @@ Resumen técnico actualizado: [media-upload-hu006.md](../engineering/media-uploa
 
 ### Referencias
 
-Readme (microservicio **media-service**, **MinIO**, enrutado `/api/media`); [docs/api/openapi.yaml](../api/openapi.yaml) (`/api/media/uploads/presign`, `/api/media/photos/confirm`, …); [docs/engineering/media-upload-hu006.md](../engineering/media-upload-hu006.md); [docs/data-model/data-model.md](../data-model/data-model.md) (reglas R4 y R5 y matriz de visibilidad); épicas en [backlog.md](backlog.md); dependencia de ficha de árbol (**HU-005**).
+Readme (microservicio **media-service**, **MinIO**, enrutado `/api/media`); [docs/api/openapi.yaml](../api/openapi.yaml) (`/api/media/uploads/presign`, `/api/media/photos/confirm`, …); [docs/data-model/data-model.md](../data-model/data-model.md) (reglas R4 y R5 y matriz de visibilidad); épicas en [backlog.md](backlog.md); dependencia de ficha de árbol (**HU-005**).
 
 ### Escenario 1 — Subida múltiple autorizada con foto principal
 

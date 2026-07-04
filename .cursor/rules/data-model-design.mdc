@@ -68,7 +68,7 @@ Diseñar modelos de datos simples, consistentes, extensibles y adecuados para un
 
 - El agregado **`fotografia`** vive en **`media-service`** (esquema PostgreSQL `media`), enlazado al ejemplar por `ejemplar_id` / `treeId` en API — **no** embeber metadatos de foto en la entidad JPA `Ejemplar` de catálogo ni en Mongo.
 - Metadatos mínimos en `media.fotografia`: referencia al ejemplar, `storageKey` / URL derivada, visibilidad, foto principal, categoría, auditoría; binarios en **MinIO** (u otro object storage), nunca en JPA ni Mongo.
-- Orquestación cross-service (permiso de subida en catálogo, borrado en cascada al eliminar árbol): ver [media-upload-hu006.md](../../docs/engineering/media-upload-hu006.md) y contrato en [openapi.yaml](../../docs/api/openapi.yaml).
+- Orquestación cross-service (permiso de subida en catálogo, borrado en cascada al eliminar árbol): contrato en [openapi.yaml](../../docs/api/openapi.yaml) y [HU-006](../../docs/backlog/HU-006-fotografias-asociadas-al-arbol.md).
 - Al modelar en **`catalog-service`**: como mucho identificadores o flags de negocio acordados por API; la persistencia de fotos es responsabilidad de **`media-service`**.
 
 ## Calidad

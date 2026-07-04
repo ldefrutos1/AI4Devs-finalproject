@@ -73,7 +73,7 @@ public final class E2eGatewayHttpClient {
   public static JsonNode getProblem(
       String pathAndQuery, String bearerToken, int expectedStatus, String expectedTitle)
       throws Exception {
-    return getProblem(pathAndQuery, bearerToken, null, expectedStatus, expectedTitle);
+    return getProblem(pathAndQuery, bearerToken, null, expectedStatus, expectedTitle, null, null);
   }
 
   public static JsonNode getProblem(
@@ -83,8 +83,23 @@ public final class E2eGatewayHttpClient {
       int expectedStatus,
       String expectedTitle)
       throws Exception {
+    return getProblem(
+        pathAndQuery, bearerToken, correlationId, expectedStatus, expectedTitle, null, null);
+  }
+
+  public static JsonNode getProblem(
+      String pathAndQuery,
+      String bearerToken,
+      String correlationId,
+      int expectedStatus,
+      String expectedTitle,
+      String expectedDetail,
+      String expectedInstancePath)
+      throws Exception {
     HttpResponse<String> response = get(pathAndQuery, bearerToken, correlationId);
-    JsonNode problem = E2eProblemAssertions.assertProblem(response, expectedStatus, expectedTitle);
+    JsonNode problem =
+        E2eProblemAssertions.assertProblem(
+            response, expectedStatus, expectedTitle, expectedDetail, expectedInstancePath);
     if (correlationId != null && !correlationId.isBlank()) {
       String corr = correlationId.trim();
       E2eCorrelationAssertions.assertResponseHeader(response, corr);
@@ -130,7 +145,8 @@ public final class E2eGatewayHttpClient {
       int expectedStatus,
       String expectedTitle)
       throws Exception {
-    return postProblem(pathAndQuery, jsonBody, bearerToken, null, expectedStatus, expectedTitle);
+    return postProblem(
+        pathAndQuery, jsonBody, bearerToken, null, expectedStatus, expectedTitle, null, null);
   }
 
   public static JsonNode postProblem(
@@ -141,8 +157,24 @@ public final class E2eGatewayHttpClient {
       int expectedStatus,
       String expectedTitle)
       throws Exception {
+    return postProblem(
+        pathAndQuery, jsonBody, bearerToken, correlationId, expectedStatus, expectedTitle, null, null);
+  }
+
+  public static JsonNode postProblem(
+      String pathAndQuery,
+      String jsonBody,
+      String bearerToken,
+      String correlationId,
+      int expectedStatus,
+      String expectedTitle,
+      String expectedDetail,
+      String expectedInstancePath)
+      throws Exception {
     HttpResponse<String> response = post(pathAndQuery, jsonBody, bearerToken, correlationId);
-    JsonNode problem = E2eProblemAssertions.assertProblem(response, expectedStatus, expectedTitle);
+    JsonNode problem =
+        E2eProblemAssertions.assertProblem(
+            response, expectedStatus, expectedTitle, expectedDetail, expectedInstancePath);
     if (correlationId != null && !correlationId.isBlank()) {
       String corr = correlationId.trim();
       E2eCorrelationAssertions.assertResponseHeader(response, corr);
