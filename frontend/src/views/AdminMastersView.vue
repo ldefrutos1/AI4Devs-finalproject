@@ -86,13 +86,23 @@ const speciesModalTitle = computed(() =>
 )
 
 const speciesAutocompleteRef = ref<InstanceType<typeof SpeciesAutocompleteInput> | null>(null)
+const speciesFilterHint = ref('')
 
 async function onApplySpeciesFilter(): Promise<void> {
-  speciesAutocompleteRef.value?.commitSpeciesFromText()
+  speciesFilterHint.value = ''
+  const result = speciesAutocompleteRef.value?.commitSpeciesFromText('filter')
+  if (result === 'cleared_unresolved') {
+    speciesFilterHint.value = t('common.filters.speciesUnresolved')
+  }
   await applySpeciesFilter()
 }
 
+function onSpeciesFilterTextInput(): void {
+  speciesFilterHint.value = ''
+}
+
 async function onClearSpeciesFilter(): Promise<void> {
+  speciesFilterHint.value = ''
   await clearSpeciesFilter()
 }
 
@@ -137,7 +147,15 @@ onMounted(async () => {
                   :species="speciesFilterOptions"
                   input-class="form-control"
                   :placeholder="t('adminMasters.filters.species.placeholder')"
+                  @filter-text-input="onSpeciesFilterTextInput"
                 />
+                <output
+                  v-if="speciesFilterHint"
+                  class="muted"
+                  data-testid="admin-masters-species-filter-hint"
+                >
+                  {{ speciesFilterHint }}
+                </output>
               </div>
               <div class="filter-field">
                 <label class="form-label" for="admin-masters-filter-genus">{{

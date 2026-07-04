@@ -411,4 +411,55 @@ describe('AdminMastersView', () => {
       expect.objectContaining({ page: 0, genusId: undefined, speciesId: undefined }),
     )
   })
+
+  it('auto-selecciona especie con una sola coincidencia parcial al aplicar filtro', async () => {
+    fetchSpeciesMock.mockResolvedValue([{ id: 1, label: 'Encina (Quercus ilex)' }])
+
+    const wrapper = mount(AdminMastersView, {
+      global: {
+        plugins: [createTestI18n()],
+        stubs: { MtlConfirmDialog: true },
+      },
+    })
+    await flushPromises()
+
+    await wrapper.get('[data-testid="admin-masters-filter-species"]').setValue('enc')
+    await wrapper.get('.catalog-toolbar__form').trigger('submit.prevent')
+    await flushPromises()
+
+    expect(fetchAdminSpeciesListMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 0, speciesId: 1 }),
+    )
+    expect(wrapper.find('[data-testid="admin-masters-species-filter-hint"]').exists()).toBe(false)
+  })
+
+  it('muestra aviso y no filtra por especie si el texto es ambiguo', async () => {
+    fetchSpeciesMock.mockResolvedValue([
+      { id: 1, label: 'Encina (Quercus ilex)' },
+      { id: 2, label: 'Encino americano (Quercus rubra)' },
+    ])
+
+    const wrapper = mount(AdminMastersView, {
+      global: {
+        plugins: [createTestI18n()],
+        stubs: { MtlConfirmDialog: true },
+      },
+    })
+    await flushPromises()
+
+    await wrapper.get('[data-testid="admin-masters-filter-species"]').setValue('enc')
+    await wrapper.get('.catalog-toolbar__form').trigger('submit.prevent')
+    await flushPromises()
+
+    expect(wrapper.get('[data-testid="admin-masters-species-filter-hint"]').text()).toContain(
+      'No se ha seleccionado ninguna especie',
+    )
+    expect(fetchAdminSpeciesListMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ page: 0, speciesId: undefined }),
+    )
+    expect(
+      (wrapper.get('[data-testid="admin-masters-filter-species"]').element as HTMLInputElement)
+        .value,
+    ).toBe('')
+  })
 })

@@ -55,6 +55,8 @@ docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d --scale ca
 
 **Réplicas de `catalog-service`:** añade `--scale catalog-service=N` al `up` de apps (p. ej. `N=2`). Sin `--scale`, una sola réplica. El gateway y media siguen con `http://catalog-service:8080`; Docker reparte el tráfico. Comprobar: `docker compose -f docker-compose.yml -f docker-compose.apps.yml ps catalog-service`. Tras cambiar observabilidad o escalar: `docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d --force-recreate prometheus grafana`. En Grafana (**MTL Microservices**), filtra **Instancia** para ver cada réplica; el panel UP solo muestra targets `environment=docker` (no mezcla con `host.docker.internal:8081` del perfil Maven en host).
 
+**SPA — error `Failed to fetch dynamically imported module`:** el navegador pide un chunk antiguo (`TreeDetailView-….js`). Reconstruye frontend y recarga sin caché: `docker compose -f docker-compose.yml -f docker-compose.apps.yml build frontend` y `up -d frontend`; en el navegador Ctrl+Shift+R.
+
 | Acceso | URL |
 |--------|-----|
 | SPA | `http://localhost:8088` (`FRONTEND_PORT`) |

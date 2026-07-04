@@ -3,6 +3,10 @@ export const es = {
     cancel: 'Cancelar',
     emptyValue: '—',
     filtersTitle: 'Filtros de búsqueda',
+    filters: {
+      speciesUnresolved:
+        'No se ha seleccionado ninguna especie. Elige una de la lista o escribe el nombre completo.',
+    },
   },
   appShell: {
     brand: 'MyTreeLibrary',
@@ -63,11 +67,11 @@ export const es = {
     publicTiles: {
       trees: {
         title: 'Catálogo público',
-        desc: 'Explorar árboles publicados en listado y mapa.',
+        desc: 'Explorar árboles publicados.',
       },
       subscribe: {
         title: 'Suscripción por correo',
-        desc: 'Recibir avisos sobre novedades sin cuenta de colaborador.',
+        desc: 'Recibir avisos sobre novedades.',
       },
       login: {
         title: 'Iniciar sesión',
@@ -98,7 +102,7 @@ export const es = {
   subscriptionNew: {
     title: 'Suscripción por correo',
     intro:
-      'Recibirás avisos sobre el catálogo público. No sustituye una cuenta de colaborador; es solo notificaciones por correo.',
+      'Recibirás avisos sobre nuevsa incorporaciones al catálogo.',
     fields: {
       email: {
         label: 'Correo electrónico',
