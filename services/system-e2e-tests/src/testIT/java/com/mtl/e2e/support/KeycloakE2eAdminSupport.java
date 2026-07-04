@@ -20,6 +20,14 @@ public final class KeycloakE2eAdminSupport {
   private static final String SPA_CLIENT_ID = "mtl-spa";
   private static final String DEFAULT_COLABORADOR_USER = "colaborador";
   private static final String DEFAULT_COLABORADOR_PASSWORD = "colaborador_dev";
+  private static final int EXPIRED_TOKEN_LIFESPAN_SECONDS = 1;
+  /** Lee way por defecto del validador JWT de Spring Security OAuth2 Resource Server. */
+  private static final int JWT_CLOCK_SKEW_SECONDS = 60;
+  private static final int MAX_ACCEPTABLE_TOKEN_TTL_SECONDS = 10;
+  private static final int LIFESPAN_PROPAGATION_MS = 250;
+
+  /** Bloqueo compartido con {@link E2eCollaboratorTokenLifecycle} para mutaciones Admin API. */
+  static final Object KEYCLOAK_ADMIN_LOCK = new Object();
 
   private static final HttpClient HTTP =
       HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).build();
@@ -61,6 +69,169 @@ public final class KeycloakE2eAdminSupport {
       throw new IllegalStateException("Keycloak no devolvió access_token: " + json);
     }
     return token;
+  }
+
+  /**
+   * Access token de colaborador ya expirado (lifespan realm + cliente {@code mtl-spa} a 1s, espera según
+   * {@code expires_in} y restauración). Requiere Admin API y {@code directAccessGrants} temporal.
+   */
+  public static String fetchExpiredCollaboratorAccessToken() {
+    synchronized (KEYCLOAK_ADMIN_LOCK) {
+      boolean directAccessWasEnabled = isDirectAccessGrantsEnabled();
+      String originalClientLifespan = null;
+      int originalRealmLifespan = -1;
+      boolean lifespanSaved = false;
+      try {
+        if (!directAccessWasEnabled) {
+          enableDirectAccessGrants();
+        }
+        String adminToken = fetchAdminAccessToken();
+        String clientUuid = findSpaClientId(adminToken);
+        ObjectNode client = fetchClientRepresentation(adminToken, clientUuid);
+        ObjectNode realm = fetchRealmRepresentation(adminToken);
+        originalClientLifespan = readClientAccessTokenLifespan(client);
+        originalRealmLifespan = realm.path("accessTokenLifespan").asInt();
+        lifespanSaved = true;
+        writeClientAccessTokenLifespan(client, String.valueOf(EXPIRED_TOKEN_LIFESPAN_SECONDS));
+        realm.put("accessTokenLifespan", EXPIRED_TOKEN_LIFESPAN_SECONDS);
+        putClientRepresentation(adminToken, clientUuid, client);
+        putRealmRepresentation(adminToken, realm);
+        Thread.sleep(LIFESPAN_PROPAGATION_MS);
+        TokenIssue issue = fetchCollaboratorTokenIssue();
+        if (issue.expiresInSeconds() > MAX_ACCEPTABLE_TOKEN_TTL_SECONDS) {
+          throw new IllegalStateException(
+              "Keycloak emitió token con expires_in="
+                  + issue.expiresInSeconds()
+                  + "s; no se pudo acortar lifespan para E2E expirado");
+        }
+        Thread.sleep((issue.expiresInSeconds() + JWT_CLOCK_SKEW_SECONDS + 1L) * 1_000L);
+        return issue.accessToken();
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new IllegalStateException("Interrumpido esperando expiración del token Keycloak", e);
+      } finally {
+        if (lifespanSaved) {
+          restoreTokenLifespans(originalClientLifespan, originalRealmLifespan);
+        }
+        if (!directAccessWasEnabled) {
+          rollbackDirectAccessGrants();
+        }
+      }
+    }
+  }
+
+  private record TokenIssue(String accessToken, int expiresInSeconds) {}
+
+  private static TokenIssue fetchCollaboratorTokenIssue() {
+    String body =
+        formBody(
+            "grant_type", "password",
+            "client_id", SPA_CLIENT_ID,
+            "username", colaboradorUsername(),
+            "password", colaboradorPassword(),
+            "scope", "openid");
+    JsonNode json = postForm(tokenEndpoint(keycloakRealm()), body);
+    String token = json.path("access_token").asString(null);
+    if (token == null || token.isBlank()) {
+      throw new IllegalStateException("Keycloak no devolvió access_token: " + json);
+    }
+    return new TokenIssue(token, json.path("expires_in").asInt(-1));
+  }
+
+  private static boolean isDirectAccessGrantsEnabled() {
+    String adminToken = fetchAdminAccessToken();
+    String clientUuid = findSpaClientId(adminToken);
+    ObjectNode representation = fetchClientRepresentation(adminToken, clientUuid);
+    return representation.path("directAccessGrantsEnabled").asBoolean(false);
+  }
+
+  private static void restoreTokenLifespans(String originalClientLifespan, int originalRealmLifespan) {
+    try {
+      String adminToken = fetchAdminAccessToken();
+      String clientUuid = findSpaClientId(adminToken);
+      ObjectNode client = fetchClientRepresentation(adminToken, clientUuid);
+      writeClientAccessTokenLifespan(client, originalClientLifespan);
+      putClientRepresentation(adminToken, clientUuid, client);
+      if (originalRealmLifespan >= 0) {
+        ObjectNode realm = fetchRealmRepresentation(adminToken);
+        realm.put("accessTokenLifespan", originalRealmLifespan);
+        putRealmRepresentation(adminToken, realm);
+      }
+    } catch (RuntimeException ignored) {
+      // Mejor esfuerzo tras fallo en el flujo principal
+    }
+  }
+
+  private static ObjectNode fetchRealmRepresentation(String adminToken) {
+    HttpRequest request =
+        HttpRequest.newBuilder(
+                URI.create(keycloakBaseUrl() + "/admin/realms/" + keycloakRealm()))
+            .timeout(Duration.ofSeconds(30))
+            .header("Authorization", "Bearer " + adminToken)
+            .header("Accept", "application/json")
+            .GET()
+            .build();
+    JsonNode node = sendJson(request);
+    if (!(node instanceof ObjectNode objectNode)) {
+      throw new IllegalStateException("Representación de realm inesperada: " + node);
+    }
+    return objectNode;
+  }
+
+  private static void putRealmRepresentation(String adminToken, ObjectNode representation) {
+    try {
+      byte[] body = E2eTestJson.MAPPER.writeValueAsBytes(representation);
+      HttpRequest request =
+          HttpRequest.newBuilder(
+                  URI.create(keycloakBaseUrl() + "/admin/realms/" + keycloakRealm()))
+              .timeout(Duration.ofSeconds(30))
+              .header("Authorization", "Bearer " + adminToken)
+              .header("Content-Type", "application/json")
+              .PUT(HttpRequest.BodyPublishers.ofByteArray(body))
+              .build();
+      HttpResponse<String> response =
+          HTTP.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() < 200 || response.statusCode() >= 300) {
+        throw new IllegalStateException(
+            "PUT realm Keycloak falló: HTTP "
+                + response.statusCode()
+                + " — "
+                + response.body());
+      }
+    } catch (IllegalStateException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new IllegalStateException("Error actualizando realm Keycloak", e);
+    }
+  }
+
+  private static String readClientAccessTokenLifespan(ObjectNode client) {
+    JsonNode attributes = client.path("attributes");
+    if (!attributes.isObject()) {
+      return null;
+    }
+    JsonNode lifespan = attributes.path("access.token.lifespan");
+    return lifespan.isMissingNode() || lifespan.isNull() ? null : lifespan.asString();
+  }
+
+  private static void writeClientAccessTokenLifespan(ObjectNode client, String lifespanSeconds) {
+    ObjectNode attributes =
+        client.path("attributes").isObject()
+            ? (ObjectNode) client.path("attributes")
+            : client.putObject("attributes");
+    if (lifespanSeconds == null || lifespanSeconds.isBlank()) {
+      attributes.put("access.token.lifespan", "");
+    } else {
+      attributes.put("access.token.lifespan", lifespanSeconds);
+    }
+  }
+
+  private static void rollbackDirectAccessGrants() {
+    try {
+      disableDirectAccessGrants();
+    } catch (RuntimeException ignored) {
+      // Mejor esfuerzo tras fallo al obtener token
+    }
   }
 
   private static void updateDirectAccessGrants(boolean enabled) {

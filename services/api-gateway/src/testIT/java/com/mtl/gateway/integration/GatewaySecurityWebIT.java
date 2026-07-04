@@ -110,6 +110,33 @@ class GatewaySecurityWebIT {
   }
 
   @Test
+  void protectedCatalogRouteWithInvalidBearer_returnsProblemJsonWithCorrelationId() {
+    webTestClient
+        .get()
+        .uri("/api/catalog/trees")
+        .header("Authorization", "Bearer token-inexistente")
+        .header(CorrelationIdWebFilter.HEADER_NAME, "gw-it-corr-401-invalid")
+        .exchange()
+        .expectStatus()
+        .isUnauthorized()
+        .expectHeader()
+        .contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
+        .expectHeader()
+        .valueEquals(CorrelationIdWebFilter.HEADER_NAME, "gw-it-corr-401-invalid")
+        .expectBody()
+        .jsonPath("$.title")
+        .isEqualTo("No autenticado")
+        .jsonPath("$.status")
+        .isEqualTo(401)
+        .jsonPath("$.detail")
+        .isEqualTo("Se requiere autenticación con un token Bearer válido")
+        .jsonPath("$.instance")
+        .isEqualTo("/api/catalog/trees")
+        .jsonPath("$.correlationId")
+        .isEqualTo("gw-it-corr-401-invalid");
+  }
+
+  @Test
   void protectedCatalogRouteWithoutToken_returnsProblemJsonWithCorrelationId() {
     webTestClient
         .get()

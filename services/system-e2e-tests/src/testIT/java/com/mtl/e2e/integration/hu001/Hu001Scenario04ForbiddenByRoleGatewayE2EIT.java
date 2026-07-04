@@ -1,10 +1,12 @@
 package com.mtl.e2e.integration.hu001;
 
 import static com.mtl.e2e.integration.hu001.Hu001E2ePaths.FAMILIES_PAGE;
+import static com.mtl.e2e.integration.hu001.Hu001E2ePaths.FAMILIES_PATH;
 import static com.mtl.e2e.integration.hu001.Hu001E2ePaths.SPECIES_BY_ID_1;
 
 import com.mtl.e2e.support.E2eCollaboratorTokenSupport;
 import com.mtl.e2e.support.E2eGatewayHttpClient;
+import com.mtl.e2e.support.E2eProblemExpectations;
 import com.mtl.e2e.support.E2eTokens;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -25,13 +27,25 @@ class Hu001Scenario04ForbiddenByRoleGatewayE2EIT extends E2eCollaboratorTokenSup
   @DisplayName("Escenario 4: COLABORADOR en GET /api/catalog/families → 403 Prohibido")
   void listFamilies_asCollaborator_viaGateway_returns403Problem() throws Exception {
     E2eGatewayHttpClient.getProblem(
-        FAMILIES_PAGE, E2eTokens.collaboratorToken(), 403, "Prohibido");
+        FAMILIES_PAGE,
+        E2eTokens.collaboratorToken(),
+        "hu001-s04-families",
+        403,
+        E2eProblemExpectations.FORBIDDEN_TITLE,
+        E2eProblemExpectations.FORBIDDEN_DETAIL,
+        FAMILIES_PATH);
   }
 
   @Test
   @DisplayName("Escenario 4: COLABORADOR en GET /api/catalog/species/1 → 403 Prohibido")
   void getSpeciesById_asCollaborator_viaGateway_returns403Problem() throws Exception {
     E2eGatewayHttpClient.getProblem(
-        SPECIES_BY_ID_1, E2eTokens.collaboratorToken(), 403, "Prohibido");
+        SPECIES_BY_ID_1,
+        E2eTokens.collaboratorToken(),
+        "hu001-s04-species-1",
+        403,
+        E2eProblemExpectations.FORBIDDEN_TITLE,
+        E2eProblemExpectations.FORBIDDEN_DETAIL,
+        SPECIES_BY_ID_1);
   }
 }

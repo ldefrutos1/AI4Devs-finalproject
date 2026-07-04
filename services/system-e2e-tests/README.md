@@ -47,8 +47,8 @@ mvn -pl system-e2e-tests verify
 | Clase | Comprueba |
 |-------|-----------|
 | `Hu001Scenario02…` | Esc. 2: COLABORADOR → species **200**; eco `X-Correlation-Id` |
-| `Hu001Scenario03…` | Esc. 3: sin Bearer / Bearer inválido → **401** Problem + correlación |
-| `Hu001Scenario04…` | Esc. 4: COLABORADOR → `families`, `species/1` → **403** (id `1` en semilla) |
+| `Hu001Scenario03…` | Esc. 3: sin Bearer / Bearer inválido / Bearer **expirado** (este último requiere `MTL_E2E_AUTO_KEYCLOAK_TOKEN=true`) → **401** Problem + correlación |
+| `Hu001Scenario04…` | Esc. 4: COLABORADOR → `families`, `species/1` → **403** Problem + correlación (id `1` en semilla) |
 | `CatalogMastersGatewayE2EIT` | Maestros species/provinces, búsqueda `q` / `unaccent` |
 | `EjemplarLifecycleGatewayE2EIT` | Ciclo completo del ejemplar por HTTP: alta `POST` → consulta en "mis árboles" `GET` → borrado `DELETE` (204) → ausencia. Complementa el E2E de UI (Playwright `e2e/`). Requiere **media-service** arriba |
 | `Hu010Scenario01…` | **HU-010** esc. 1 (Java): `POST /api/ai/chat/messages` con `treeId` → **200** respuesta orientativa |

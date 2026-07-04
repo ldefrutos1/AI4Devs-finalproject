@@ -57,7 +57,11 @@ public class GatewaySecurityConfig {
             ex ->
                 ex.authenticationEntryPoint(authenticationEntryPoint)
                     .accessDeniedHandler(accessDeniedHandler))
-        .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+        .oauth2ResourceServer(
+            oauth2 ->
+                oauth2
+                    .authenticationEntryPoint(authenticationEntryPoint)
+                    .jwt(Customizer.withDefaults()))
         .build();
   }
 }

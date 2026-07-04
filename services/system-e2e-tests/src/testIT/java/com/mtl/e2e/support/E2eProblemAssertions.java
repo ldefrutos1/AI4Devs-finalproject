@@ -12,6 +12,16 @@ public final class E2eProblemAssertions {
 
   public static JsonNode assertProblem(
       HttpResponse<String> response, int expectedStatus, String expectedTitle) throws Exception {
+    return assertProblem(response, expectedStatus, expectedTitle, null, null);
+  }
+
+  public static JsonNode assertProblem(
+      HttpResponse<String> response,
+      int expectedStatus,
+      String expectedTitle,
+      String expectedDetail,
+      String expectedInstancePath)
+      throws Exception {
     assertThat(response.statusCode())
         .as("HTTP status — body: %s", response.body())
         .isEqualTo(expectedStatus);
@@ -25,6 +35,25 @@ public final class E2eProblemAssertions {
     assertThat(body.path("title").asString())
         .as("problem.title")
         .isEqualTo(expectedTitle);
+    if (expectedDetail != null) {
+      String detail = body.path("detail").asString();
+      assertThat(detail).as("problem.detail").isEqualTo(expectedDetail);
+      assertDetailDoesNotLeakInternals(detail);
+    }
+    if (expectedInstancePath != null) {
+      assertThat(body.path("instance").asString())
+          .as("problem.instance")
+          .isEqualTo(expectedInstancePath);
+    }
     return body;
+  }
+
+  static void assertDetailDoesNotLeakInternals(String detail) {
+    assertThat(detail)
+        .as("problem.detail no debe filtrar detalle interno")
+        .doesNotContainIgnoringCase("Exception")
+        .doesNotContainIgnoringCase("stacktrace")
+        .doesNotContain(" at com.")
+        .doesNotContain(" at org.");
   }
 }
