@@ -84,6 +84,7 @@ const page = ref(0)
 const size = ref(DEFAULT_PAGE_SIZE)
 const speciesOptions = ref<MasterListItem[]>([])
 const speciesAutocompleteRef = ref<InstanceType<typeof SpeciesAutocompleteInput> | null>(null)
+const speciesFilterHint = ref('')
 
 const filters = reactive({
   speciesId: '',
@@ -171,12 +172,21 @@ async function loadSpeciesOptions(): Promise<void> {
 }
 
 async function applyFilters(): Promise<void> {
-  speciesAutocompleteRef.value?.commitSpeciesFromText()
+  speciesFilterHint.value = ''
+  const result = speciesAutocompleteRef.value?.commitSpeciesFromText('filter')
+  if (result === 'cleared_unresolved') {
+    speciesFilterHint.value = t('common.filters.speciesUnresolved')
+  }
   page.value = 0
   await loadTrees()
 }
 
+function onSpeciesFilterTextInput(): void {
+  speciesFilterHint.value = ''
+}
+
 async function clearFilters(): Promise<void> {
+  speciesFilterHint.value = ''
   filters.speciesId = ''
   filters.createdFrom = ''
   filters.createdTo = ''
@@ -256,7 +266,15 @@ onMounted(async () => {
                 :species="speciesOptions"
                 input-class="form-control"
                 :placeholder="t('myTrees.filters.species.placeholder')"
+                @filter-text-input="onSpeciesFilterTextInput"
               />
+              <output
+                v-if="speciesFilterHint"
+                class="muted"
+                data-testid="my-trees-species-filter-hint"
+              >
+                {{ speciesFilterHint }}
+              </output>
             </div>
 
             <div class="filter-field">

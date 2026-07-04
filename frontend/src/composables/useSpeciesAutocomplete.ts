@@ -4,6 +4,9 @@ import {
   SPECIES_SUGGESTIONS_BLUR_DELAY_MS,
   filterSpeciesByLabel,
   findSpeciesByExactLabel,
+  resolveSpeciesFromText,
+  type SpeciesResolveMode,
+  type SpeciesResolveResult,
 } from '@/composables/speciesAutocomplete'
 
 export function useSpeciesAutocomplete(species: Ref<MasterListItem[]>, speciesId: Ref<string>) {
@@ -80,12 +83,18 @@ export function useSpeciesAutocomplete(species: Ref<MasterListItem[]>, speciesId
   }
 
   function confirmHighlightedSpecies(): void {
-    if (speciesHighlightIndex.value < 0) {
+    if (speciesHighlightIndex.value >= 0) {
+      const highlighted = filteredSpecies.value[speciesHighlightIndex.value]
+      if (highlighted) {
+        selectSpecies(highlighted)
+      }
       return
     }
-    const highlighted = filteredSpecies.value[speciesHighlightIndex.value]
-    if (highlighted) {
-      selectSpecies(highlighted)
+    if (filteredSpecies.value.length === 1) {
+      const [single] = filteredSpecies.value
+      if (single) {
+        selectSpecies(single)
+      }
     }
   }
 
@@ -93,8 +102,28 @@ export function useSpeciesAutocomplete(species: Ref<MasterListItem[]>, speciesId
     resetSpeciesSuggestions()
   }
 
-  function commitSpeciesFromText(): void {
-    applySpeciesSelection(findSpeciesByExactLabel(species.value, speciesAutocompleteText.value))
+  function commitSpeciesFromText(mode: SpeciesResolveMode = 'form'): SpeciesResolveResult['kind'] {
+    const result = resolveSpeciesFromText(species.value, speciesAutocompleteText.value, mode)
+
+    if (result.kind === 'matched') {
+      selectSpecies(result.item)
+      return result.kind
+    }
+
+    if (result.kind === 'cleared_unresolved') {
+      speciesAutocompleteText.value = ''
+      applySpeciesSelection(null)
+      resetSpeciesSuggestions()
+      return result.kind
+    }
+
+    if (result.kind === 'unresolved') {
+      applySpeciesSelection(null)
+      return result.kind
+    }
+
+    applySpeciesSelection(null)
+    return result.kind
   }
 
   return {

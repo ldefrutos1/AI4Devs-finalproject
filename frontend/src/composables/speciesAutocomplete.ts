@@ -36,3 +36,39 @@ export function filterSpeciesByLabel(
     normalizeSpeciesAutocompleteValue(item.label).includes(normalizedInput),
   )
 }
+
+export type SpeciesResolveMode = 'filter' | 'form'
+
+export type SpeciesResolveResult =
+  | { kind: 'empty' }
+  | { kind: 'matched'; item: MasterListItem }
+  | { kind: 'cleared_unresolved' }
+  | { kind: 'unresolved' }
+
+export function resolveSpeciesFromText(
+  species: MasterListItem[],
+  inputValue: string,
+  mode: SpeciesResolveMode,
+): SpeciesResolveResult {
+  const normalizedInput = normalizeSpeciesAutocompleteValue(inputValue)
+  if (!normalizedInput) {
+    return { kind: 'empty' }
+  }
+
+  const exact = findSpeciesByExactLabel(species, inputValue)
+  if (exact) {
+    return { kind: 'matched', item: exact }
+  }
+
+  const partial = filterSpeciesByLabel(species, inputValue)
+  if (mode === 'filter' && partial.length === 1) {
+    const [item] = partial
+    return { kind: 'matched', item }
+  }
+
+  if (mode === 'filter') {
+    return { kind: 'cleared_unresolved' }
+  }
+
+  return { kind: 'unresolved' }
+}

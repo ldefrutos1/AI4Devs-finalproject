@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
 import { useSpeciesAutocomplete } from '@/composables/useSpeciesAutocomplete'
+import type { SpeciesResolveMode, SpeciesResolveResult } from '@/composables/speciesAutocomplete'
 import type { MasterListItem } from '@/types/catalog'
 
 const props = withDefaults(
@@ -24,6 +25,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
+  filterTextInput: []
 }>()
 
 const speciesRef = computed(() => props.species)
@@ -49,7 +51,11 @@ const {
   commitSpeciesFromText,
 } = useSpeciesAutocomplete(speciesRef, speciesId)
 
-defineExpose({ commitSpeciesFromText })
+defineExpose({
+  commitSpeciesFromText(mode?: SpeciesResolveMode): SpeciesResolveResult['kind'] {
+    return commitSpeciesFromText(mode)
+  },
+})
 
 watch(
   () => props.modelValue,
@@ -68,6 +74,11 @@ watch(
 onMounted(() => {
   syncTextFromSpeciesId()
 })
+
+function onSpeciesInputWithEmit(event: Event): void {
+  onSpeciesInput(event)
+  emit('filterTextInput')
+}
 </script>
 
 <template>
@@ -82,7 +93,7 @@ onMounted(() => {
       :placeholder="placeholder"
       :aria-invalid="ariaInvalid || undefined"
       autocomplete="off"
-      @input="onSpeciesInput"
+      @input="onSpeciesInputWithEmit"
       @keydown.down.prevent="highlightNextSpecies"
       @keydown.up.prevent="highlightPreviousSpecies"
       @keydown.page-down.prevent="highlightNextSpecies"
