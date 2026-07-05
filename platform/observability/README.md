@@ -48,7 +48,16 @@ Paneles: estado UP, tráfico HTTP, latencia p95 y memoria JVM heap.
 Cada servicio publica:
 
 - `application` = `spring.application.name`
-- `environment` = `APP_ENV` (por defecto `local`)
+- `environment` = `APP_ENV` (por defecto `local` en host; `docker` con `docker-compose.apps.yml`)
+
+Prometheus añade además la etiqueta `environment` en el scrape según el fichero de config:
+
+| Modo | Config Prometheus | Valor `environment` en `up` |
+|------|-------------------|-----------------------------|
+| Microservicios en host (`mvn spring-boot:run`) | `prometheus.yml` | `local` |
+| Stack apps en Docker | `prometheus-docker.yml` | `docker` |
+
+El dashboard **MTL Microservices** incluye la variable **Entorno** y admite ambos valores. Si tras actualizar el JSON provisionado sigue en *No data*, reinicia Grafana: `docker compose restart grafana` desde `infra/compose`.
 
 ## Evolución
 
