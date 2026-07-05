@@ -22,7 +22,6 @@ test('alta y borrado de una especie en maestros admin', async ({ page }) => {
   const suffix = String(Date.now())
   const scientificName = `E2e species ${suffix}`
   const commonName = `Especie E2E ${suffix}`
-  const expectedLabel = `${commonName} (${scientificName})`
 
   await test.step('1. Iniciar sesion como administrador', async () => {
     await loginAsAdmin(page)
@@ -50,10 +49,10 @@ test('alta y borrado de una especie en maestros admin', async ({ page }) => {
   })
 
   await test.step('4. Verificar que la especie aparece en la tabla', async () => {
-    // Refresca opciones del filtro (lista unpaged en memoria del composable).
+    // Refresca opciones del autocomplete de filtro (fetch unpaged al montar la vista).
     await page.reload()
     await expectAdminMastersReady(page)
-    await filterAdminSpeciesByLabel(page, expectedLabel)
+    await filterAdminSpeciesByLabel(page, scientificName)
 
     const row = adminSpeciesRow(page, scientificName)
     await expect(row).toHaveCount(1)

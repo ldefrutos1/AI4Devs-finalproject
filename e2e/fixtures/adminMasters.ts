@@ -39,14 +39,27 @@ export async function expectSpeciesModalClosed(page: Page): Promise<void> {
 }
 
 /**
- * Filtra la tabla por etiqueta exacta de especie (el formulario hace commit al pulsar Aplicar).
+ * Filtra la tabla eligiendo una especie en el autocomplete y pulsando Aplicar.
  * Tras crear una especie conviene recargar la pagina para refrescar las opciones del autocomplete.
  */
 export async function filterAdminSpeciesByLabel(page: Page, label: string): Promise<void> {
-  await page.getByTestId('admin-masters-filter-species').fill(label)
+  const filterInput = page.getByTestId('admin-masters-filter-species')
+  await filterInput.click()
+  await filterInput.fill(label)
+
+  const suggestions = page.locator('.species-autocomplete-list .species-autocomplete-item')
+  const matchingOption = suggestions.filter({ hasText: label }).first()
+  await expect(matchingOption).toBeVisible({ timeout: 10_000 })
+  await matchingOption.click()
+
   await page.getByTestId('admin-masters-filter-apply').click()
 
   await expect(async () => {
+    const unresolvedHint = page.getByTestId('admin-masters-species-filter-hint')
+    if (await unresolvedHint.isVisible()) {
+      const message = (await unresolvedHint.textContent())?.trim() ?? '(sin mensaje)'
+      throw new Error(`Filtro de especies sin resolver: "${message}"`)
+    }
     const listError = page.locator('.admin-masters-page .error[role="alert"]')
     if (await listError.isVisible()) {
       const message = (await listError.textContent())?.trim() ?? '(sin mensaje)'
