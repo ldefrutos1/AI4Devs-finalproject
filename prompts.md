@@ -116,11 +116,11 @@ Añade diagramas Mermaid de apoyo (C3 productor/consumidor y, si procede, secuen
 
 Si algún límite entre microservicios o el momento de publicación del evento no está claro, pregúntame antes de documentar.
 
-### **2.3. Descripción de alto nivel del proyecto y estructura de ficheros**
+### **2.3. Estructura de ficheros del monorepo (readme §2.6)**
 
 **Prompt 1:**
 
-Actúa como arquitecto de software. A partir de la arquitectura definida en @readme.md (§3.1–§3.2), redacta la **descripción de alto nivel del proyecto y la estructura de ficheros** del monorepo para la memoria (§3.3).
+Actúa como arquitecto de software. A partir de la arquitectura definida en @readme.md (§3.1–§3.2), redacta la **estructura de ficheros** del monorepo para la memoria (§2.6).
 
 Incluye:
 - Un párrafo breve que explique el enfoque **monorepo** (frontend, backend, infra, documentación y automatización en un solo repositorio).
@@ -135,7 +135,7 @@ Si la organización de algún módulo o la ubicación de la documentación no es
 
 **Prompt 2:**
 
-Actúa como arquitecto backend Java. A partir de la estructura del monorepo en @readme.md (§3.3), del stack Spring Boot 4 acordado y de @.cursor/rules/spring-boot-4-backend.mdc, define las **convenciones de paquetes Java** para los microservicios en `services/`.
+Actúa como arquitecto backend Java. A partir de la estructura del monorepo en @readme.md (§2.6), del stack Spring Boot 4 acordado y de @.cursor/rules/spring-boot-4-backend.mdc, define las **convenciones de paquetes Java** para los microservicios en `services/`.
 
 Documenta de forma concisa (tablas o listas en Markdown):
 - **GroupId** `com.mtl` y tabla **módulo Maven ↔ paquete raíz** (`api-gateway` → `com.mtl.gateway`, `catalog-service` → `com.mtl.catalog`, etc.).
@@ -149,7 +149,7 @@ Si alguna capa o excepción (p. ej. `api-gateway` WebFlux) no está clara, preg�
 
 **Prompt 3:**
 
-Actúa como arquitecto frontend. A partir del monorepo en @readme.md (§3.3), de @frontend/README.md y de @.cursor/rules/frontend-vue3.mdc, define las **convenciones de estructura y organización del frontend** Vue 3 en `frontend/`.
+Actúa como arquitecto frontend. A partir del monorepo en @readme.md (§2.6), de @frontend/README.md y de @.cursor/rules/frontend-vue3.mdc, define las **convenciones de estructura y organización del frontend** Vue 3 en `frontend/`.
 
 Documenta de forma concisa (tablas o listas en Markdown):
 - **Stack** del MVP: Vue 3, TypeScript, Vite, Vue Router, Pinia, `vue-i18n`, `oidc-client-ts` (Keycloak).

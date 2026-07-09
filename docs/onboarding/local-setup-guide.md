@@ -1,6 +1,6 @@
 # Arranque local (guía operativa)
 
-Referencia canónica de **accesos, puertos y flujos** para desarrollo local. Complemento operativo de [readme.md §2.4](../../readme.md#24-instrucciones-de-instalación-entorno-de-desarrollo) (arranque rápido) y [§3.4](../../readme.md#34-infraestructura-y-despliegue) (modos de despliegue). Normativa ampliada del backend: [services/README.md](../../services/README.md). Compose e infra: [infra/compose/README.md](../../infra/compose/README.md). OIDC en la SPA: [frontend/README.md](../../frontend/README.md).
+Referencia canónica de **accesos, puertos y flujos** para desarrollo local. Complemento operativo de [readme.md §2.4](../../readme.md#24-instrucciones-de-instalación-entorno-de-desarrollo) (arranque rápido) y [§3.3](../../readme.md#33-infraestructura-y-despliegue) (modos de despliegue). Normativa ampliada del backend: [services/README.md](../../services/README.md). Compose e infra: [infra/compose/README.md](../../infra/compose/README.md). OIDC en la SPA: [frontend/README.md](../../frontend/README.md).
 
 ## Prerrequisitos
 
@@ -76,7 +76,7 @@ Vite reenvía `/api/*` al gateway (**8080**); no hace falta definir `VITE_GATEWA
 
 ## Accesos
 
-Dos modos locales (detalle en [readme §3.4](../../readme.md#34-infraestructura-y-despliegue)):
+Dos modos locales (detalle en [readme §3.3](../../readme.md#33-infraestructura-y-despliegue)):
 
 - **Dev en host** (habitual): infra en Docker + Maven/Vite en el equipo → UI en **`:5173`**.
 - **Todo en Docker**: overlay `docker-compose.apps.yml` → UI en **`:8088`**.
