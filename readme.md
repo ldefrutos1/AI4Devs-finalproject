@@ -9,13 +9,13 @@
    - [2.3 Diseño y experiencia de usuario](#23-diseño-y-experiencia-de-usuario)
    - [2.4 Instalación (entorno de desarrollo)](#24-instrucciones-de-instalación-entorno-de-desarrollo)
    - [2.5 Demo del MVP](#25-demo-del-mvp)
+   - [2.6 Estructura de ficheros](#26-estructura-de-ficheros)
 3. 🏗️ [Arquitectura del sistema](#3-arquitectura-del-sistema)
    - [3.1 Diagrama de arquitectura](#31-diagrama-de-arquitectura)
    - [3.2 Descripción de componentes principales](#32-descripción-de-componentes-principales)
-   - [3.3 Descripción de alto nivel del proyecto y estructura de ficheros](#33-descripción-de-alto-nivel-del-proyecto-y-estructura-de-ficheros)
-   - [3.4 Infraestructura y despliegue](#34-infraestructura-y-despliegue)
-   - [3.5 Seguridad](#35-seguridad)
-   - [3.6 Tests](#36-tests)
+   - [3.3 Infraestructura y despliegue](#33-infraestructura-y-despliegue)
+   - [3.4 Seguridad](#34-seguridad)
+   - [3.5 Tests](#35-tests)
 4. 🛢️ [Modelo de datos](#4-modelo-de-datos)
    - [4.1 Modelo lógico del sistema completo](#41-modelo-lógico-del-sistema-completo)
    - [4.2 Diagrama de entidad-relación (implementación física)](#42-diagrama-de-entidad-relación-implementación-física)
@@ -38,7 +38,7 @@ MyTreeLibrary.
 
 ### **1.3. Descripción breve**
 
-MyTreeLibrary es una plataforma colaborativa para registrar árboles singulares con fotos, ubicación y datos de interés, y consultarlos de forma pública. En el MVP, los usuarios con rol de administrador pueden consultar a la IA las características de una especie; colaboradores y administradores pueden usar un chat asistido desde la edición de ficha.
+MyTreeLibrary es una plataforma colaborativa para registrar árboles singulares con fotografías, ubicación y datos de interés, y consultarlos de forma pública. En el MVP, los usuarios con rol de administrador pueden consultar a la IA las características de una especie; colaboradores y administradores pueden usar un chat asistido desde la edición de ficha.
 
 ### **1.4. Repositorio**
 
@@ -51,6 +51,15 @@ MyTreeLibrary es una plataforma colaborativa para registrar árboles singulares 
 ---
 
 ## 2. 🌳 Descripción general del producto
+
+En esta sección:
+
+- [2.1 Objetivo](#21-objetivo)
+- [2.2 Características y funcionalidades principales](#22-características-y-funcionalidades-principales)
+- [2.3 Diseño y experiencia de usuario](#23-diseño-y-experiencia-de-usuario)
+- [2.4 Instalación (entorno de desarrollo)](#24-instrucciones-de-instalación-entorno-de-desarrollo)
+- [2.5 Demo del MVP](#25-demo-del-mvp)
+- [2.6 Estructura de ficheros](#26-estructura-de-ficheros)
 
 ### **2.1. Objetivo**
 
@@ -246,7 +255,7 @@ Una vez levantados los contenedores y la aplicación (frontend y backend), queda
    - → **Prometheus**: **http://localhost:9090/targets**
    - → **Mailpit** (correo de prueba): **http://localhost:8025**
 
-En desarrollo lo habitual es **infra en Docker** y **aplicación en host** (pasos anteriores). Existe un segundo modo con **toda la app en contenedores** (SPA en `:8088`); ver [§3.4 Infraestructura y despliegue](#34-infraestructura-y-despliegue).
+En desarrollo lo habitual es **infra en Docker** y **aplicación en host** (pasos anteriores). Existe un segundo modo con **toda la app en contenedores** (SPA en `:8088`); ver [§3.3 Infraestructura y despliegue](#33-infraestructura-y-despliegue).
 
 **Compose e infra:** [infra/compose/README.md](infra/compose/README.md).
 
@@ -271,6 +280,50 @@ En desarrollo lo habitual es **infra en Docker** y **aplicación en host** (paso
 
 ---
 
+### **2.6. Estructura de ficheros**
+
+Estructura de repositorio (monorepo):
+
+```
+proyecto/
+├── frontend/                 # Frontend: SPA Vue 3 (Vite)
+├── e2e/                      # E2E UI (Playwright); ver `docs/engineering/testing-e2e.md`
+├── services/                 # Backend: Gateway + microservicios Spring Boot (un directorio por despliegue)
+│   ├── api-gateway/
+│   ├── catalog-service/
+│   ├── media-service/
+│   ├── notification-service/
+│   ├── ai-assistant-service/
+│   └── system-e2e-tests/     # IT E2E HTTP contra el API Gateway (JWT real; ver README del módulo)
+├── platform/
+│   └── observability/        # Configuración de telemetría/trazas/logs (Prometheus, Grafana…)
+├── infra/                    # Orquestación local y nube
+│   ├── compose/              # Docker Compose (infra de apoyo); ver README.md en esa carpeta
+│   └── k8s/                  # Manifiestos / Helm (según despliegue)
+├── docs/
+│   ├── adr/                  # Architecture Decision Records
+│   ├── ai-process-evidence/  # Ejemplos del proceso seguido en el desarrollo
+│   ├── api/                  # OpenAPI (contrato del gateway)
+│   ├── backlog/              # Historias y desgloses de tickets (HU-*)
+│   ├── data-model/           # Modelo de datos (reglas, Mongo, readme §4)
+│   ├── engineering/          # Guías: tests Java/Maven (`testing-java.md`), Flyway local (`flyway-dev-reset.md`), mapa canónico (`canonical-sources.md`)
+│   ├── events/               # Contrato de eventos Kafka
+│   ├── onboarding/           # Inicio rápido, ramas Git, guías Vue y diseño frontend
+│   ├── security/             # JWT, gateway, estrategia de validación
+│   ├── software-revisions/   # Revisiones y auditorías del proyecto
+│   └── use-cases/            # Casos de uso
+├── scripts/                  # Atajos PowerShell locales (`dev/`); ver scripts/README.md
+├── .cursor/
+│   ├── commands/             # Commands Cursor
+│   ├── rules/                # Reglas Cursor (API, Spring, seguridad…)
+│   └── skills/               # Skills de encargo, refinamiento HU, BD…
+├── .github/                  # Plantilla PR (pull_request_template.md)
+├── AGENTS.md                 # Índice para agentes IA (skills, canónicos, flujo)
+└── readme.md
+```
+
+---
+
 ## 3. 🏗️ Arquitectura del sistema
 
 **NOTA:** La elección de una arquitectura de microservicios en Java con Spring y Vue tiene un **propósito didáctico**, con el fin de aprender estas tecnologías.
@@ -279,10 +332,9 @@ En esta sección:
 
 - [3.1 Diagrama de arquitectura](#31-diagrama-de-arquitectura)
 - [3.2 Descripción de componentes principales](#32-descripción-de-componentes-principales)
-- [3.3 Descripción de alto nivel del proyecto y estructura de ficheros](#33-descripción-de-alto-nivel-del-proyecto-y-estructura-de-ficheros)
-- [3.4 Infraestructura y despliegue](#34-infraestructura-y-despliegue)
-- [3.5 Seguridad](#35-seguridad)
-- [3.6 Tests](#36-tests)
+- [3.3 Infraestructura y despliegue](#33-infraestructura-y-despliegue)
+- [3.4 Seguridad](#34-seguridad)
+- [3.5 Tests](#35-tests)
 
 ### **3.1. Diagrama de arquitectura**
 
@@ -886,49 +938,7 @@ sequenceDiagram
 
 </details>
 
-### **3.3. Descripción de alto nivel del proyecto y estructura de ficheros**
-
-Estructura de repositorio (monorepo):
-
-```
-proyecto/
-├── frontend/                 # SPA Vue 3 (Vite)
-├── e2e/                      # E2E UI (Playwright); ver `docs/engineering/testing-e2e.md`
-├── services/                 # Gateway + microservicios Spring Boot (un directorio por despliegue)
-│   ├── api-gateway/
-│   ├── catalog-service/
-│   ├── media-service/
-│   ├── notification-service/
-│   ├── ai-assistant-service/
-│   └── system-e2e-tests/     # IT E2E HTTP contra el API Gateway (JWT real; ver README del módulo)
-├── platform/
-│   └── observability/        # Configuración de telemetría/trazas/logs (Prometheus, Grafana…)
-├── infra/                    # Orquestación local y nube
-│   ├── compose/              # Docker Compose (infra de apoyo); ver README.md en esa carpeta
-│   └── k8s/                  # Manifiestos / Helm (según despliegue)
-├── docs/
-│   ├── adr/                  # Architecture Decision Records
-│   ├── ai-process-evidence/  # Ejemplos del proceso seguido en el desarrollo
-│   ├── api/                  # OpenAPI (contrato del gateway)
-│   ├── backlog/              # Historias y desgloses de tickets (HU-*)
-│   ├── data-model/           # Modelo de datos (reglas, Mongo, readme §4)
-│   ├── engineering/          # Guías: tests Java/Maven (`testing-java.md`), Flyway local (`flyway-dev-reset.md`), mapa canónico (`canonical-sources.md`)
-│   ├── events/               # Contrato de eventos Kafka
-│   ├── onboarding/           # Inicio rápido, ramas Git, guías Vue y diseño frontend
-│   ├── security/             # JWT, gateway, estrategia de validación
-│   ├── software-revisions/   # Revisiones y auditorías del proyecto
-│   └── use-cases/            # Casos de uso
-├── scripts/                  # Atajos PowerShell locales (`dev/`); ver scripts/README.md
-├── .cursor/
-│   ├── commands/             # Commands Cursor
-│   ├── rules/                # Reglas Cursor (API, Spring, seguridad…)
-│   └── skills/               # Skills de encargo, refinamiento HU, BD…
-├── .github/                  # Plantilla PR (pull_request_template.md)
-├── AGENTS.md                 # Índice para agentes IA (skills, canónicos, flujo)
-└── readme.md
-```
-
-### **3.4. Infraestructura y despliegue**
+### **3.3. Infraestructura y despliegue**
 
 **Infraestructura:** el sistema necesita la siguiente infraestructura: **un** PostgreSQL/PostGIS (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO/S3, Kafka, Keycloak, servidor SMTP (Mailpit en local), Prometheus y Grafana para métricas y dashboards. Todo está definido en [`infra/compose`](infra/compose/).
 
@@ -1012,11 +1022,11 @@ flowchart TB
     end
 ```
 
-### **3.5. Seguridad**
+### **3.4. Seguridad**
 
 La autenticación se basa en **OIDC** con **Keycloak** como IdP (realm `mtl`): la SPA obtiene un token **JWT firmado** que envía en cada petición API como `Authorization: Bearer`; el **API Gateway** y los microservicios lo validan (firma, caducidad y emisor).
 
-Tras autenticar, la **autorización** aplica roles de realm **`COLABORADOR`** y **`ADMIN`** en recursos sensibles; las rutas públicas siguen el contrato OpenAPI y el resto exige JWT válido.
+Tras autenticar, la **autorización** restringe el acceso a recursos sensibles según los roles de realm **`COLABORADOR`** y **`ADMIN`**; las rutas públicas siguen el contrato OpenAPI y el resto exige JWT válido.
 
 Las fotografías residen en buckets **privados** (MinIO en local, S3 en producción): la SPA **nunca** recibe credenciales del almacén; **media-service** comprueba permisos y política de subida (MIME, tamaño, límite por ejemplar) antes de emitir **URLs prefirmadas** PUT/GET de **corta duración**; el cliente sube el binario directamente al bucket y confirma metadatos en la API. Flujo presign → PUT → confirm: [openapi.yaml](docs/api/openapi.yaml) y [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md).
 
@@ -1024,7 +1034,7 @@ En **producción**, el tráfico expuesto (SPA, API e IdP) debe ir cifrado con **
 
 **Implementación y normativa:** [docs/security/jwt-gateway-strategy.md](docs/security/jwt-gateway-strategy.md) · `.cursor/rules/api-security.mdc` · [docs/api/openapi.yaml](docs/api/openapi.yaml) · Keycloak: [infra/compose/README.md](infra/compose/README.md).
 
-### **3.6. Tests**
+### **3.5. Tests**
 
 La estrategia de tests del sistema contempla los siguientes niveles:
 
@@ -1044,13 +1054,13 @@ La estrategia de tests del sistema contempla los siguientes niveles:
 **Ejecución:**
 1. **Ejecución automática en PR y push a `main`** — en cada pull request hacia `main` y en cada push a `main` se ejecuta automáticamente el workflow de GitHub [ci.yml](.github/workflows/ci.yml), que incluye tests unitarios de backend (Maven/Surefire), calidad y tests del frontend (ESLint, typecheck, Vitest) y detección de secretos con Gitleaks. Los tests de integración (`*IT`) y los E2E no forman parte de este pipeline.
 
-2. **UI front + back (Playwright)** — flujo de usuario completo contra un **entorno ya levantado** (infra + microservicios + front en dev o Docker; [§3.4](#34-infraestructura-y-despliegue)).
+2. **E2E completo (Playwright)** — flujo de usuario completo contra un **entorno ya levantado** (infra + microservicios + front en dev o Docker; [§3.3](#33-infraestructura-y-despliegue)).
    - **Local:** `.\scripts\dev\test-e2e.ps1 -Local` (por defecto `http://localhost:5173` en dev en host; con app en Docker, `-BaseUrl http://localhost:8088`).
 
-3. **REST del back (`system-e2e-tests`)** — contrato HTTP/JWT por el gateway, sin navegador, contra el **mismo entorno levantado** descrito en el punto 2.
+3. **E2E REST del backend (`system-e2e-tests`)** — contrato HTTP/JWT por el gateway, sin navegador, contra el **entorno ya levantado** descrito en el punto 2.
    - **Local:** con el stack arriba, desde `services/`: `$env:MTL_E2E_AUTO_KEYCLOAK_TOKEN = "true"; mvn -pl system-e2e-tests verify` (detalle de variables y escenarios en [system-e2e-tests](services/system-e2e-tests/README.md)).
 
-4. **Levantando contenedores en el proceso de prueba** — levanta un stack efímero autocontenido en Docker (PostgreSQL, Mongo, Kafka, Keycloak, microservicios y front en contenedor). Tiene un coste elevado de computación, motivo por el cual no se ejecuta automáticamente en cada PR; existe un workflow de GitHub que permite su ejecución manual. Ejecuta en secuencia `system-e2e-tests` (HTTP) y Playwright (UI). Se puede ejecutar de dos modos:
+4. **E2E completo (Playwright) levantando contenedores en el proceso de prueba** — levanta un stack efímero autocontenido en Docker (PostgreSQL, Mongo, Kafka, Keycloak, microservicios y front en contenedor). Tiene un coste elevado de computación, motivo por el cual no se ejecuta automáticamente en cada PR; existe un workflow de GitHub que permite su ejecución manual. Ejecuta en secuencia `system-e2e-tests` (HTTP) y Playwright (UI). Se puede ejecutar de dos modos:
    - **CI:** workflow manual [E2E Playwright (alta de ejemplar)](.github/workflows/e2e-playwright.yml) en GitHub Actions → *Run workflow*.
    - **Local:** `.\scripts\dev\test-e2e.ps1` (compila jars, levanta `infra/compose/docker-compose.e2e.yml`, ejecuta ambas suites y baja el stack con `down -v`). Atajos: `-SkipBuild`, `-KeepStack` — [scripts/README.md](scripts/README.md).
 
@@ -1420,7 +1430,9 @@ La definición de los mensajes en Kafka, el payload y las reglas de publicación
 
 ### **Desarrollo asistido por IA (gobierno del proceso)**
 
-El desarrollo no se apoya en prompts sueltos, sino en **artefactos repetibles**. Para ello se han definido las [reglas del repositorio](.cursor/rules/), el backlog [backlog.md](docs/backlog/backlog.md) y un índice operativo para agentes IA en [AGENTS.md](AGENTS.md). El flujo detallado está en [ai-development-playbook.md](docs/onboarding/ai-development-playbook.md). A partir de casos de uso, descripción del sistema y modelo de datos se refinan las HU y se desglosan en tickets con **Reglas aplicables por capa** por TASK.
+El desarrollo no se apoya en prompts sueltos, sino en **artefactos repetibles**. Se partió definiendo las reglas aplicables a cada faceta del desarrollo: [reglas del repositorio](.cursor/rules/), el backlog del proyecto en [backlog.md](docs/backlog/backlog.md) y un índice operativo para agentes IA en [AGENTS.md](AGENTS.md).
+
+A partir de los casos de uso, la descripción del sistema y el modelo de datos se identificó el backlog inicial; después se refinó cada historia y se desglosó en tickets de trabajo con **Reglas aplicables por capa** por TASK. El flujo detallado está en [ai-development-playbook.md](docs/onboarding/ai-development-playbook.md).
 
 El detalle del ciclo por historia se resume en:
 
@@ -1438,7 +1450,7 @@ La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada
 
 **Evidencia del proceso:** hay ejemplos del proceso en [docs/ai-process-evidence/](docs/ai-process-evidence/README.md). Muestra representativa por fase del ciclo de vida: [prompts.md](prompts.md).
 
-A continuación se incluye el backlog generado a partir de los casos de uso (§2.2.2) y del modelo de datos. Documentación completa (historias, criterios y tickets): [backlog.md](docs/backlog/backlog.md).
+A continuación se incluye el backlog del proyecto. Documentación completa (historias, criterios y tickets): [backlog.md](docs/backlog/backlog.md).
 
 | ID | Título | Estado |
 |----|--------|--------|
@@ -1477,7 +1489,7 @@ En la generación de tickets de trabajo se incluye explícitamente una sección 
 
 Para el trabajo con GitHub se ha definido una estrategia sencilla de ramas — detalle en [docs/onboarding/github-branching.md](docs/onboarding/github-branching.md).
 
-Plantilla PR: [`.github/pull_request_template.md`](.github/pull_request_template.md) (precarga desde la rama base `main`; en **fix/chore**, trazabilidad HU → **N/A**).
+Plantilla PR: [`.github/pull_request_template.md`](.github/pull_request_template.md) — trazabilidad con las HU; se precarga desde la rama base `main` (en **fix/chore**, trazabilidad HU → **N/A**).
 
 En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), calidad frontend (`lint`, `typecheck`, Vitest) y escaneo de secretos (Gitleaks) — workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
 
