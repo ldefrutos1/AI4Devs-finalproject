@@ -30,13 +30,22 @@ jobs:
 
       # Opcion A: compilar los jars en el runner; los Dockerfiles solo los empaquetan.
       - name: Compilar jars de los servicios
-        run: mvn -f services/pom.xml -pl catalog-service,media-service,api-gateway -am package -DskipTests -B
+        run: mvn -f services/pom.xml -pl catalog-service,media-service,ai-assistant-service,api-gateway -am package -DskipTests -B
 
-      - name: Levantar stack E2E y ejecutar Playwright
+      - name: Levantar stack E2E (infra y microservicios)
         working-directory: infra/compose
         run: >
-          docker compose -f docker-compose.e2e.yml up --build
-          --abort-on-container-exit --exit-code-from playwright
+          docker compose -f docker-compose.e2e.yml up -d --build --wait
+          postgres mongo kafka redis keycloak catalog-service media-service
+          ai-assistant-service api-gateway frontend
+
+      - name: system-e2e-tests (Maven/JWT)
+        working-directory: infra/compose
+        run: docker compose -f docker-compose.e2e.yml run --rm system-e2e-tests
+
+      - name: Playwright UI
+        working-directory: infra/compose
+        run: docker compose -f docker-compose.e2e.yml run --rm playwright
 
       - name: Publicar informe de Playwright
         if: ${{ always() }}
