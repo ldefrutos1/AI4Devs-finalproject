@@ -1,6 +1,6 @@
 # Convenciones y buenas prácticas — tests Java (`services/`)
 
-Guía breve para alinear implementación, Maven e IDE. Comandos y perfiles generales: [services/README.md](../../services/README.md) (apartado 1). Estrategia de tests más amplia (Testcontainers, contrato, aceptación): [readme.md](../../readme.md) (§3.6 Tests). **Reglas mínimas por capa:** §2. **E2E gateway + catálogo:** §2.1.
+Guía breve para alinear implementación, Maven e IDE. Comandos y perfiles generales: [services/README.md](../../services/README.md) (apartado 1). Estrategia de tests más amplia (Testcontainers, contrato, aceptación): [readme.md](../../readme.md) (§3.5 Tests). **Reglas mínimas por capa:** §2. **E2E gateway + catálogo:** §2.1.
 
 ## 1. Estructura Maven
 

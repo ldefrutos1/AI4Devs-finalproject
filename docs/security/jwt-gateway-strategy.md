@@ -1,6 +1,6 @@
 # Estrategia JWT y API Gateway (MyTreeLibrary)
 
-Documento operativo alineado con [readme.md](../../readme.md) §3.5, [infra/compose/README.md](../../infra/compose/README.md) y [.cursor/rules/api-security.mdc](../../.cursor/rules/api-security.mdc).
+Documento operativo alineado con [readme.md](../../readme.md) §3.4, [infra/compose/README.md](../../infra/compose/README.md) y [.cursor/rules/api-security.mdc](../../.cursor/rules/api-security.mdc).
 
 ## 1. Rol del Keycloak y del JWT
 

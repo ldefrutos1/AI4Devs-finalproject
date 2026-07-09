@@ -44,7 +44,7 @@ Como usuario con rol administrador, quiero consultar y gestionar los registros d
 ### Riesgos
 
 - **Deriva contrato / código:** con **OpenAPI** ya detallado, el riesgo residual es que futuros cambios en SPA o servicio no actualicen el YAML o los DTOs en paralelo.
-- **Privacidad y minimización:** el MVP no amplía la recogida más allá del **correo** y los campos del modelo (**estado**, marcas temporales); la UI **ADMIN** no debe pedir ni exponer datos personales adicionales; coherencia con [readme.md](../../readme.md) §3.5 y con el contrato OpenAPI.
+- **Privacidad y minimización:** el MVP no amplía la recogida más allá del **correo** y los campos del modelo (**estado**, marcas temporales); la UI **ADMIN** no debe pedir ni exponer datos personales adicionales; coherencia con [readme.md](../../readme.md) §3.4 y con el contrato OpenAPI.
 
 ### Aclaraciones cerradas (contrato HTTP)
 

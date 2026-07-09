@@ -31,7 +31,7 @@ Como colaborador o usuario con rol **ADMIN**, quiero autenticarme mediante el pr
 - **Correlación** `X-Correlation-Id`: normalización en gateway, reenvío al upstream en proxy y lectura en MDC de microservicios (`catalog-service`, `media-service`, `notification-service`, `ai-assistant-service`; **TASK-HU-001-10**).
 - Mensajes de error de acceso o sesión en frontend sin filtrar detalle interno del backend.
 - Tests automatizados del resource server sin depender de Keycloak manual en cada ejecución (JWT de prueba / decoder stub).
-- Documentación de variables (`VITE_*`, `MTL_JWT_ISSUER_URI`, etc.) y flujo de arranque en [services/README.md](../../services/README.md), [frontend/README.md](../../frontend/README.md) y readme §3.2.1 / §3.5.
+- Documentación de variables (`VITE_*`, `MTL_JWT_ISSUER_URI`, etc.) y flujo de arranque en [services/README.md](../../services/README.md), [frontend/README.md](../../frontend/README.md) y readme §3.2.1 / §3.4.
 
 #### Queda fuera de esta historia
 
@@ -88,7 +88,7 @@ Ver [HU-001-ticket-breakdown.md](HU-001-ticket-breakdown.md) (`TASK-HU-001-01` �
 
 ### Referencias
 
-Backlog `HU-001` (tabla §3); [HU-001-ticket-breakdown.md](HU-001-ticket-breakdown.md); [infra/compose/README.md](../../infra/compose/README.md); [jwt-gateway-strategy.md](../security/jwt-gateway-strategy.md); [readme.md](../../readme.md) §2.3 (matriz de páginas por rol), §3.2.1 (autenticación en front) y §3.5 (seguridad); [frontend/README.md](../../frontend/README.md) (flujo OIDC).
+Backlog `HU-001` (tabla §3); [HU-001-ticket-breakdown.md](HU-001-ticket-breakdown.md); [infra/compose/README.md](../../infra/compose/README.md); [jwt-gateway-strategy.md](../security/jwt-gateway-strategy.md); [readme.md](../../readme.md) §2.3 (matriz de páginas por rol), §3.2.1 (autenticación en front) y §3.4 (seguridad); [frontend/README.md](../../frontend/README.md) (flujo OIDC).
 
 ### Escenario 1 — Login y sesión válida por OIDC
 

@@ -125,7 +125,7 @@ docker compose down -v
 
 ### `start-dev` solo para desarrollo
 
-El comando **`start-dev`** de Keycloak está pensado para **entorno local**: configuración relajada, sin el endurecimiento operativo de producción. **No** usar esta imagen/comando tal cual en producción; allí se aplicará TLS, hostname estricto, modo de arranque y secretos según el despliegue (véase [readme.md](../../readme.md) §2.4–2.5).
+El comando **`start-dev`** de Keycloak está pensado para **entorno local**: configuración relajada, sin el endurecimiento operativo de producción. **No** usar esta imagen/comando tal cual en producción; allí se aplicará TLS, hostname estricto, modo de arranque y secretos según el despliegue (véase [readme.md](../../readme.md) §3.4).
 
 ### Import del realm al levantar Compose
 
