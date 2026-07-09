@@ -38,11 +38,15 @@ MyTreeLibrary.
 
 ### **1.3. Descripción breve**
 
-MyTreeLibrary es una plataforma colaborativa para registrar árboles singulares con fotos, ubicación y datos de interés, y consultarlos de forma pública. En el MVP, los usuarios con rol de administrador pueden consultar a la IA las características de una especie; colaboradores y administradores pueden usar un chat asistido orientativo desde la edición de ficha; la identificación por imagen queda para versiones posteriores.
+MyTreeLibrary es una plataforma colaborativa para registrar árboles singulares con fotos, ubicación y datos de interés, y consultarlos de forma pública. En el MVP, los usuarios con rol de administrador pueden consultar a la IA las características de una especie; colaboradores y administradores pueden usar un chat asistido desde la edición de ficha.
 
 ### **1.4. Repositorio**
 
 [github.com/ldefrutos1/AI4Devs-finalproject](https://github.com/ldefrutos1/AI4Devs-finalproject)
+
+### **1.5. Video demostrativo**
+
+[Video demostrativo](https://youtu.be/yf7u4BZm4Po)
 
 ---
 
@@ -80,7 +84,7 @@ La solución ofrece un sistema de notificaciones para comunicar novedades a usua
 
 #### Integración con IA
 
-En el **MVP**, usuarios con rol de administrador pueden consultar las características de una especie; colaboradores y administradores autenticados pueden mantener un chat orientativo con el asistente desde la edición de un ejemplar (**UC-06**, **HU-010**); en versiones futuras se incorporará la identificación orientativa por imagen (**HU-009**).
+En el **MVP**, usuarios con rol de administrador pueden consultar las características de una especie; colaboradores y administradores autenticados pueden mantener un chat con el asistente IA desde la edición de un ejemplar; en versiones futuras se incorporará la identificación orientativa por imagen.
 
 ### **2.2.1. Diagrama de contexto del sistema (C1)**
 
@@ -96,7 +100,7 @@ flowchart TB
 
     KC["🔐 Keycloak<br>Autenticación"]:::soporte
     SMTP["📧 Servidor SMTP<br>Notificaciones"]:::soporte
-    PIA["🧠 Proveedor IA<br>Características especie y chat MVP<br>Identificación imagen futuro"]:::externo
+    PIA["🧠 Proveedor IA<br>Características especie y chat"]:::externo
     MAP["🗺️ OpenStreetMap<br>Geolocalización"]:::externo
 
     U -->|Usa la aplicación| S
@@ -139,7 +143,6 @@ El sistema está diseñado para facilitar el alta de ejemplares a partir de foto
 ![Alta](./docs/Alta.jpg)
 
 La aplicación implementa una navegación simple por roles con una **página de entrada (Inicio)** adaptada a cada perfil.
-
 
 
 ### **Navegación de la aplicación**
@@ -247,25 +250,24 @@ En desarrollo lo habitual es **infra en Docker** y **aplicación en host** (paso
 
 **Compose e infra:** [infra/compose/README.md](infra/compose/README.md).
 
-
-
 ---
 
 ### **2.5. Demo del MVP**
 
 **Vídeo**
 
-C:\Users\ldefr\Videos\Captures\IA4Dev.mp4
+[Video demostrativo](https://youtu.be/yf7u4BZm4Po)
 
 | Paso | Qué se muestra |
 |------|----------------|
 | 1 | Un visitante recorre el catálogo **sin login**: listado, ficha de detalle y mapa, alta de suscripción |
 | 2 | Un **colaborador** inicia sesión y da de alta un ejemplar en estado publicado |
-| 3 | Tras el alta, el aviso por correo queda visible en **Mailpit** ([localhost:8025](http://localhost:8025)) |
+| 3 | Tras el alta, el aviso por correo queda visible en **Mailpit** |
 | 4 | Un usuario **ADMIN** entra en maestros taxonómicos y en la gestión de suscripciones |
-| 5 | Como **ADMIN**, se pide una sugerencia IA de enriquecimiento de especie y se añaden datos semiestructurados que se almacenan en MongoDB |
-
-Usuarios de prueba: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#usuarios-de-prueba-keycloak-solo-local) · [infra/compose/README.md](infra/compose/README.md).
+| 5 | Como **ADMIN**, se pide una sugerencia IA de enriquecimiento de especie y se consulta desde el chat |
+| 6 | Como **ADMIN**, se añaden datos semiestructurados que se almacenan en MongoDB |
+| 7 | Acceso a las consolas de: Mongo, MinIO, Prometheus y Grafana |
+| 8 | Ejecución de los test e2e |
 
 ---
 
@@ -934,12 +936,14 @@ proyecto/
 
 | Modo | Cuándo | Infra | Aplicación | UI | Arranque |
 |------|--------|-------|------------|-----|----------|
-| **Dev en host** (habitual) | Desarrollo diario, debug en IDE | `docker-compose.yml` | Maven + Vite en el host | `:5173` | [§2.4](#24-instrucciones-de-instalación-entorno-de-desarrollo) |
+| **Dev en host** (habitual) | Desarrollo diario, debug en IDE | `docker-compose.yml` | Maven + Vite en el host | `:5173` | [§2.4 instalación entorno desarrollo](#24-instrucciones-de-instalación-entorno-de-desarrollo) |
 | **Todo en Docker** | Validar imágenes, demo sin IDE | `docker-compose.yml` + `docker-compose.apps.yml` | Contenedores (SPA, gateway, microservicios) | `:8088` | Ver bloque siguiente y [infra/compose/README.md](infra/compose/README.md) |
 
-Accesos, puertos en ambos modos y qué servicios levantar por flujo: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#accesos).
+El detalle de accesos, puertos y qué servicios levantar por flujo se encuentra en: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#accesos).
 
-**Generación de imágenes:** para la ejecución en Docker es necesario generar previamente las imágenes con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1) y haber levantado la infraestructura comentada en el punto anterior; tras estos pasos se puede levantar la aplicación con:
+**Generación de imágenes:** para la ejecución en Docker es necesario generar previamente las imágenes con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1).
+
+**Arranque:** una vez levantada la infraestructura y generadas las imagenes; se levanta la aplicación con:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
@@ -951,7 +955,7 @@ docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
 
 ![Dashboard Grafana MyTreeLibrary](./docs/Grafana.jpg)
 
-**Despliegue en producción:** en entornos productivos el sistema se puede desplegar en un orquestador de contenedores (Kubernetes); se deben definir secretos externos, Keycloak y Kafka en HA según entorno, bases de datos gestionadas y almacenamiento de objetos S3 en nube. También es necesario un servidor SMTP y un proveedor de servicios IA.
+**Despliegue en producción:** en entornos productivos el sistema se puede desplegar en un orquestador de contenedores (Kubernetes). También es necesario un servidor SMTP y un proveedor de servicios IA.
 
 ```mermaid
 flowchart TB
@@ -1016,7 +1020,7 @@ Tras autenticar, la **autorización** aplica roles de realm **`COLABORADOR`** y 
 
 Las fotografías residen en buckets **privados** (MinIO en local, S3 en producción): la SPA **nunca** recibe credenciales del almacén; **media-service** comprueba permisos y política de subida (MIME, tamaño, límite por ejemplar) antes de emitir **URLs prefirmadas** PUT/GET de **corta duración**; el cliente sube el binario directamente al bucket y confirma metadatos en la API. Flujo presign → PUT → confirm: [openapi.yaml](docs/api/openapi.yaml) y [HU-006](docs/backlog/HU-006-fotografias-asociadas-al-arbol.md).
 
-En **producción**, el tráfico expuesto (SPA, API e IdP) debe ir cifrado con **TLS**; en desarrollo local la API puede servirse en HTTP. El **gateway** aplica **CORS** restrictivo a los orígenes del SPA en local: `http://localhost:5173`, `http://127.0.0.1:5173` (Vite en host) y `http://localhost:8088`, `http://127.0.0.1:8088` (SPA en Docker); métodos y cabeceras acordados (`Authorization`, `Content-Type`, `X-Correlation-Id`, etc.) y sin credenciales cross-origin innecesarias.
+En **producción**, el tráfico expuesto (SPA, API e IdP) debe ir cifrado con **TLS**; en desarrollo local la API puede servirse en HTTP. El **gateway** aplica **CORS** restrictivo a los orígenes del SPA en local: `http://localhost:5173`, `http://127.0.0.1:5173` (Vite en host) y `http://localhost:8088`, `http://127.0.0.1:8088` (SPA en Docker).
 
 **Implementación y normativa:** [docs/security/jwt-gateway-strategy.md](docs/security/jwt-gateway-strategy.md) · `.cursor/rules/api-security.mdc` · [docs/api/openapi.yaml](docs/api/openapi.yaml) · Keycloak: [infra/compose/README.md](infra/compose/README.md).
 

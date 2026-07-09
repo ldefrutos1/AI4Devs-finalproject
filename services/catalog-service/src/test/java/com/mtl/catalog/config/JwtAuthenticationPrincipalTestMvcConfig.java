@@ -1,12 +1,12 @@
 package com.mtl.catalog.config;
 
 import java.util.List;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -20,7 +20,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * anotado con {@link AuthenticationPrincipal}, leyendo el {@link Authentication} del {@link SecurityContextHolder}
  * (p. ej. tras {@code SecurityMockMvcRequestPostProcessors.authentication}).
  */
-@Configuration
+@TestConfiguration
 public class JwtAuthenticationPrincipalTestMvcConfig implements WebMvcConfigurer {
 
   @Override

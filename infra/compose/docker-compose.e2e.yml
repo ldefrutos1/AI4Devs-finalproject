@@ -14,16 +14,23 @@
 #   - Kafka: el alta de ejemplar emite el evento EJEMPLAR_CREADO (topic autocreado
 #     al primer envio). No hay consumidor en este stack (no se verifica el correo):
 #     el evento queda publicado.
+#   - ai-assistant-service: requerido por system-e2e-tests (HU-010, modo stub).
 #
 # Bases de datos efimeras: Postgres/Mongo/Kafka usan tmpfs (en RAM) y Keycloak
 # arranca con H2 en memoria. Cada ejecucion parte de cero.
 #
-# Uso (desde infra/compose, con los jars ya compilados; ver e2e/README.md):
-#   docker compose -f docker-compose.e2e.yml up --build \
-#     --abort-on-container-exit --exit-code-from playwright
+# Uso (desde infra/compose; atajo: scripts/dev/test-e2e.ps1). Con los jars compilados:
+#   docker compose -f docker-compose.e2e.yml up -d --build --wait \
+#     postgres mongo kafka redis keycloak catalog-service media-service \
+#     ai-assistant-service api-gateway frontend
+#   docker compose -f docker-compose.e2e.yml run --rm system-e2e-tests
+#   docker compose -f docker-compose.e2e.yml run --rm playwright
 #   docker compose -f docker-compose.e2e.yml down -v
 #
-# Orden de pruebas: system-e2e-tests (HTTP/JWT) y despues Playwright (UI).
+# No usar `up --abort-on-container-exit` con system-e2e-tests: al terminar Maven
+# aborta todo el stack antes de que arranque Playwright.
+#
+# Orden: system-e2e-tests (HTTP/JWT) y despues Playwright (UI).
 
 name: mtl-e2e
 
@@ -189,6 +196,29 @@ services:
     networks:
       - mtl
 
+  # ── ai-assistant-service: chat IA (stub) para system-e2e-tests HU-010 ─────
+  ai-assistant-service:
+    image: ${AI_ASSISTANT_SERVICE_IMAGE:-mtl/ai-assistant-service:e2e}
+    build:
+      context: ../../services/ai-assistant-service
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mtl
+      MTL_JWT_ISSUER_URI: http://keycloak:8080/realms/mtl-e2e
+      MTL_AI_PROVIDER_MODE: stub
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      - mtl
+
   # ── api-gateway: punto de entrada /api ────────────────────────────────────
   api-gateway:
     image: ${API_GATEWAY_IMAGE:-mtl/api-gateway:e2e}
@@ -199,10 +229,13 @@ services:
       MTL_JWT_ISSUER_URI: http://keycloak:8080/realms/mtl-e2e
       MTL_CATALOG_URI: http://catalog-service:8080
       MTL_MEDIA_URI: http://media-service:8080
+      MTL_AI_URI: http://ai-assistant-service:8080
     depends_on:
       catalog-service:
         condition: service_healthy
       media-service:
+        condition: service_healthy
+      ai-assistant-service:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:8080/actuator/health || exit 1"]
@@ -214,7 +247,9 @@ services:
       - mtl
 
   # ── system-e2e-tests: HTTP contra gateway (Failsafe, sin UI) ───────────────
+  # Perfil e2e-run: no arranca con `compose up` a secas; el script usa `compose run`.
   system-e2e-tests:
+    profiles: ["e2e-run"]
     image: maven:3.9.9-eclipse-temurin-21
     working_dir: /workspace/services
     volumes:
@@ -274,6 +309,7 @@ services:
   # cosa que NO ocurre con http://frontend (HTTP + host != localhost). Al compartir la
   # red del frontend, keycloak/api-gateway siguen resolviendose por nombre en la red mtl.
   playwright:
+    profiles: ["e2e-run"]
     image: mcr.microsoft.com/playwright:v1.49.0-jammy
     working_dir: /e2e
     volumes:
@@ -289,19 +325,21 @@ services:
       - bash
       - -lc
       - >
+        set -euo pipefail &&
+        echo '[mtl-e2e] playwright: npm ci…' &&
         npm ci &&
+        echo '[mtl-e2e] playwright: esperando keycloak, gateway y SPA (wait-on)…' &&
         npx wait-on -t 180000
         http-get://keycloak:8080/realms/mtl-e2e/.well-known/openid-configuration
         http-get://api-gateway:8080/actuator/health
         http-get://localhost:80 &&
-        npx playwright test
+        echo '[mtl-e2e] playwright: ejecutando specs (list + html en playwright-report/)…' &&
+        npx playwright test --reporter=list,html
     depends_on:
       frontend:
         condition: service_healthy
       keycloak:
         condition: service_started
-      system-e2e-tests:
-        condition: service_completed_successfully
     network_mode: "service:frontend"
 
 networks:

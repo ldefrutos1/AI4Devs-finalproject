@@ -40,12 +40,17 @@ Construye y arranca todo el stack y ejecuta Playwright como contenedor en la red
 
 ```bash
 # desde la raiz del repo: primero construir los jars de los servicios
-mvn -f services/pom.xml -pl catalog-service,media-service,api-gateway -am package -DskipTests
+mvn -f services/pom.xml -pl catalog-service,media-service,ai-assistant-service,api-gateway -am package -DskipTests
 
-# levantar stack E2E (autocontenido) y ejecutar Playwright (sale con su exit code)
+# levantar stack E2E (infra + apps en background; esperar healthchecks)
 cd infra/compose
-docker compose -f docker-compose.e2e.yml up --build \
-  --abort-on-container-exit --exit-code-from playwright
+docker compose -f docker-compose.e2e.yml up -d --build --wait \
+  postgres mongo kafka redis keycloak catalog-service media-service \
+  ai-assistant-service api-gateway frontend
+
+# pruebas en serie (no usar up --abort-on-container-exit: Maven abortaría antes de Playwright)
+docker compose -f docker-compose.e2e.yml run --rm system-e2e-tests
+docker compose -f docker-compose.e2e.yml run --rm playwright
 
 # limpiar (incluye volumenes efimeros)
 docker compose -f docker-compose.e2e.yml down -v
@@ -53,12 +58,17 @@ docker compose -f docker-compose.e2e.yml down -v
 
 ```powershell
 # desde la raiz del repo: primero construir los jars de los servicios
-mvn -f services/pom.xml -pl catalog-service,media-service,api-gateway -am package -DskipTests
+mvn -f services/pom.xml -pl catalog-service,media-service,ai-assistant-service,api-gateway -am package -DskipTests
 
-# levantar stack E2E (autocontenido) y ejecutar Playwright (sale con su exit code)
+# levantar stack E2E (infra + apps en background; esperar healthchecks)
 Set-Location infra/compose
-docker compose -f docker-compose.e2e.yml up --build `
-  --abort-on-container-exit --exit-code-from playwright
+docker compose -f docker-compose.e2e.yml up -d --build --wait `
+  postgres mongo kafka redis keycloak catalog-service media-service `
+  ai-assistant-service api-gateway frontend
+
+# pruebas en serie
+docker compose -f docker-compose.e2e.yml run --rm system-e2e-tests
+docker compose -f docker-compose.e2e.yml run --rm playwright
 
 # limpiar (incluye volumenes efimeros)
 docker compose -f docker-compose.e2e.yml down -v
@@ -66,7 +76,16 @@ docker compose -f docker-compose.e2e.yml down -v
 
 Atajo (desde la raíz del repo): `.\scripts\dev\test-e2e.ps1`
 
-El informe HTML queda en `e2e/playwright-report/`.
+### Orden en Docker (variante B)
+
+1. **`system-e2e-tests`** — contenedor Maven (`mvn verify` del módulo Java). Si falla, **Playwright no arranca**.
+2. **`playwright`** — `npm ci`, `wait-on` y `npx playwright test`. Los logs de cada spec salen por consola (`list`); el informe HTML se escribe en disco.
+
+El informe HTML queda en `e2e/playwright-report/` (no es lo que ves en consola). Para abrirlo tras una ejecución local:
+
+```bash
+cd e2e && npm run report
+```
 
 ## Relacion con `services/system-e2e-tests`
 

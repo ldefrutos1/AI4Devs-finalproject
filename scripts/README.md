@@ -42,9 +42,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\dev\test-backend.p
 
 | Parámetro | Descripción |
 |-----------|-------------|
-| *(sin flag)* | Variante Docker: compila jars, levanta `docker-compose.e2e.yml`, ejecuta Playwright y baja el stack (`down -v`). |
+| *(sin flag)* | Variante Docker: compila jars, levanta stack (`up -d --wait`), `run` Maven y Playwright en serie, `down -v`. |
 | `-SkipBuild` | Docker sin recompilar jars (variante Docker). |
 | `-KeepStack` | Docker: no baja el stack al terminar (depuración). |
+| `-VerboseLogs` | Docker: arranque del stack en primer plano (todos los contenedores de infra/apps). Las pruebas Maven y Playwright siempre muestran su salida en `compose run`. |
 | `-Local` | Playwright contra entorno **ya levantado** (p. ej. Vite en `:5173` o stack Docker completo). |
 | `-SkipInstall` | Con `-Local`: omite `npm install` y `playwright install`. |
 | `-Ui` | Con `-Local`: abre el runner UI de Playwright (`npm run e2e:ui`). |
