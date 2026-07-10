@@ -2,23 +2,8 @@
 
 1. 📋 [Ficha del proyecto](#1-ficha-del-proyecto)
 2. 🌳 [Descripción general del producto](#2-descripción-general-del-producto)
-   - [2.1 Objetivo](#21-objetivo)
-   - [2.2 Características y funcionalidades principales](#22-características-y-funcionalidades-principales)
-   - [2.2.1 Diagrama de contexto (C1)](#221-diagrama-de-contexto-del-sistema-c1)
-   - [2.2.2 Diagrama de casos de uso del sistema](#222-diagrama-de-casos-de-uso-del-sistema)
-   - [2.3 Diseño y experiencia de usuario](#23-diseño-y-experiencia-de-usuario)
-   - [2.4 Instalación (entorno de desarrollo)](#24-instrucciones-de-instalación-entorno-de-desarrollo)
-   - [2.5 Demo del MVP](#25-demo-del-mvp)
-   - [2.6 Estructura de ficheros](#26-estructura-de-ficheros)
 3. 🏗️ [Arquitectura del sistema](#3-arquitectura-del-sistema)
-   - [3.1 Diagrama de arquitectura](#31-diagrama-de-arquitectura)
-   - [3.2 Descripción de componentes principales](#32-descripción-de-componentes-principales)
-   - [3.3 Infraestructura y despliegue](#33-infraestructura-y-despliegue)
-   - [3.4 Seguridad](#34-seguridad)
-   - [3.5 Tests](#35-tests)
 4. 🛢️ [Modelo de datos](#4-modelo-de-datos)
-   - [4.1 Modelo lógico del sistema completo](#41-modelo-lógico-del-sistema-completo)
-   - [4.2 Diagrama de entidad-relación (implementación física)](#42-diagrama-de-entidad-relación-implementación-física)
 5. 🔌 [Especificación de la API](#5-especificación-de-la-api)
 6. 📖 [Historias de usuario](#6-historias-de-usuario)
 7. 🎫 [Tickets de trabajo](#7-tickets-de-trabajo)
@@ -38,7 +23,7 @@ MyTreeLibrary.
 
 ### **1.3. Descripción breve**
 
-MyTreeLibrary es una plataforma colaborativa para registrar árboles singulares con fotografías, ubicación y datos de interés, y consultarlos de forma pública. En el MVP, los usuarios con rol de administrador pueden consultar a la IA las características de una especie; colaboradores y administradores pueden usar un chat asistido desde la edición de ficha.
+MyTreeLibrary es una plataforma colaborativa que permite registrar árboles singulares mediante fotografías, ubicación y otros datos de interés, así como consultarlos públicamente. En el MVP, los usuarios con rol de administrador pueden recurrir a la inteligencia artificial para consultar las características de una especie, mientras que colaboradores y administradores disponen de un chat asistido durante la edición de las fichas.
 
 ### **1.4. Repositorio**
 
@@ -221,14 +206,14 @@ La aplicación implementa una navegación simple por roles con una **página de 
 **Administrador**
 ![Administrador](./docs/Admin.jpg)
 
-**Datos semiestructurados (Mongo)**
+**Edición de datos semiestructurados (Mongo)**
 ![Mongo](./docs/Mongo.jpg)
 
 ### **2.4. Instrucciones de instalación (entorno de desarrollo)**
 
-1. **Infraestructura:** para poder ejecutar la aplicación en desarrollo se necesita arrancar los contenedores que tienen la infraestructura (PostgreSQL, Mongo, ...) definidos en [`infra/compose/docker-compose.yml`](infra/compose/docker-compose.yml) siguiendo estos pasos:
+1. **Infraestructura:** para poder ejecutar la aplicación en desarrollo se necesita arrancar los contenedores que tienen la infraestructura (PostgreSQL, Mongo, ...), definidos en [`infra/compose/docker-compose.yml`](infra/compose/docker-compose.yml), siguiendo estos pasos:
 - Copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario: `infra/compose/.env.example` → `infra/compose/.env`.
-- Desde `infra/compose/`, ejecutar:
+- Arrancar los contenedores: desde `infra/compose/`, ejecutar:
   ```bash
   docker compose up -d
   ```
@@ -239,13 +224,13 @@ La aplicación implementa una navegación simple por roles con una **página de 
    ```
 3. **Frontend:** para ejecutar el frontend se deben seguir los siguientes pasos:
 - Copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario: `frontend/.env.example` → `frontend/.env`.
-- Desde `frontend/`, ejecutar:
+- Arrancar la aplicación: desde `frontend/`, ejecutar:
    ```bash
    npm install
    npm run dev
    ```
 
-Una vez levantados los contenedores y la aplicación (frontend y backend), quedarán disponibles las siguientes URLs:
+Una vez levantados los contenedores de infraestructura y la aplicación (frontend y backend), quedarán disponibles las siguientes URLs:
    - → **UI** de la aplicación: **http://localhost:5173**
    - → **API Gateway**: **http://localhost:8080**
    - → **Microservicios**: **http://localhost:8081-8084**
@@ -255,7 +240,9 @@ Una vez levantados los contenedores y la aplicación (frontend y backend), queda
    - → **Prometheus**: **http://localhost:9090/targets**
    - → **Mailpit** (correo de prueba): **http://localhost:8025**
 
-En desarrollo lo habitual es **infra en Docker** y **aplicación en host** (pasos anteriores). Existe un segundo modo con **toda la app en contenedores** (SPA en `:8088`); ver [§3.3 Infraestructura y despliegue](#33-infraestructura-y-despliegue).
+El detalle de accesos, puertos y qué servicios levantar por flujo se encuentra en: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#accesos).
+
+Para despliegues en otros entornos ver [§3.3 Infraestructura y despliegue](#33-infraestructura-y-despliegue).
 
 **Compose e infra:** [infra/compose/README.md](infra/compose/README.md).
 
@@ -263,20 +250,20 @@ En desarrollo lo habitual es **infra en Docker** y **aplicación en host** (paso
 
 ### **2.5. Demo del MVP**
 
-**Vídeo**
-
-[Video demostrativo](https://youtu.be/yf7u4BZm4Po)
+El video del proyecto muestra la siguiente funcionalidad:
 
 | Paso | Qué se muestra |
 |------|----------------|
-| 1 | Un visitante recorre el catálogo **sin login**: listado, ficha de detalle y mapa, alta de suscripción |
-| 2 | Un **colaborador** inicia sesión y da de alta un ejemplar en estado publicado |
-| 3 | Tras el alta, el aviso por correo queda visible en **Mailpit** |
-| 4 | Un usuario **ADMIN** entra en maestros taxonómicos y en la gestión de suscripciones |
-| 5 | Como **ADMIN**, se pide una sugerencia IA de enriquecimiento de especie y se consulta desde el chat |
-| 6 | Como **ADMIN**, se añaden datos semiestructurados que se almacenan en MongoDB |
-| 7 | Acceso a las consolas de: Mongo, MinIO, Prometheus y Grafana |
+| 1 | Un visitante recorre el catálogo **sin login**: listado, acceso a ficha de detalle y mapa, alta de suscripción |
+| 2 | Un **colaborador** inicia sesión (Keycloak) y da de alta un ejemplar en estado publicado |
+| 3 | Tras el alta, se muestra en la consola de **Mailpit** el aviso por correo generado con mensajería asíncrona (Kafka) |
+| 4 | Se inicia sesión con usuario **ADMIN** accediendo a maestros taxonómicos y a la gestión de suscripciones |
+| 5 | Con usuario **ADMIN**, se pide una sugerencia IA de enriquecimiento de especie y se consulta al chat |
+| 6 | Con usuario **ADMIN**, se añaden datos semiestructurados que se almacenan en MongoDB |
+| 7 | Acceso a las consolas de la infraestructura: Mongo, MinIO, Prometheus y Grafana (acceso al dashboard propio del proyecto) |
 | 8 | Ejecución de los test e2e |
+
+[Video demostrativo](https://youtu.be/yf7u4BZm4Po)
 
 ---
 
@@ -423,7 +410,7 @@ flowchart TB
 
 ### **3.2. Descripción de componentes principales**
 
-A continuación se detallan los componentes del diagrama C2 (§3.1), propios del sistema. No se listan las dependencias externas como el proveedor de mapas (**OpenStreetMap** / **Leaflet**) ni el proveedor de IA.
+A continuación se detallan los componentes del diagrama C2 (§3.1), propios del sistema. No se listan las dependencias externas como el proveedor de mapas (**OpenStreetMap** / **Leaflet**) ni el proveedor de IA (**OpenAI API**).
 
 > En los bloques **3.2.1–3.2.4**, los diagramas y secuencias técnicas están en bloques **Desplegar** (clic en el título para expandir o contraer).
 
@@ -940,22 +927,34 @@ sequenceDiagram
 
 ### **3.3. Infraestructura y despliegue**
 
-**Infraestructura:** el sistema necesita la siguiente infraestructura: **un** PostgreSQL/PostGIS (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`), MongoDB, Redis, MinIO/S3, Kafka, Keycloak, servidor SMTP (Mailpit en local), Prometheus y Grafana para métricas y dashboards. Todo está definido en [`infra/compose`](infra/compose/).
+**Despliegue en producción:** en entornos productivos el sistema se puede desplegar en un orquestador de contenedores (Kubernetes). También es necesario un servidor SMTP y un proveedor de servicios IA.
 
-**Modos de ejecución en local:**
+**Infraestructura:** el sistema necesita la siguiente infraestructura: 
+- PostgreSQL/PostGIS (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`) 
+- MongoDB 
+- Redis 
+- MinIO/S3 
+- Kafka 
+- Keycloak 
+- Servidor SMTP (Mailpit en local) 
+- Prometheus  
+- Grafana
+- OpenAI API (necesaria para servicios IA)
 
-| Modo | Cuándo | Infra | Aplicación | UI | Arranque |
-|------|--------|-------|------------|-----|----------|
-| **Dev en host** (habitual) | Desarrollo diario, debug en IDE | `docker-compose.yml` | Maven + Vite en el host | `:5173` | [§2.4 instalación entorno desarrollo](#24-instrucciones-de-instalación-entorno-de-desarrollo) |
-| **Todo en Docker** | Validar imágenes, demo sin IDE | `docker-compose.yml` + `docker-compose.apps.yml` | Contenedores (SPA, gateway, microservicios) | `:8088` | Ver bloque siguiente y [infra/compose/README.md](infra/compose/README.md) |
+En desarrollo, toda esta infraestructura se puede levantar con Docker Compose: [`infra/compose`](infra/compose/).
 
-El detalle de accesos, puertos y qué servicios levantar por flujo se encuentra en: [local-setup-guide.md](docs/onboarding/local-setup-guide.md#accesos).
+**Generación de imágenes:** la generación de las imágenes de la aplicación se hace con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1). Este script genera las siguientes imágenes:
+- mtl/frontend
+- mtl/api-gateway
+- mtl/catalog-service
+- mtl/media-service
+- mtl/notification-service
+- mtl/ai-assistant-service
 
-**Generación de imágenes:** para la ejecución en Docker es necesario generar previamente las imágenes con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1).
-
-**Arranque:** una vez levantada la infraestructura y generadas las imagenes; se levanta la aplicación con:
+**Docker Compose:** los archivos `docker-compose.yml` y `docker-compose.apps.yml` contienen la definición de arranque de la aplicación. Una vez generadas las imágenes, la aplicación se arranca en Docker Compose (SPA en el puerto `:8088`) con los siguientes comandos. Ver [infra/compose/README.md](infra/compose/README.md).
 
 ```bash
+docker compose up -d
 docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
 ```
 
@@ -965,7 +964,7 @@ docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
 
 ![Dashboard Grafana MyTreeLibrary](./docs/Grafana.jpg)
 
-**Despliegue en producción:** en entornos productivos el sistema se puede desplegar en un orquestador de contenedores (Kubernetes). También es necesario un servidor SMTP y un proveedor de servicios IA.
+
 
 ```mermaid
 flowchart TB
