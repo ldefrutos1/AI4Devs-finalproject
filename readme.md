@@ -958,14 +958,6 @@ docker compose up -d
 docker compose -f docker-compose.yml -f docker-compose.apps.yml up -d
 ```
 
-**Script arranque completo:** existe un script que lanza todos los pasos anteriores (build de imágenes + levantar infra + levantar aplicación): `.\scripts\dev\start-docker-stack.ps1`.
-
-**Observabilidad:** con la aplicación y la infra levantada, Prometheus recoge métricas de cada microservicio vía Actuator y Grafana muestra el dashboard **MTL Microservices**.
-
-![Dashboard Grafana MyTreeLibrary](./docs/Grafana.jpg)
-
-
-
 ```mermaid
 flowchart TB
     %% --- Estilos (Consistentes con toda la documentación) ---
@@ -1020,6 +1012,12 @@ flowchart TB
 
     end
 ```
+
+**Script arranque completo:** existe un script que lanza todos los pasos anteriores (build de imágenes + levantar infra + levantar aplicación): `.\scripts\dev\start-docker-stack.ps1`.
+
+**Observabilidad:** con la aplicación y la infra levantada, Prometheus recoge métricas de cada microservicio vía Actuator y Grafana muestra el dashboard **MTL Microservices**.
+
+![Dashboard Grafana MyTreeLibrary](./docs/Grafana.jpg)
 
 ### **3.4. Seguridad**
 
