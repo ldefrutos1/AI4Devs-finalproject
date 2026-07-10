@@ -211,7 +211,7 @@ La aplicación implementa una navegación simple por roles con una **página de 
 
 ### **2.4. Instrucciones de instalación (entorno de desarrollo)**
 
-1. **Infraestructura:** para poder ejecutar la aplicación en desarrollo se necesita arrancar los contenedores que tienen la infraestructura (PostgreSQL, Mongo, ...), definidos en [`infra/compose/docker-compose.yml`](infra/compose/docker-compose.yml), siguiendo estos pasos:
+1. **Infraestructura:** para poder ejecutar la aplicación en desarrollo se necesita arrancar los contenedores que tienen la infraestructura (PostgreSQL, Mongo, ...), definidos en [infra/compose/docker-compose.yml](infra/compose/docker-compose.yml), siguiendo estos pasos:
 - Copiar el archivo de variables de entorno de ejemplo y adaptarlo si fuera necesario: `infra/compose/.env.example` → `infra/compose/.env`.
 - Arrancar los contenedores: desde `infra/compose/`, ejecutar:
   ```bash
@@ -941,7 +941,7 @@ sequenceDiagram
 - Grafana
 - OpenAI API (necesaria para servicios IA)
 
-En desarrollo, toda esta infraestructura se puede levantar con Docker Compose: [`infra/compose`](infra/compose/).
+En desarrollo, toda esta infraestructura se puede levantar con Docker Compose: [infra/compose](infra/compose/).
 
 **Generación de imágenes:** la generación de las imágenes de la aplicación se hace con [scripts/dev/build-images.ps1](scripts/dev/build-images.ps1). Este script genera las siguientes imágenes:
 - mtl/frontend
@@ -1427,23 +1427,23 @@ La definición de los mensajes en Kafka, el payload y las reglas de publicación
 
 ### **Desarrollo asistido por IA (gobierno del proceso)**
 
-El desarrollo no se apoya en prompts sueltos, sino en **artefactos repetibles**. Se partió definiendo las reglas aplicables a cada faceta del desarrollo: [reglas del repositorio](.cursor/rules/), el backlog del proyecto en [backlog.md](docs/backlog/backlog.md) y un índice operativo para agentes IA en [AGENTS.md](AGENTS.md).
+El desarrollo ha buscado generar **artefactos reutilizables**. Se partió definiendo las reglas aplicables a cada faceta del desarrollo: [reglas del repositorio](.cursor/rules/), el backlog del proyecto en [backlog.md](docs/backlog/backlog.md) y un índice operativo para agentes IA en [AGENTS.md](AGENTS.md).
 
 A partir de los casos de uso, la descripción del sistema y el modelo de datos se identificó el backlog inicial; después se refinó cada historia y se desglosó en tickets de trabajo con **Reglas aplicables por capa** por TASK. El flujo detallado está en [ai-development-playbook.md](docs/onboarding/ai-development-playbook.md).
 
 El detalle del ciclo por historia se resume en:
 
-- 1. Refinamiento de la HU con la skill [`hu-refinement-mtl`](.cursor/skills/hu-refinement-mtl/SKILL.md) (mensaje breve con `HU-XXX`)
+- 1. Refinamiento de la HU con la skill [hu-refinement-mtl](.cursor/skills/hu-refinement-mtl/SKILL.md) (mensaje breve con `HU-XXX`)
 - 2. Análisis del documento generado (`docs/backlog/HU-XXX-*.md`)
 - 3. Cierre de riesgos y **Aclaraciones pendientes** (refinamiento humano)
-- 4. Desglose en tickets con [`hu-breakdown-mtl`](.cursor/skills/hu-breakdown-mtl/SKILL.md) (`HU-*-ticket-breakdown.md`)
-- 5. Implementación de cada TASK con [`encargo-mtl`](.cursor/skills/encargo-mtl/SKILL.md): mensaje mínimo (`TASK-HU-XXX-nn` + `@` al breakdown); el agente completa objetivo, alcance y definición de hecho desde el breakdown. Encargo completo solo en TASKs complejos (véase la skill y [hu-breakdown-and-encargo.md](docs/ai-process-evidence/hu-breakdown-and-encargo.md))
-- 6. Abrir PR: [`.github/pull_request_template.md`](.github/pull_request_template.md) (GitHub la precarga desde la rama **base**, `main`) — [github-branching.md](docs/onboarding/github-branching.md)
+- 4. Desglose en tickets con [hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md) (`HU-*-ticket-breakdown.md`)
+- 5. Implementación de cada TASK con [encargo-mtl](.cursor/skills/encargo-mtl/SKILL.md): mensaje mínimo (`TASK-HU-XXX-nn` + `@` al breakdown); el agente completa objetivo, alcance y definición de hecho desde el breakdown. Encargo completo solo en TASKs complejos (véase la skill y [hu-breakdown-and-encargo.md](docs/ai-process-evidence/hu-breakdown-and-encargo.md))
+- 6. Abrir PR: [.github/pull_request_template.md](.github/pull_request_template.md) (GitHub la precarga desde la rama **base**, `main`) — [github-branching.md](docs/onboarding/github-branching.md)
 - 7. Tras merge: ticket → **Hecho** en el breakdown; **Estado** de la HU en [backlog.md](docs/backlog/backlog.md) §3
 
 Por cuestiones operativas, al comienzo de la historia se hacen comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.
 
-La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada `docs/backlog/HU-*.md`, validar el alcance de cada TASK antes de implementar, pedir al agente una **revisión explícita** tras cada TASK, contra las reglas del breakdown, y confirmar tests y PR antes del merge. Además se han implementado skills específicas de revisión para la capa de persistencia y backend: [db-postgresql-mtl](.cursor/skills/db-postgresql-mtl/SKILL.md) ([db-mongo-mtl](.cursor/skills/db-mongo-mtl/SKILL.md)); revisión transversal del diff (tests, seguridad, arquitectura, etc.) en [`.cursor/skills/review`](.cursor/skills/review/README.md).
+La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada `docs/backlog/HU-*.md`, validar el alcance de cada TASK antes de implementar, pedir al agente una **revisión explícita** tras cada TASK, contra las reglas del breakdown, y confirmar tests y PR antes del merge. Además se han implementado skills específicas de revisión para la capa de persistencia y backend: [db-postgresql-mtl](.cursor/skills/db-postgresql-mtl/SKILL.md) ([db-mongo-mtl](.cursor/skills/db-mongo-mtl/SKILL.md)); revisión transversal del diff (tests, seguridad, arquitectura, etc.) en [.cursor/skills/review](.cursor/skills/review/README.md).
 
 **Evidencia del proceso:** hay ejemplos del proceso en [docs/ai-process-evidence/](docs/ai-process-evidence/README.md). Muestra representativa por fase del ciclo de vida: [prompts.md](prompts.md).
 
@@ -1486,9 +1486,9 @@ En la generación de tickets de trabajo se incluye explícitamente una sección 
 
 Para el trabajo con GitHub se ha definido una estrategia sencilla de ramas — detalle en [docs/onboarding/github-branching.md](docs/onboarding/github-branching.md).
 
-Plantilla PR: [`.github/pull_request_template.md`](.github/pull_request_template.md) — trazabilidad con las HU; se precarga desde la rama base `main` (en **fix/chore**, trazabilidad HU → **N/A**).
+Plantilla PR: [.github/pull_request_template.md](.github/pull_request_template.md) — trazabilidad con las HU; se precarga desde la rama base `main` (en **fix/chore**, trazabilidad HU → **N/A**).
 
-En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), calidad frontend (`lint`, `typecheck`, Vitest) y escaneo de secretos (Gitleaks) — workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), calidad frontend (`lint`, `typecheck`, Vitest) y escaneo de secretos (Gitleaks) — workflow [.github/workflows/ci.yml](.github/workflows/ci.yml).
 
 Adicionalmente, en cada PR, se lanza una revisión adicional desde **Codex**.
 
