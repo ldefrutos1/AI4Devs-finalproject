@@ -1431,25 +1431,25 @@ La definición de los mensajes en Kafka, el payload y las reglas de publicación
 
 ### **Desarrollo asistido por IA (gobierno del proceso)**
 
-El desarrollo ha buscado generar **artefactos reutilizables**. Se partió definiendo las reglas aplicables a cada faceta del desarrollo: [reglas del repositorio](.cursor/rules/), el backlog del proyecto en [backlog.md](docs/backlog/backlog.md) y un índice operativo para agentes IA en [AGENTS.md](AGENTS.md).
+El desarrollo ha buscado generar **artefactos reutilizables** (rules, skills). Se partió definiendo las reglas aplicables a cada faceta del desarrollo: [reglas del repositorio](.cursor/rules/), el backlog del proyecto en [backlog.md](docs/backlog/backlog.md) y un índice operativo para agentes IA en [AGENTS.md](AGENTS.md).
 
 A partir de los casos de uso, la descripción del sistema y el modelo de datos se identificó el backlog inicial; después se refinó cada historia y se desglosó en tickets de trabajo con **Reglas aplicables por capa** por TASK. El flujo detallado está en [ai-development-playbook.md](docs/onboarding/ai-development-playbook.md).
 
 El detalle del ciclo por historia se resume en:
 
-- 1. Refinamiento de la HU con la skill [hu-refinement-mtl](.cursor/skills/hu-refinement-mtl/SKILL.md) (mensaje breve con `HU-XXX`)
-- 2. Análisis del documento generado (`docs/backlog/HU-XXX-*.md`)
-- 3. Cierre de riesgos y **Aclaraciones pendientes** (refinamiento humano)
-- 4. Desglose en tickets con [hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md) (`HU-*-ticket-breakdown.md`)
+- 1. Refinamiento de la HU con la skill [hu-refinement-mtl](.cursor/skills/hu-refinement-mtl/SKILL.md) (mensaje breve con `HU-XXX`. Por ejemplo invocar en Curosr: `/hu-breakdown-mtl HU-016`.)
+- 2. Análisis del documento generado en el punto anterior (`docs/backlog/HU-XXX-*.md`)
+- 3. Cierre de los riesgos y **Aclaraciones pendientes** (refinamiento humano)
+- 4. Generación del desglose de la HU en tickets con la skill [hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md) (`HU-*-ticket-breakdown.md`)
 - 5. Implementación de cada TASK con [encargo-mtl](.cursor/skills/encargo-mtl/SKILL.md): mensaje mínimo (`TASK-HU-XXX-nn` + `@` al breakdown); el agente completa objetivo, alcance y definición de hecho desde el breakdown. Encargo completo solo en TASKs complejos (véase la skill y [hu-breakdown-and-encargo.md](docs/ai-process-evidence/hu-breakdown-and-encargo.md))
 - 6. Abrir PR: [.github/pull_request_template.md](.github/pull_request_template.md) (GitHub la precarga desde la rama **base**, `main`) — [github-branching.md](docs/onboarding/github-branching.md)
 - 7. Tras merge: ticket → **Hecho** en el breakdown; **Estado** de la HU en [backlog.md](docs/backlog/backlog.md) §3
 
 Por cuestiones operativas, al comienzo de la historia se hacen comprobaciones iniciales que permiten detectar historias incompletas o mal formadas.
 
-La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada `docs/backlog/HU-*.md`, validar el alcance de cada TASK antes de implementar, pedir al agente una **revisión explícita** tras cada TASK, contra las reglas del breakdown, y confirmar tests y PR antes del merge. Además se han implementado skills específicas de revisión para la capa de persistencia y backend: [db-postgresql-mtl](.cursor/skills/db-postgresql-mtl/SKILL.md) ([db-mongo-mtl](.cursor/skills/db-mongo-mtl/SKILL.md)); revisión transversal del diff (tests, seguridad, arquitectura, etc.) en [.cursor/skills/review](.cursor/skills/review/README.md).
-
 **Evidencia del proceso:** hay ejemplos del proceso en [docs/ai-process-evidence/](docs/ai-process-evidence/README.md). Muestra representativa por fase del ciclo de vida: [prompts.md](prompts.md).
+
+La **supervisión humana** se concentra en cerrar riesgos y aclaraciones en cada `docs/backlog/HU-*.md`, validar el alcance de cada TASK antes de implementar, pedir al agente una **revisión explícita** tras cada TASK, contra las reglas del breakdown, y confirmar tests y PR antes del merge. Además se han implementado skills específicas de revisión para la capa de persistencia y backend: [db-postgresql-mtl](.cursor/skills/db-postgresql-mtl/SKILL.md) ([db-mongo-mtl](.cursor/skills/db-mongo-mtl/SKILL.md)); revisión transversal del diff (tests, seguridad, arquitectura, etc.) en [.cursor/skills/review](.cursor/skills/review/README.md).
 
 A continuación se incluye el backlog del proyecto. Documentación completa (historias, criterios y tickets): [backlog.md](docs/backlog/backlog.md).
 
@@ -1476,11 +1476,11 @@ A continuación se incluye el backlog del proyecto. Documentación completa (his
 
 ## 7. 🎫 Tickets de trabajo
 
-El desglose homogéneo usa la skill [hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md): un mensaje breve con `HU-XXX` genera `docs/backlog/HU-*-ticket-breakdown.md` con orden, dependencias y **Reglas aplicables por capa**.
+El desglose en ticket de trabajo usa la skill [hu-breakdown-mtl](.cursor/skills/hu-breakdown-mtl/SKILL.md): un mensaje breve con `HU-XXX` genera `docs/backlog/HU-*-ticket-breakdown.md` con orden, dependencias y **Reglas aplicables por capa**.
 
 La implementación de cada TASK sigue [encargo-mtl](.cursor/skills/encargo-mtl/SKILL.md): la especificación vive en el breakdown; lo habitual es un **mensaje mínimo** (`Implementa TASK-HU-XXX-nn` + enlace al breakdown) y que el agente estructure el encargo. Resumen del flujo de skills: [AGENTS.md](AGENTS.md) § «Cómo encargar trabajo al agente».
 
-En la generación de tickets de trabajo se incluye explícitamente una sección con las reglas de Cursor que debe aplicar el agente de IA al implementarlos.
+En la generación del documento de desglose de tickets de trabajo se incluye explícitamente una sección con las reglas de Cursor que debe aplicar el agente de IA al implementarlos.
 
 **Evidencia (desglose e encargos):** HU-008 y HU-016 (incl. encargo TASK-HU-016-02) en [hu-breakdown-and-encargo.md](docs/ai-process-evidence/hu-breakdown-and-encargo.md).
 
@@ -1490,13 +1490,13 @@ En la generación de tickets de trabajo se incluye explícitamente una sección 
 
 Para el trabajo con GitHub se ha definido una estrategia sencilla de ramas — detalle en [docs/onboarding/github-branching.md](docs/onboarding/github-branching.md).
 
-Plantilla PR: [.github/pull_request_template.md](.github/pull_request_template.md) — trazabilidad con las HU; se precarga desde la rama base `main` (en **fix/chore**, trazabilidad HU → **N/A**).
+Para las PR se usa la plantilla: [.github/pull_request_template.md](.github/pull_request_template.md) — que permite trazabilidad con las HU; se precarga desde la rama base `main` (en **fix/chore**, trazabilidad HU → **N/A**).
 
 En cada PR, **GitHub Actions** ejecuta en paralelo tests Java (`mvn test`), calidad frontend (`lint`, `typecheck`, Vitest) y escaneo de secretos (Gitleaks) — workflow [.github/workflows/ci.yml](.github/workflows/ci.yml).
 
 Adicionalmente, en cada PR, se lanza una revisión adicional desde **Codex**.
 
-Existen dos workflows de **GitHub Actions** adicionales que se ejecutan manualmente: E2E Playwright y auditoría de dependencias ([docs/engineering/devsecops-ci.md](docs/engineering/devsecops-ci.md)).
+Existen dos workflows de **GitHub Actions** adicionales que se ejecutan manualmente por el coste computacional que tienen: E2E Playwright y auditoría de dependencias ([docs/engineering/devsecops-ci.md](docs/engineering/devsecops-ci.md)).
 
 **Evidencia (PRs documentados):** ejemplos HU-004 y HU-008 en [pull-request-examples.md](docs/ai-process-evidence/pull-request-examples.md).
 
