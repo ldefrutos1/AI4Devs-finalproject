@@ -269,7 +269,7 @@ El video del proyecto muestra la siguiente funcionalidad:
 
 ### **2.6. Estructura de ficheros**
 
-Estructura de repositorio (monorepo):
+El repositorio del proyecto es un monorepo con la siguiente estructura:
 
 ```
 proyecto/
@@ -927,8 +927,6 @@ sequenceDiagram
 
 ### **3.3. Infraestructura y despliegue**
 
-**Despliegue en producción:** en entornos productivos el sistema se puede desplegar en un orquestador de contenedores (Kubernetes). También es necesario un servidor SMTP y un proveedor de servicios IA.
-
 **Infraestructura:** el sistema necesita la siguiente infraestructura: 
 - PostgreSQL/PostGIS (cuatro esquemas de aplicación: `catalog`, `media`, `notification`, `ai`) 
 - MongoDB 
@@ -1018,6 +1016,12 @@ flowchart TB
 **Observabilidad:** con la aplicación y la infra levantada, Prometheus recoge métricas de cada microservicio vía Actuator y Grafana muestra el dashboard **MTL Microservices**.
 
 ![Dashboard Grafana MyTreeLibrary](./docs/Grafana.jpg)
+
+**Despliegue en Kubernetes con Istio:** en entornos productivos el sistema se puede desplegar en Kubernetes con Istio con la estructura que se indica en el siguiente diagrama:
+
+![MyTreeLibrary desplegada en k8s con Istio](./docs/Istio.jpg)
+
+La definición de los archivos de configuración k8s queda fuera del alcance del proyecto.
 
 ### **3.4. Seguridad**
 
